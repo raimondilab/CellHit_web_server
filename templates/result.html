@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %} CLRP | Result {% endblock %}
+
+
+{% block head %}
+
+<!-- ===============================================-->
+<!--    Stylesheets-->
+<!-- ===============================================-->
+<link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+
+<!-- ===============================================-->
+<!--    JavaScripts-->
+<!-- ===============================================-->
+
+<!--Explore JS -->
+<script type="text/javascript" src="{{url_for('static', filename='/assets/js/d3.js')}}"></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+<script type="text/javascript" src="{{url_for('static', filename='/assets/js/FileSaver.js')}}"></script>
+<script type="text/javascript" src="{{url_for('static', filename='/assets/js/result.js')}}"></script>
+{% endblock%}
+
+
+{% block content %}
+<!-- ============================================-->
+<!-- <section> begin ============================-->
+<section class="pt-7 min-vh-100 min-vh-md-100 vh-sm-100 vh-100" id="explore">
+    <div class="container container-sm container-md container-lg">
+        <h2 class="fw-bold underline mb-1">Result
+            <span class="btn-info btn-title" id="btnIntro"><ion-icon
+                    name="information-outline"></ion-icon></span>
+        </h2>
+    </div>
+</section>
+{% endblock%}

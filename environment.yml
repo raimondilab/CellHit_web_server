@@ -1,0 +1,9 @@
+name: CLRP
+channels:
+  - defaults
+dependencies:
+  - flask
+  - pandas
+  - pip
+  - python
+

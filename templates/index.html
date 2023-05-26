@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %} CLRP | Home {% endblock %}
+
+{% block head %}
+<!-- ===============================================-->
+<!--    Stylesheets-->
+<!-- ===============================================-->
+<link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<link href="{{url_for('static', filename='/assets/css/nice-select.css')}}" rel="stylesheet"/>
+<link href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet"/>
+
+<!-- ===============================================-->
+<!--    JavaScripts-->
+<!-- ===============================================-->
+<script type="text/javascript" src="{{url_for('static', filename='/assets/js/d3.js')}}"></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+<script src="{{url_for('static', filename='/assets/js/index.js')}}"></script>
+{% endblock%}
+
+{% block content %}
+<!-- ===============================================-->
+<!--    Home Content-->
+<!-- ===============================================-->
+<section class="py-0" id="home">
+    <div class="bg-holder d-sm-block img-fluid" id="back"
+         style="background-image:url(/static/assets/images/Heat-map_1_.webp);background-position:right;background-size:contain;">
+    </div>
+    <!--/.bg-holder-->
+    <div class="container">
+        <div class="row align-items-center min-vh-100 min-vh-md-100 vh-sm-100 vh-100">
+            <div class="col-sm-6 col-md-6 col-lg-6 text-sm-start text-center">
+                <h1 class="display-2 fw-semi-bold lh-sm fs-4 fs-lg-6 fs-xxl-8">CLRP</h1>
+                <p class="mb-4 fs-1 fs-lg-1 fs-xxl-2">
+                    Cell line response prediction model to
+                    small molecule perturbation
+                </p>
+                <form id="search-box" method="post" class="mb-3" action="/result/">
+                    <div class="form-group">
+                        <input type="file" >
+                    </div>
+                </form>
+                <span>Please click here for an example input file.</span>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ===============================================-->
+<!--    End of Home Content-->
+<!-- ===============================================-->
+
+<!-- Cookie Banner -->
+<div id="cb-cookie-banner" class="alert alert-dark text-center mb-0" role="alert">
+    This website uses cookies to ensure you get the best experience on our website.
+    <a href="https://www.cookiesandyou.com/" target="blank">Learn more</a>
+    <button type="button" class="btn btn-primary btn-sm ms-3" onclick="hideCookieBanner()">
+        I Got It
+    </button>
+</div>
+
+<!--end section-->
+{% endblock %}
