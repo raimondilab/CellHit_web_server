@@ -18807,7 +18807,7 @@ label{
     color: #fff;
     background: #004059;
     text-align: center;
-    padding: 15px 40px;
+    padding: 15px 10px;
     font-size: inherit;
     letter-spacing: 2px;
     user-select: none;
@@ -18818,7 +18818,7 @@ label{
 
 label ion-icon {
   font-size: 0.85rem;
-  margin-right: 10px;
+  margin-right: 1px;
 }
 
 label:active{
@@ -18836,11 +18836,7 @@ label:hover{
     display; none;
 }
 
-row, div{
- border: 0px !important;
-}
-
-.vertical-line::before{
+.vertical_line::before{
     display: block;
     content: '';
     margin-right: 5px;
@@ -18849,8 +18845,19 @@ row, div{
 }
 
 .home-img{
-z-index: 1;
 background-image:url(/static/assets/images/Heat-map_1_.webp);
 background-position:right;
 background-size:contain;
+}
+
+.swal2-styled.swal2-confirm {
+  outline: none !important;
+  background-color: #004059 !important;
+  box-sizing: none !important;
+
+}
+
+button:active {
+   box-sizing: none !important;
+   outline: none !important;
 }

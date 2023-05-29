@@ -4,6 +4,28 @@ $( document ).ready(function() {
 window.onload = initializeCookieBanner();
 window.hideCookieBanner = hideCookieBanner;
 
+
+
+// Show results
+$("#search-box").submit(function(e){
+
+  const databaseBtn = $('#databaseBtn').val();
+  const annotationBtn = $('#annotationBtn').val();
+
+	if (databaseBtn !== "" && databaseBtn !== "undefined" && annotationBtn !== "" && annotationBtn  !== "undefined") {
+	     $("#search-box").submit();
+
+	}
+
+    Swal.fire({
+      title: 'Oops...',
+      text: 'Please fill out these fields!',
+     showCloseButton: true
+     });
+
+    e.preventDefault();
+});
+
 });
 
 /* Javascript to show and hide cookie banner using localstorage */

@@ -16,7 +16,7 @@
 <script type="text/javascript" src="{{url_for('static', filename='/assets/js/d3.js')}}"></script>
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{{url_for('static', filename='/assets/js/index.js')}}"></script>
 {% endblock%}
 
@@ -36,13 +36,13 @@
                     Cell line response prediction model to
                     small molecule perturbation
                 </p>
-                <form id="search-box" method="post" class="mb-3" action="/result/">
+                <form id="search-box" method="post" enctype=multipart/form-data class="mb-2" action="/result/">
                     <div class="form-group">
-                        <input type="file" class="btn-file" id="databaseBtn">
+                        <input type="file" class="btn-file" id="databaseBtn" name="dataset" >
                         <label for="databaseBtn">
                             <ion-icon name="bar-chart-outline"></ion-icon>
                             Upload dataset</label>
-                        <input type="file" class="btn-file" id="annotationBtn">
+                        <input type="file" class="btn-file" id="annotationBtn" name="annotation" >
                         <label for="annotationBtn">
                             <ion-icon name="id-card-outline"></ion-icon>
                             Upload annotation file</label>
@@ -50,27 +50,29 @@
                         <button id="search" class="btn button shadow-none" type="submit"></button>
                     </div>
                 </form>
-                <span>Please click <a href="#">here</a> for an example input file.</span>
-                <div class="row align-items-center row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 py-5">
-                    <div class="col d-flex align-items-start vertical-line">
+                <span>Please click <b><a
+                                    href="{{url_for('static', filename='clrp/upload_example_LRRK2.csv')}}"
+                                    download>here</a> </b> for an example input file.</span>
+                <div class="row align-items-center row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 py-5 hide-mobile">
+                    <div class="col d-flex align-items-start vertical_line">
                         <div>
                             <h4 class="fw-bold mb-0">969</h4>
                             <p>Cell Lines</p>
                         </div>
                     </div>
-                      <div class="col d-flex align-items-start vertical-line">
+                    <div class="col d-flex align-items-start vertical_line">
                         <div>
                             <h4 class="fw-bold mb-0">134</h4>
                             <p>Cancer Types</p>
                         </div>
                     </div>
-                    <div class="col d-flex align-items-start vertical-line">
+                    <div class="col d-flex align-items-start vertical_line">
                         <div>
                             <h4 class="fw-bold mb-0">1024</h4>
                             <p>FDA-approved drugs</p>
                         </div>
                     </div>
-                    <div class="col d-flex align-items-start vertical-line">
+                    <div class="col d-flex align-items-start vertical_line">
                         <div>
                             <h4 class="fw-bold mb-0">794</h4>
                             <p>Genes</p>
@@ -79,7 +81,6 @@
                 </div>
             </div>
         </div>
-    </div>
     </div>
 </section>
 <!-- ===============================================-->
