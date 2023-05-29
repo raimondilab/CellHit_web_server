@@ -18840,7 +18840,7 @@ row, div{
  border: 0px !important;
 }
 
-div.vertical-line::before{
+.vertical-line::before{
     display: block;
     content: '';
     margin-right: 5px;
@@ -18848,4 +18848,9 @@ div.vertical-line::before{
     height: 50px;
 }
 
-
+.home-img{
+z-index: 1;
+background-image:url(/static/assets/images/Heat-map_1_.webp);
+background-position:right;
+background-size:contain;
+}
