@@ -18750,10 +18750,10 @@ transition: 1s ease;
 .btn-title {
   padding: 0.200rem .65rem;
     padding-top: 0.2rem;
-    padding-right: 0.65rem;
+    padding-right: 0.55rem;
     padding-bottom: 0.2rem;
-    padding-left: 0.65rem;
-  font-size: .95em;
+    padding-left: 0.55rem;
+    font-size: .95em;
   border-radius: 0.25rem;
 }
 
@@ -18762,13 +18762,12 @@ transition: 1s ease;
 }
 
 .btn-title{
-  padding: 0.575rem .75rem;
-    padding-top: 0.575rem;
-    padding-right: 0.75rem;
-    padding-bottom: 0.575rem;
-    padding-left: 0.75rem;
-  font-size: 0.975rem;
-  border-radius: 0.25rem;
+  padding-top: 0.25rem;
+padding-right: 0.75rem;
+padding-bottom: 0.025rem;
+padding-left: 0.75rem;
+font-size: 0.975rem;
+border-radius: 0.25rem;
 }
 
 .ui-button, .ui-dialog-buttonset button, .ui-dialog-titlebar-close{
@@ -18836,11 +18835,19 @@ label:hover{
     display; none;
 }
 
+.line::after{
+    display: block;
+    content: '';
+    margin-top: 5px;
+    border-bottom: 5px solid #359ccf;
+    width: 50px;
+}
+
 .vertical_line::before{
     display: block;
     content: '';
     margin-right: 5px;
-    border-left: 2px solid #004059;
+    border-bottom: 5px solid #004059;
     height: 50px;
 }
 
@@ -18860,4 +18867,12 @@ background-size:contain;
 button:active {
    box-sizing: none !important;
    outline: none !important;
+}
+
+.card-result{
+border: 1px solid #d3d3d3;
+background-color: white;
+border-radius: 0.5rem;
+font-size: 1.2rem;
+
 }

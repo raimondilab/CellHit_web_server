@@ -1,55 +1,15 @@
 $( document ).ready(function() {
 
-// Setting visibility pathway-level heatmap
-show_row('#pathway_level', "#row_pathway");
 
-// Setting visibility gene-level heatmap
-show_row('#gene_level',"#row_gene_level");
+scatter_plot();
 
-// Setting visibility survival analysis
-show_row('#survival_analysis', "#row_survival");
-show_title('#survival_tissue_ligand_enzyme', "#title_ligand_enzyme");
-show_title('#survival_tissue_gpcr_ligand_enzyme', "#title_gpcr_ligand_enzyme");
-show_title('#survival_subtype', "#title_survival_subtype");
-show_title('#survival_tissue_ligand_enzyme_subtype', "#title_ligand_enzyme_subtype");
-show_title('#survival_tissue_gpcr_ligand_enzyme_subtype', "#title_gpcr_ligand_enzyme_subtype");
-
-// Setting visibility Coupling/Transduction Mechanism
-show_row('#coupling_level', '#row_coupling');
-
-// Cross ref
-show_title("#crossref","#row_related");
-
-// Export pathways level heatmaps
-$('#exp_path').click(function() {
-downloadPng("pathway_level_heatmap", "pathway_level_heatmap");
-downloadPng("subtypes_level_heatmap", "subtypes_level_heatmap");
-});
+ora();
 
 // Intro modal
 $('#btnIntro').click(function() {
 introPanel();
 });
 });
-
-/**
- * Shows the row with the given ID if the result type is not empty.
- * @param {string} result_type - The ID of the result type input element.
- * @param {string} row_id - The ID of the row to show.
- */
-function show_row(result_type, row_id){
-const type_val = $(result_type).val() || ""; // Use default value
-if (type_val){
-    $(row_id).removeClass("hidden");
-}
-}
-
-function show_title(result_type, row_id){
-const type_val = $(result_type).val() || "[]"; // Use default value
-if (type_val.length > 2){
-    $(row_id).removeClass("hidden");
-}
-}
 
 //Download jpg
 function downloadPng(pngId, fileName) {
@@ -73,4 +33,49 @@ function introPanel() {
 			}
 		}
 	});
+}
+
+
+function scatter_plot(){
+
+var trace1 = {
+  x: [1, 2, 3, 4, 5],
+  y: [1, 6, 3, 6, 1],
+  mode: 'markers',
+  type: 'scatter',
+  name: 'ovary',
+  text: ['A-1', 'A-2', 'A-3', 'A-4', 'A-5'],
+  marker: { size: 12 }
+};
+
+var trace2 = {
+  x: [1.5, 2.5, 3.5, 4.5, 5.5],
+  y: [4, 1, 7, 1, 4],
+  mode: 'markers',
+  type: 'scatter',
+  name: 'blood',
+  text: ['B-a', 'B-b', 'B-c', 'B-d', 'B-e'],
+  marker: { size: 12 }
+};
+
+var data = [ trace1, trace2 ];
+
+var layout = {
+  autosize: true,
+  xaxis: {
+    showgrid: false,
+    showticklabels : false
+},
+yaxis: {
+    showgrid: false,
+    showline: false,
+    showticklabels : false
+}
+
+};
+
+var config = {responsive: true}
+
+Plotly.newPlot('scatter_plot', data, layout, config);
+
 }

@@ -52,12 +52,13 @@ def result():
             temp_name_annotation = temp_file.name.split(os.sep)[-1]
             annotation_file.save(os.path.join(app.config['UPLOAD_FOLDER'], temp_name_annotation))
 
-    return jsonify({'filename': temp_name, 'annotation': temp_name_annotation})
+    return render_template("result.html", filename=temp_name, annotation=temp_name_annotation)
 
 
 # Check allowed file extensions
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

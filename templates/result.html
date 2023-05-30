@@ -18,7 +18,9 @@
 <script type="text/javascript" src="{{url_for('static', filename='/assets/js/d3.js')}}"></script>
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
 <script type="text/javascript" src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.20.0.min.js" charset="utf-8"></script>
 <script type="text/javascript" src="{{url_for('static', filename='/assets/js/FileSaver.js')}}"></script>
+<script type="text/javascript" src="{{url_for('static', filename='/assets/js/enrichment.js')}}"></script>
 <script type="text/javascript" src="{{url_for('static', filename='/assets/js/result.js')}}"></script>
 {% endblock%}
 
@@ -26,12 +28,48 @@
 {% block content %}
 <!-- ============================================-->
 <!-- <section> begin ============================-->
-<section class="pt-7 min-vh-100 min-vh-md-100 vh-sm-100 vh-100" id="explore">
-    <div class="container container-sm container-md container-lg">
-        <h2 class="fw-bold underline mb-1">Result
-            <span class="btn-info btn-title" id="btnIntro"><ion-icon
-                    name="information-outline"></ion-icon></span>
-        </h2>
+<section class="pt-7">
+    <div class="container">
+        <div class="row g-2">
+            <h2 class="fw-bold underline mb-3 line">Result
+                <span class="btn-info btn-title" id="btnIntro"><ion-icon
+                        name="information-outline"></ion-icon></span>
+            </h2>
+            <h4 class="fw-bold underline mb-2">Cell line
+                <span class="btn-info btn-sm" id="btnPath"><ion-icon
+                        name="help-outline"></ion-icon></span>
+            </h4>
+            <div class="col-3">
+                <div class="p-3 shadow">
+
+                </div>
+            </div>
+            <div class="col-9 mb-1">
+                <div class="p-3 "><div id="scatter_plot"></div></div>
+            </div>
+             <h4 class="fw-bold underline mb-2">Genes
+                <span class="btn-info btn-sm" id="btnGene"><ion-icon
+                        name="help-outline"></ion-icon></span>
+            </h4>
+            <div class="col-6">
+                <div class="p-3">
+                    <div id="ora"></div>
+                </div>
+            </div>
+            <div class="col-6 mb-1">
+                <div class="p-3 border bg-light">Custom column padding</div>
+            </div>
+             <h4 class="fw-bold underline mb-2">Small Molecule
+                <span class="btn-info btn-sm" id="btnDrug"><ion-icon
+                        name="help-outline"></ion-icon></span>
+            </h4>
+             <div class="col-6">
+                <div class="p-3 border bg-light">Custom column padding</div>
+            </div>
+            <div class="col-6">
+                <div class="p-3 border bg-light">Custom column padding</div>
+            </div>
+        </div>
     </div>
 </section>
 {% endblock%}
