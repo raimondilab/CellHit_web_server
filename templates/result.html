@@ -41,13 +41,35 @@
             </h4>
             <div class="col-3">
                 <div class="p-3 shadow">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="basic-addon1">Select lineage</span>
+                        <select type="text" class="form-control" placeholder="Username" aria-label="select lineage"
+                                aria-describedby="basic-addon1">
+                        </select>
+                    </div>
 
+                    <div class="input-group mb-3">
+                        <select type="text" class="form-control"
+                               aria-label="lineage" aria-describedby="basic-addon2">
+                        </select>
+                        <span class="input-group-text" id="basic-addon2">Select subtypes</span>
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Color by</span>
+                        <select type="text" class="form-control" aria-label="color by">
+                            <option selected>Lineage</option>
+                            <option>Subtypes</option>
+                            <option>Origin</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             <div class="col-9 mb-1">
-                <div class="p-3 "><div id="scatter_plot"></div></div>
+                <div class="p-3 ">
+                    <div id="scatter_plot"></div>
+                </div>
             </div>
-             <h4 class="fw-bold underline mb-2">Genes
+            <h4 class="fw-bold underline mb-2">Genes
                 <span class="btn-info btn-sm" id="btnGene"><ion-icon
                         name="help-outline"></ion-icon></span>
             </h4>
@@ -59,11 +81,11 @@
             <div class="col-6 mb-1">
                 <div class="p-3 border bg-light">Custom column padding</div>
             </div>
-             <h4 class="fw-bold underline mb-2">Small Molecule
+            <h4 class="fw-bold underline mb-2">Small Molecule
                 <span class="btn-info btn-sm" id="btnDrug"><ion-icon
                         name="help-outline"></ion-icon></span>
             </h4>
-             <div class="col-6">
+            <div class="col-6">
                 <div class="p-3 border bg-light">Custom column padding</div>
             </div>
             <div class="col-6">

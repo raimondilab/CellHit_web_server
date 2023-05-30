@@ -27,7 +27,7 @@ var trace2 = {
 
 var trace3 = {
   x: ["REAC", "KEGG", "WP", "CORUM", "WP", "REAC"],
-  y: [0, 2, 4, 6, 8, 10],
+  y: [5, 2, 4, 6, 8, 10],
   mode: 'markers',
   marker: {
     size: 18,
@@ -41,11 +41,37 @@ var trace3 = {
 
 var data = [trace1, trace2, trace3];
 
-var layout = { autosize: true,
+var layout = {
+               autosize: true,
                showlegend: false,
                showgrid: false,
-              title : "g:Profiler"
-              };
+               title: {
+                  text: 'g:Profiler',
+                  font: {
+                        family: 'Roboto Condensed',
+                        size: '0.75rem',
+                        color: '#183F56'
+                    }
+                  },
+                  xaxis: {
+                  font: {
+                        family: 'Roboto Condensed',
+                        size: '0.75rem',
+                        color: '#183F56'
+                    }
+                  },
+               yaxis: {
+                  range: [0, 18],
+                  title: {
+                  text: '-log10(p-value)',
+                  font: {
+                        family: 'Roboto Condensed',
+                        size: '0.75rem',
+                        color: '#183F56'
+                    }
+                  }
+                   }
+            };
 
 var config = {responsive: true}
 
