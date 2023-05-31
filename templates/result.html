@@ -11,24 +11,34 @@
 <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.3.2/css/buttons.dataTables.min.css">
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
+<link href="assets/plugins/global/plugins.bundle.css" rel="stylesheet" type="text/css"/>
+<script src="assets/plugins/global/plugins.bundle.js"></script>
+
 
 <!-- ===============================================-->
 <!--    JavaScripts-->
 <!-- ===============================================-->
-
-<!--Explore JS -->
 <script type="text/javascript" src="{{url_for('static', filename='/assets/js/d3.js')}}"></script>
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
 <script type="text/javascript" src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/2.3.2/js/dataTables.buttons.min.js"></script>
-<script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-<script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-<script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/2.3.2/js/buttons.html5.min.js"></script>
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/2.3.2/js/buttons.print.min.js"></script>
+<script type="text/javascript" charset="utf8"
+        src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" charset="utf8"
+        src="https://cdn.datatables.net/buttons/2.3.2/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" charset="utf8"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script type="text/javascript" charset="utf8"
+        src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script type="text/javascript" charset="utf8"
+        src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script type="text/javascript" charset="utf8"
+        src="https://cdn.datatables.net/buttons/2.3.2/js/buttons.html5.min.js"></script>
+<script type="text/javascript" charset="utf8"
+        src="https://cdn.datatables.net/buttons/2.3.2/js/buttons.print.min.js"></script>
 <script src="https://cdn.plot.ly/plotly-2.20.0.min.js" charset="utf-8"></script>
 <script type="text/javascript" src="{{url_for('static', filename='/assets/js/FileSaver.js')}}"></script>
+
+<!--Result JS -->
 <script type="text/javascript" src="{{url_for('static', filename='/assets/js/enrichment.js')}}"></script>
 <script type="text/javascript" src="{{url_for('static', filename='/assets/js/result.js')}}"></script>
 {% endblock%}
@@ -49,27 +59,27 @@
                         name="help-outline"></ion-icon></span>
             </h4>
             <div class="col-3">
-                <div class="p-3 shadow">
-                    <div class="input-group mb-3">
-                        <span class="input-group-text" id="basic-addon1">Select lineage</span>
-                        <select type="text" class="form-control" aria-label="select lineage"
-                                aria-describedby="basic-addon1" >
-                        </select>
-                    </div>
+                <div class="p-3 rounded-3 shadow">
+                        <div class="form-floating border rounded mb-3">
+                            <select class="form-select form-select-transparent" id="lineage">
+                                <option></option>
+                            </select>
+                            <label>Select lineage</label>
+                        </div>
 
-                    <div class="input-group mb-3">
-                        <select type="text" class="form-control"
-                               aria-label="lineage" aria-describedby="basic-addon2">
+                    <div class="form-floating border rounded mb-3">
+                        <select class="form-select form-select-transparent">
+                            <option></option>
                         </select>
-                        <span class="input-group-text" id="basic-addon2">Select subtypes</span>
+                        <label>Select subtype</label>
                     </div>
-                    <div class="input-group mb-3">
-                        <span class="input-group-text">Color by</span>
-                        <select type="text" class="form-control" aria-label="color by">
+                    <div class="form-floating border rounded mb-3">
+                        <select type="text" class="form-select  form-select-lg" aria-label="color by">
                             <option selected>Lineage</option>
                             <option>Subtypes</option>
                             <option>Origin</option>
                         </select>
+                        <label>Color by</label>
                     </div>
                 </div>
             </div>

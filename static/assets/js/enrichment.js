@@ -50,7 +50,6 @@ var layout = {
                autosize: true,
                showlegend: true,
                title: {
-                  text: 'g:Profiler',
                   font: {
                         family: 'Roboto Condensed',
                         size: '0.75rem',
@@ -157,7 +156,7 @@ function addTable(data) {
   let data_table = new DataTable('#table', {
 
   // options
-    scrollY: 290,
+    scrollY: 291,
     scrollX: true,
     dom: 'Bfrtip',
     buttons: [
