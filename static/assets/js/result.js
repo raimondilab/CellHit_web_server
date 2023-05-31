@@ -5,10 +5,13 @@ scatter_plot();
 
 ora();
 
+addTable([]);
+
 // Intro modal
 $('#btnIntro').click(function() {
 introPanel();
 });
+
 });
 
 //Download jpg
@@ -35,7 +38,7 @@ function introPanel() {
 	});
 }
 
-
+// Draw scatter plot
 function scatter_plot(){
 
 var trace1 = {

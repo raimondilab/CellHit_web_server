@@ -4102,9 +4102,12 @@ fieldset:disabled .btn {
 }
 
 .btn-sm, .btn-group-sm > .btn {
- padding: 0.575rem 1.25rem;
-font-size: 0.675rem;
-border-radius: 0.25rem;
+    padding-top: .25rem;
+    padding-right: 0.65rem;
+    padding-bottom: .25rem;
+    padding-left: 0.65rem;
+    font-size: 0.75rem;
+    border-radius: 0.25rem;
 }
 
 .fade {
@@ -18748,26 +18751,16 @@ transition: 1s ease;
 }
 
 .btn-title {
-  padding: 0.200rem .65rem;
-    padding-top: 0.2rem;
-    padding-right: 0.55rem;
-    padding-bottom: 0.2rem;
-    padding-left: 0.55rem;
-    font-size: .95em;
-  border-radius: 0.25rem;
+    padding-top: .015rem;
+    padding-right: 0.5rem;
+    padding-bottom: 0.015rem;
+    padding-left: 0.5rem;
+    font-size: .60em;
+    border-radius: 0.25rem;
 }
 
 .hidden {
    display: none;
-}
-
-.btn-title{
-  padding-top: 0.25rem;
-padding-right: 0.75rem;
-padding-bottom: 0.025rem;
-padding-left: 0.75rem;
-font-size: 0.975rem;
-border-radius: 0.25rem;
 }
 
 .ui-button, .ui-dialog-buttonset button, .ui-dialog-titlebar-close{
@@ -18800,7 +18793,7 @@ input[type="file"]{
   display: none;
 }
 
-label{
+.label-btn{
     display: inline-block;
     text-transform: uppercase;
     color: #fff;
@@ -18815,16 +18808,16 @@ label{
     border-radius: 3px;
 }
 
-label ion-icon {
+.label-btn ion-icon {
   font-size: 0.85rem;
   margin-right: 1px;
 }
 
-label:active{
+.label-btn:active{
  transform: scale(0.9);
 }
 
-label:hover{
+.label-btn:hover{
   text-decoration: none;
   color: #fff;
   background-color: #359ccf;
@@ -18835,6 +18828,14 @@ label:hover{
     display; none;
 }
 
+.vertical_line:before{
+    display: block;
+    content: '';
+    margin-right: 5px;
+    border-left: 3px solid #004059;
+    height: 50px;
+}
+
 .line::after{
     display: block;
     content: '';
@@ -18843,13 +18844,6 @@ label:hover{
     width: 50px;
 }
 
-.vertical_line::before{
-    display: block;
-    content: '';
-    margin-right: 5px;
-    border-bottom: 5px solid #004059;
-    height: 50px;
-}
 
 .home-img{
 background-image:url(/static/assets/images/Heat-map_1_.webp);
@@ -18869,10 +18863,7 @@ button:active {
    outline: none !important;
 }
 
-.card-result{
-border: 1px solid #d3d3d3;
-background-color: white;
-border-radius: 0.5rem;
-font-size: 1.2rem;
-
+#symbol{
+ display: none;
 }
+
