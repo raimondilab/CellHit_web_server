@@ -8,7 +8,10 @@ scatter_plot();
 ora();
 
 // Add ora table
-addTable([]);
+addTableOra([]);
+
+// Add small molecule table
+addTableSmallMolecule([]);
 
 // List subtype by lineage
 subtype_list("adrenal");

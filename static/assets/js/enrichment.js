@@ -92,8 +92,7 @@ Plotly.newPlot('ora', data, layout, config);
 /**
 Create result table
 **/
-
-function addTable(data) {
+function addTableOra(data) {
 
   var myTableDiv = document.getElementById("enrichment_table");
 

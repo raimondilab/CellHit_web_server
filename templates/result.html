@@ -39,6 +39,7 @@
 <script type="text/javascript" src="{{url_for('static', filename='/assets/js/FileSaver.js')}}"></script>
 
 <!--Result JS -->
+<script type="text/javascript" src="{{url_for('static', filename='/assets/js/small_gene.js')}}"></script>
 <script type="text/javascript" src="{{url_for('static', filename='/assets/js/enrichment.js')}}"></script>
 <script type="text/javascript" src="{{url_for('static', filename='/assets/js/result.js')}}"></script>
 {% endblock%}
@@ -107,10 +108,16 @@
                         name="help-outline"></ion-icon></span>
             </h4>
             <div class="col-6">
-                <div class="p-3 border bg-light">Custom column padding</div>
+                <div class="p-3">
+                    <img  class="img-fluid w-30 center" src="https://www.drugbank.ca/structures/DB01063/thumb.svg" id="structure">
+                    <h6 class="fw-bold underline mb-2 center" id="compound_name">Idronoxil</h6>
+                    <p class="text-justify" id="background">Idronoxil is a substance that is being studied in the treatment of cancer. It belongs to the family of drugs called signal transduction inhibitors.</p>
+                </div>
             </div>
             <div class="col-6">
-                <div class="p-3 border bg-light">Custom column padding</div>
+                <div class="p-3">
+                     <div id="small_molecule"></div>
+                </div>
             </div>
         </div>
     </div>

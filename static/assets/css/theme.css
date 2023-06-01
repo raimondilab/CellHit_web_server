@@ -18892,3 +18892,14 @@ select:focus{
   outline: none !important;
   box-shadow: none !important;
 }
+
+.text-justify {
+  text-align: justify;
+}
+
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 20%;
+}
