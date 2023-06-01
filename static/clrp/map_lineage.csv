@@ -1,0 +1,240 @@
+lineage,subtype
+adrenal,adrenocortical adenoma
+adrenal,adrenocortical carcinoma
+adrenal,pheochromocytoma & paraganglioma
+adrenal cortex,carcinoma
+bile duct,adenocarcinoma
+bile duct,"cholangiocarcinoma, intrahepatic"
+bile duct,cholangiocarcinoma
+bile duct,"cholangiocarcinoma, extrahepatic"
+blood,"b-cell, unspecified"
+blood,myeloid neoplasm NOS
+blood,acute undifferentiated leukemia
+blood,"chronic lymphoblastic leukemia, b-cell"
+blood,"chronic myelogenous leukemia, blast crisis"
+blood,chronic myelogenous leukemia
+blood,acute leukemia
+blood,juvenile myelomonocytic leukemia
+blood,"acute lymphoblastic leukemia, b-cell"
+blood,acute lymphoblastic leukemia
+blood,"acute lymphoblastic leukemia, t-cell"
+blood,acute megakaryoblastic leukemia
+blood,acute myeloid leukemia
+bone,osteosarcoma
+bone,melanotic neuroectodermal tumor
+bone,Ewing sarcoma
+bone,chondrosarcoma
+breast,basal
+breast,normal
+breast,luminal A
+breast,HER2 amp
+breast,luminal
+breast,basal A
+breast,luminal HER2 amp
+breast,HER2-enriched
+breast,luminal B
+breast,basal B
+central nervous system,meningioma
+central nervous system,glioblastoma
+central nervous system,glioma
+central nervous system,oligodendroglioma
+central nervous system,gliomatosis cerebri
+central nervous system,supratentorial embryonal tumor NOS
+central nervous system,rosette forming glioneuronal tumor
+central nervous system,dysembryoplastic neuroepithelial tumor
+central nervous system,primitive neuroectodermal tumor
+central nervous system,glioblastoma multiforme
+central nervous system,embryonal tumor with multilayer rosettes
+central nervous system,choroid plexus carcinoma
+central nervous system,ependymoma
+central nervous system,medulloblastoma
+central nervous system,craniopharyngioma
+central nervous system,astrocytoma
+cervix,carcinoma
+cervix,cervical adenocarcinoma
+cervix,clear cell carcinoma of cervix
+cervix,squamous cell carcinoma
+colorectal,"adenocarcinoma, mucinous"
+colorectal,adenocarcinoma
+colorectal,caecum adenocarcinoma
+colorectal,colon adenocarcinoma
+colorectal,rectum adenocarcinoma
+embryo,testicular
+endocrine,neuroendocrine carcinoma
+esophagus,esophageal carcinoma
+esophagus,squamous cell carcinoma
+esophagus,adenocarcinoma
+eye,retinoblastoma
+eye,uveal melanoma
+fibroblast,lung
+fibroblast,bone
+fibroblast,soft tissue
+fibroblast,breast
+fibroblast,lymphoma
+fibroblast,colorectal
+fibroblast,upper aerodigestive
+fibroblast,bladder
+fibroblast,skin
+gastric,gastrointestinal stromal tumor
+gastric,duodenal adenocarcinoma
+gastric,small cell carcinoma
+gastric,adenocarcinoma
+gastric,"adenocarcinoma, tubular"
+gastric,"adenocarcinoma, mucinous"
+gastric,"adenocarcinoma, signet ring cell"
+gastric,stomach adenocarcinoma
+germ cell,non-seminoma
+germ cell,seminoma
+kidney,renal cell carcinoma
+kidney,"renal carcinoma, transitional cell"
+kidney,"renal carcinoma, clear cell"
+kidney,kidney chromophobe
+kidney,renal medullary carcinoma
+kidney,malignant rhabdoid tumor
+kidney,wilms tumor
+kidney,papillary renal cell carcinoma
+kidney,kidney clear cell carcinoma
+liver,undifferentiated hepatic sarcoma
+liver,fibrolamellar hepatocellular carcinoma
+liver,hepatocellular carcinoma
+liver,"hepatocellular carcinoma, hbs-antigen carrier"
+liver,hepatoblastoma
+lung,"non-small cell lung cancer, unspecified"
+lung,mesothelioma
+lung,"non-small cell lung cancer, squamous cell carcinoma"
+lung,"non-small cell lung cancer, adenocarcinoma"
+lung,"non-small cell lung cancer, adenosquamous carcinoma"
+lung,small cell lung cancer
+lung,"non-small cell lung cancer, mucoepidermoid carcinoma"
+lung,"non-small cell lung cancer, large cell carcinoma"
+lung,carcinoid
+lung,pleuropulmonary blastoma
+lung,lung adenocarcinoma
+lung,lung squamous cell carcinoma
+lymphocyte,"t-cell, non-hodgkins, anaplastic large cell"
+lymphocyte,"t-cell, non-hodgkins, cutaneous"
+lymphocyte,"b-cell, non-hodgkins, mantle cell"
+lymphocyte,atl
+lymphocyte,b-cell
+lymphocyte,diffuse large B-cell lymphoma
+lymphocyte,"b-cell, hodgkins"
+lymphocyte,diffuse large b-cell lymphoma
+lymphocyte,"b-cell, non-hodgkins"
+lymphocyte,t-cell
+lymphocyte,"b-cell, non-hodgkins, burkitts"
+nasopharynx,nasopharyngeal carcinoma
+nerve,malignant peripheral nerve sheath tumor
+ovary,small cell carcinoma of the ovary hypercalcemic type
+ovary,"adenocarcinoma, serous"
+ovary,adenocarcinoma
+ovary,ovarian serous cystadenocarcinoma
+ovary,"adenocarcinoma, endometrioid"
+ovary,carcinoma
+ovary,"adenocarcinoma, mixed"
+ovary,"cystadenocarcinoma, mucinous"
+ovary,"adenocarcinoma, low grade serous"
+ovary,"adenocarcinoma, high grade serous"
+ovary,"cystadenocarcinoma, high grade serous"
+ovary,"adenocarcinoma, clear cell"
+ovary,cystadenocarcinoma
+ovary,"cystadenocarcinoma, clear cell"
+ovary,"carcinoma, brenner"
+ovary,"adenocarcinoma, mucinous"
+ovary,"cystadenocarcinoma, endometrioid"
+pancreas,"ductal adenocarcinoma, exocrine"
+pancreas,"ductal adenosquamous carcinoma, exocrine"
+pancreas,acinar cell carcinoma
+pancreas,ductal adenosquamous carcinoma
+pancreas,somatostatinoma
+pancreas,adenocarcinoma
+peripheral nervous system,MYCN amp
+peripheral nervous system,neuroblastoma
+pineal,pineal parenchymal tumor
+plasma cell,multiple myeloma
+plasma cell,"multiple myeloma, plasmacytoma"
+prostate,prostate adenocarcinoma
+prostate,small cell carcinoma
+prostate,adenocarcinoma
+skin,undifferentiated
+skin,squamous cell carcinoma
+skin,neural crest-like
+skin,melanoma
+skin,transitory
+skin,merkel cell carcinoma
+skin,melanocytic
+skin,"melanoma, amelanotic"
+soft tissue,perivascular epithelioid cell neoplasms
+soft tissue,alveolar rhabdomyosarcoma
+soft tissue,angiosarcoma
+soft tissue,undifferentiated spindle cell sarcoma
+soft tissue,neurofibroma
+soft tissue,renal leiomyoblastoma
+soft tissue,INI-deficient soft tissue sarcoma NOS
+soft tissue,undifferentiated pleomorphic sarcoma
+soft tissue,myoepithelial carcinoma
+soft tissue,fibrosarcoma
+soft tissue,pleomorphic sarcoma
+soft tissue,undifferentiated sarcoma NOS
+soft tissue,sarcoma
+soft tissue,fibromatosis
+soft tissue,synovial sarcoma
+soft tissue,spindle cell/sclerosing rhabdomyosarcoma
+soft tissue,embryonal rhabdomyosarcoma
+soft tissue,thyroid sarcoma
+soft tissue,epithelioid sarcoma
+soft tissue,malignant rhabdoid tumor
+soft tissue,synovial
+soft tissue,leiomyosarcoma
+soft tissue,wdlps
+soft tissue,myofibromatosis
+soft tissue,"rhabdomyosarcoma, alveolar"
+soft tissue,dedifferentiated liposarcoma
+soft tissue,epithelioid
+soft tissue,myxofibrosarcoma
+soft tissue,"rhabdomyosarcoma, embryonal"
+soft tissue,atypical teratoid/rhabdoid tumor
+soft tissue,rhabdomyosarcoma
+soft tissue,uterine sarcoma
+soft tissue,undifferentiated
+soft tissue,desmoplastic small round cell tumor
+soft tissue,ddlps
+soft tissue,atypical teratoid rhabdoid tumor
+soft tissue,alveolar sarcoma
+soft tissue,infantile fibrosarcoma
+soft tissue,wd/ddlps
+soft tissue,epithelioid hemangioendothelioma
+teratoma,teratoma
+thymus,thymic carcinoma
+thymus,thymoma
+thyroid,squamous cell carcinoma
+thyroid,"carcinoma, papillary"
+thyroid,"carcinoma, follicular"
+thyroid,thyroid carcinoma
+thyroid,"carcinoma, anaplastic"
+thyroid,follicular
+thyroid,carcinoma
+upper aerodigestive,NUT midline carcinoma
+upper aerodigestive,"squamous cell carcinoma, laryngeal"
+upper aerodigestive,"squamous cell carcinoma, buccal mucosa"
+upper aerodigestive,"squamous cell carcinoma, salivary gland"
+upper aerodigestive,squamous cell carcinoma
+upper aerodigestive,upper aerodigestive squamous
+upper aerodigestive,"squamous cell carcinoma, pharynx"
+upper aerodigestive,"squamous cell carcinoma, tongue"
+upper aerodigestive,"squamous cell carcinoma, oral"
+upper aerodigestive,"squamous cell carcinoma, basaloid"
+upper aerodigestive,"squamous cell carcinoma, hypopharyngeal"
+urinary tract,squamous cell carcinoma
+urinary tract,transitional cell carcinoma
+urinary tract,bladder urothelial carcinoma
+urinary tract,carcinoma
+uterus,endometrial adenosquamous carcinoma
+uterus,uterine carcinosarcoma
+uterus,endometrial squamous cell carcinoma
+uterus,endometrial adenocarcinoma
+uterus,malignant mixed mullerian tumor
+uterus,choriocarcinoma
+uterus,endometrial stromal sarcoma
+uterus,mullerian carcinoma
+uterus,uterine endometrioid
+uterus,clear cell carcinoma

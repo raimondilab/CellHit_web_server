@@ -60,24 +60,24 @@
             </h4>
             <div class="col-3">
                 <div class="p-3 rounded-3 shadow">
-                        <div class="form-floating border rounded mb-3">
-                            <select class="form-select form-select-transparent" id="lineage">
-                                <option></option>
-                            </select>
-                            <label>Select lineage</label>
-                        </div>
+                    <div class="form-floating border rounded mb-3">
+                        <select class="form-select form-select-transparent" id="lineage" data-control="lineage">
+                            {% for lineage in lineages %}
+                                <option value="{{lineage}}">{{lineage}}</option>
+                            {% endfor %}
+                        </select>
+                        <label>Select lineage</label>
+                    </div>
 
                     <div class="form-floating border rounded mb-3">
-                        <select class="form-select form-select-transparent">
-                            <option></option>
-                        </select>
+                        <select class="form-select form-select-transparent" id="subtypes"></select>
                         <label>Select subtype</label>
                     </div>
                     <div class="form-floating border rounded mb-3">
                         <select type="text" class="form-select  form-select-lg" aria-label="color by">
-                            <option selected>Lineage</option>
-                            <option>Subtypes</option>
-                            <option>Origin</option>
+                            <option value="Lineage" selected>Lineage</option>
+                            <option value="Subtypes">Subtypes</option>
+                            <option value="Origin">Origin</option>
                         </select>
                         <label>Color by</label>
                     </div>

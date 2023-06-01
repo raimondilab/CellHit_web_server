@@ -1,30 +1,30 @@
 $( document ).ready(function() {
 
-
+// Draw scatter plot
 scatter_plot();
 
+
+// Draw Ora analysis
 ora();
 
+// Add ora table
 addTable([]);
+
+// List subtype by lineage
+subtype_list("adrenal");
+
+// List subtype by lineage
+$("#lineage").on("change", function() {
+    const lineage = $('#lineage').val();
+    subtype_list(lineage);
+});
 
 // Intro modal
 $('#btnIntro').click(function() {
-introPanel();
+    introPanel();
 });
 
 });
-
-//Download jpg
-function downloadPng(pngId, fileName) {
-	const svg_id = document.getElementById(pngId);
-	console.log(unescape(encodeURIComponent(svg_id.outerHTML)));
-	const base64doc = btoa(unescape(encodeURIComponent(svg_id.outerHTML)));
-	const a = document.createElement('a');
-	const e = new MouseEvent('click');
-	a.download = fileName + '.png';
-	a.href = 'data:image/png;base64,' + base64doc;
-	a.dispatchEvent(e);
-}
 
 // Show Help Panel
 function introPanel() {
@@ -81,4 +81,23 @@ var config = {responsive: true}
 
 Plotly.newPlot('scatter_plot', data, layout, config);
 
+}
+
+/* Get subtypes by lineage */
+function subtype_list(lineage){
+
+    d3.json("/subtypes", function(data) {
+
+		  var select = document.getElementById("subtypes");
+		  $("#subtypes").find('option').remove();
+
+           for (var i = 0; i < data.length; i++) {
+               var opt = document.createElement('option');
+                   opt.value = data[i];
+                   opt.innerHTML = data[i];
+                   select.appendChild(opt);
+            }
+        }).send("POST", JSON.stringify({
+				'lineage': lineage
+	}));
 }

@@ -18855,15 +18855,40 @@ background-size:contain;
   outline: none !important;
   background-color: #004059 !important;
   box-sizing: none !important;
+  margin-bottom: 15px;
+}
+
+.swal2-styled.swal2-confirm:focus {
+  outline: none !important;
 
 }
 
-button:active {
+input[type="text"]:focus {
+  outline: none !important;
+  border-color: #00728D!important;
+  box-shadow: none !important;
+}
+
+.swal2-close{
+ font-size: 1.5rem !important;
+}
+
+button:active, button:focus {
    box-sizing: none !important;
    outline: none !important;
+   box-shadow: none !important;
 }
 
 #symbol{
  display: none;
 }
 
+select {
+text-transform: capitalize;
+color: inherit;
+}
+
+select:focus{
+  outline: none !important;
+  box-shadow: none !important;
+}
