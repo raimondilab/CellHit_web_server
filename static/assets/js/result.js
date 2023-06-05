@@ -22,6 +22,13 @@ $("#lineage").on("change", function() {
     subtype_list(lineage);
 });
 
+// Show compound structure
+$('#table2 tbody').on('click', 'tr', function () {
+     var table = $('#table2').DataTable();
+     var data = table.row(this).data();
+     small_molecule_details(data[0]);
+});
+
 // Intro modal
 $('#btnIntro').click(function() {
     introPanel();
@@ -47,11 +54,19 @@ function scatter_plot(){
 var trace1 = {
   x: [1, 2, 3, 4, 5],
   y: [1, 6, 3, 6, 1],
-  mode: 'markers',
+  mode: 'markers+text',
   type: 'scatter',
   name: 'ovary',
   text: ['A-1', 'A-2', 'A-3', 'A-4', 'A-5'],
-  marker: { size: 12 }
+  textposition: 'top center',
+  textfont: {
+    family:  'Roboto Condensed'
+  },
+  marker: { size: 12,
+   line: {
+      width: 1
+    }
+  }
 };
 
 var trace2 = {
@@ -60,8 +75,10 @@ var trace2 = {
   mode: 'markers',
   type: 'scatter',
   name: 'blood',
-  text: ['B-a', 'B-b', 'B-c', 'B-d', 'B-e'],
-  marker: { size: 12 }
+  showlegend : false,
+  marker: { size: 7,
+   symbol: "diamond"
+  }
 };
 
 var data = [ trace1, trace2 ];
@@ -83,6 +100,7 @@ yaxis: {
 var config = {responsive: true}
 
 Plotly.newPlot('scatter_plot', data, layout, config);
+
 
 }
 

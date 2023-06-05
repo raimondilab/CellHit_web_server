@@ -1,4 +1,5 @@
 flask
 pandas
 pip
-python
+
+Broad-genepy>=1.1.2

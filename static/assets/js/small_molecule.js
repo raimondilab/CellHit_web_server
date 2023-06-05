@@ -9,7 +9,7 @@ function addTableSmallMolecule(data) {
 //        return;
 //    }
 
-  data = [{'compound_name':"idronoxil", 'top_feature': "METABOL_5-HIAA", 'moa': "XIAP inhibitor \n METABOL_5-HIAA \n CRISPR_PCGF3 (10336)", "target": "ENOX2, SPHK1" , 'dsk_score': 0.8}]
+  data = [{'compound_name':"Idronoxil", 'top_feature': "METABOL_5-HIAA", 'moa': "XIAP inhibitor \n METABOL_5-HIAA \n CRISPR_PCGF3 (10336)", "target": "ENOX2, SPHK1" , 'dsk_score': 0.8}]
 
   var myTableDiv = document.getElementById("small_molecule");
 
@@ -39,8 +39,6 @@ function addTableSmallMolecule(data) {
     var tr = document.createElement('TR');
     tableBody.appendChild(tr);
 
-
-  console.log(data);
   // create cells
   var td = document.createElement('TD');
   td.width = '75';
@@ -81,5 +79,30 @@ function addTableSmallMolecule(data) {
     buttons: [
     'copy', 'csv', 'excel', 'pdf', 'print'
     ]});
+
+    // Initialize drug panel
+    var table = $('#table2').DataTable();
+    var tb_data = table.row(0).data();
+    small_molecule_details(tb_data[0]);
+
+}
+
+// Show compounds structure
+function small_molecule_details(compound_name){
+
+  console.log(compound_name);
+
+d3.json("/compound", function(data) {
+    console.log(data);
+     if (data){
+         $("#structure").attr("src", data[0].structure);
+         $("#compound_name").text(data[0].compound_name);
+         $("#description").text(data[0].description);
+     }
+
+}).send("POST", JSON.stringify({
+				'compound_name': compound_name
+	}));
+
 
 }

@@ -11,9 +11,6 @@
 <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.3.2/css/buttons.dataTables.min.css">
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
-<link href="assets/plugins/global/plugins.bundle.css" rel="stylesheet" type="text/css"/>
-<script src="assets/plugins/global/plugins.bundle.js"></script>
-
 
 <!-- ===============================================-->
 <!--    JavaScripts-->
@@ -39,7 +36,7 @@
 <script type="text/javascript" src="{{url_for('static', filename='/assets/js/FileSaver.js')}}"></script>
 
 <!--Result JS -->
-<script type="text/javascript" src="{{url_for('static', filename='/assets/js/small_gene.js')}}"></script>
+<script type="text/javascript" src="{{url_for('static', filename='/assets/js/small_molecule.js')}}"></script>
 <script type="text/javascript" src="{{url_for('static', filename='/assets/js/enrichment.js')}}"></script>
 <script type="text/javascript" src="{{url_for('static', filename='/assets/js/result.js')}}"></script>
 {% endblock%}
@@ -95,12 +92,12 @@
             </h4>
             <div class="col-6">
                 <div class="p-3">
-                    <div id="ora"></div>
+                    <div id="enrichment_table"></div>
                 </div>
             </div>
             <div class="col-6 mb-1">
                 <div class="p-3">
-                    <div id="enrichment_table"></div>
+                    <div id="ora"></div>
                 </div>
             </div>
             <h4 class="fw-bold underline mb-2">Small Molecule
@@ -109,14 +106,14 @@
             </h4>
             <div class="col-6">
                 <div class="p-3">
-                    <img  class="img-fluid w-30 center" src="https://www.drugbank.ca/structures/DB01063/thumb.svg" id="structure">
-                    <h6 class="fw-bold underline mb-2 center" id="compound_name">Idronoxil</h6>
-                    <p class="text-justify" id="background">Idronoxil is a substance that is being studied in the treatment of cancer. It belongs to the family of drugs called signal transduction inhibitors.</p>
+                     <div id="small_molecule"></div>
                 </div>
             </div>
             <div class="col-6">
                 <div class="p-3">
-                     <div id="small_molecule"></div>
+                    <img  class="img-fluid w-30 center" id="structure">
+                    <h6 class="fw-bold underline mb-2 center" id="compound_name"></h6>
+                    <p class="text-justify" id="description"></p>
                 </div>
             </div>
         </div>

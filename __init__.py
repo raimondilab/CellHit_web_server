@@ -74,6 +74,24 @@ def get_subtype_list():
     return json.dumps(subtypes)
 
 
+@app.route('/compound', methods=['GET', 'POST'])
+def get_compound_desc():
+
+    if request.method == 'POST':
+        target = request.get_json(force=True)
+        target = target.get('compound_name')
+        target = str(target.strip())
+
+        df = pd.read_csv("static/clrp/small_molecule_drugbank.csv", sep=",", header=0)
+        df = df[df['NAME'].str.contains(target)].reset_index(drop=True)
+
+        if not df.empty:
+            data = [{"compound_name": df.iloc[0, 1].replace('"', ""), "structure": df.iloc[0, 3].replace('"', ""), "description": df.iloc[0, 9].replace('"', "")}]
+            return json.dumps(data)
+
+    return json.dumps([])
+
+
 # Check allowed file extensions
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
