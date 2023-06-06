@@ -60,7 +60,7 @@ def result():
 
 @app.route('/subtypes', methods=['GET', 'POST'])
 def get_subtype_list():
-    subtypes = []
+    subtypes = ["Select..."]
 
     if request.method == 'POST':
         target = request.get_json(force=True)
@@ -70,6 +70,9 @@ def get_subtype_list():
         df = pd.read_csv("static/clrp/map_lineage.csv")
         df = df[df['lineage'] == target]
         subtypes = list(df['subtype'].unique())
+
+        if len(subtypes) > 1:
+            subtypes.insert(0, "All")
 
     return json.dumps(subtypes)
 
