@@ -1,2 +1,2 @@
-# Cell line response perturbation (CLRP)
+# CellHit
 Cell line response prediction model to small molecule perturbation webapp
