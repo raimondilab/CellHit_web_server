@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import { Helmet } from 'react-helmet';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
+import {useNavigate} from "react-router-dom";
 import { Container, Row, Col, Form } from 'react-bootstrap';
 import { Button } from 'primereact/button';
 import { Heading, Box, Text, Image, VStack, HStack, Divider } from '@chakra-ui/react';
 
 const HomePage = () => {
 
+const navigate = useNavigate();
 const [loading, setLoading] = useState(false);
 
 const load = () => {
@@ -15,6 +17,7 @@ const load = () => {
 
         setTimeout(() => {
             setLoading(false);
+            navigate("/explore/", { state: {'source': 'home'}});
         }, 2000);
 };
 
@@ -24,21 +27,20 @@ const load = () => {
         <title>CellHit | Home</title>
       </Helmet>
       <Header />
-      <div className="d-flex flex-column flex-grow-1">
-        <Container className="my-auto">
-          <Row className="justify-content-md-center align-items-center" style={{ minHeight: '97vh' }}>
-            <Col xs={12} md={6}>
-             <Box maxW='32rem'>
-              <Heading  as='h1' size='4xl' noOfLines={1} mb={4}>Discover CellHit</Heading>
-              <Text fontSize='xl'>
-               Cell line response prediction model to small molecule perturbation
-              </Text>
-              <Button label="Explore now"  loading={loading} onClick={load} />
-            </Box>
-            <div class="row align-items-center row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 py-5 hide-mobile">
+    <section class="py-0" id="home">
+    <div class="container">
+        <div class="row align-items-center min-vh-100 min-vh-md-100 vh-sm-100 vh-100">
+            <div class="col-sm-6 col-md-6 col-lg-6 text-sm-start text-center">
+                <h1 class="display-2 fw-semi-bold lh-sm fs-4 fs-lg-6 fs-xxl-8">Discover CellHit</h1>
+                <p class="mb-4 fs-1 fs-lg-1 fs-xxl-2">
+                    Cell line response prediction model to
+                    small molecule perturbation
+                </p>
+                 <Button  className="btn-home  shadow-none" label="Explore now" loading={loading} onClick={load} />
+                <div class="row align-items-center row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 py-5 hide-mobile">
                     <div class="col d-flex align-items-start vertical_line">
                         <div>
-                            <h4 class="fw-bold mb-0"> 1249 </h4>
+                            <h4 class="fw-bold mb-0"> 45 </h4>
                             <p>Cell Lines</p>
                         </div>
                     </div>
@@ -61,14 +63,14 @@ const load = () => {
                         </div>
                     </div>
                 </div>
-            </Col>
-            <Col xs={12} md={6}>
-              <img src="/assets/images/bg.png" alt="Web server logo" className="img-fluid" />
-            </Col>
-          </Row>
-        </Container>
-      </div>
-      <Footer />
+            </div>
+             <div class="col-sm-6 col-md-6 col-lg-6 text-sm-start text-center">
+               <img src="/assets/images/bg.png" alt="Database" className="img-fluid"/>
+             </div>
+        </div>
+    </div>
+</section>
+      <Footer/>
     </>
   );
 };

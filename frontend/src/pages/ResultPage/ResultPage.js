@@ -12,7 +12,7 @@ import { FilterMatchMode, FilterOperator } from 'primereact/api';
 import 'animate.css';
 import 'primeicons/primeicons.css';
 import { MultiSelect } from 'primereact/multiselect';
-
+import Swal from 'sweetalert2'
 
 const ResultPage = () => {
 
@@ -27,7 +27,8 @@ useEffect(() => {
 }, [location, navigate]);
 
 const state = location.state ||  [];
-const datatable = state.data|| [];
+
+
 const dt = useRef(null);
 let data = null;
 
@@ -132,6 +133,19 @@ let data = null;
   </div>
 );
 
+const onClickHandlerHelp = () => {
+ Swal.fire({
+  html: `
+     <div className="container my-2">
+     <h2 className="display-6 fw-bold mb-2">Help</h2>
+     <p className="text-justify fs-1">We provides various filters that enable the visualization of the heatmap according to your specific requirements.
+     Please note that the available filters may be updated based on the available results.</p>
+     <p className="text-justify fs-1">For more information, please refer to the <a className="italic" href="/help/" target="_blank">help</a> page.</p>
+     </div>
+  `,
+  showCloseButton: true,
+});;
+};
 
 return (
     <>
@@ -143,12 +157,25 @@ return (
         <div className="container">
         <div className="row mb-4">
             <div className="col-12">
-             <h1 className="display-5 fw-bold title-explore mb-3">Explore</h1>
+             <h1 className="display-5 fw-bold mb-3 line">Explore
+             <span className="badge">
+                        <button type="button" className="btn btn-info"  onClick={onClickHandlerHelp}><ion-icon name="information-outline"></ion-icon></button>
+                 </span>
+             </h1>
             </div>
           </div>
+          <div className="row mb-5">
+            <div className="col-12">
+               <h2 className="display-6 fw-bold mb-5">GDSC</h2>
+               <Tooltip target=".export-buttons>button" position="bottom" />
+               <DataTable ref={dt} value={data} paginator rows={5} removableSort header={header} filters={filters} onFilter={(e) => setFilters(e.filters)} tableStyle={{ minWidth: '50rem' }}>
+                    {dynamicColumns}
+                </DataTable>
+            </div>
+        </div>
           <div className="row mb-4">
             <div className="col-12">
-               <h2 className="display-6 fw-bold mb-5">Functional site information</h2>
+               <h2 className="display-6 fw-bold mb-5">PRISM</h2>
                <Tooltip target=".export-buttons>button" position="bottom" />
                <DataTable ref={dt} value={data} paginator rows={5} removableSort header={header} filters={filters} onFilter={(e) => setFilters(e.filters)} tableStyle={{ minWidth: '50rem' }}>
                     {dynamicColumns}
