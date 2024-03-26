@@ -19,12 +19,12 @@ useEffect(() => {
    return (
     <>
     <Helmet>
-        <title>Atlantis | Error</title>
+        <title>CellHit | Error</title>
       </Helmet>
       <Header/>
       <section className="py-0">
     <div className="bg-holder d-sm-block img-fluid bg" id="back"
-          style={{ backgroundImage: 'url(/assets/images/PRKACB_Logo.png)'}}>
+          style={{ backgroundImage: 'url(/assets/images/cell.webp)'}}>
     </div>
     <div className="container">
         <div className="row align-items-center min-vh-100 min-vh-md-100 vh-sm-100 vh-100">

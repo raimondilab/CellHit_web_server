@@ -17,7 +17,7 @@ const load = () => {
 
         setTimeout(() => {
             setLoading(false);
-            navigate("/explore/", { state: {'source': 'home'}});
+            navigate("/under/", { state: {'source': 'home'}});
         }, 2000);
 };
 
@@ -27,44 +27,44 @@ const load = () => {
         <title>CellHit | Home</title>
       </Helmet>
       <Header />
-    <section class="py-0" id="home">
-    <div class="container">
-        <div class="row align-items-center min-vh-100 min-vh-md-100 vh-sm-100 vh-100">
-            <div class="col-sm-6 col-md-6 col-lg-6 text-sm-start text-center">
-                <h1 class="display-2 fw-semi-bold lh-sm fs-4 fs-lg-6 fs-xxl-8">Discover CellHit</h1>
-                <p class="mb-4 fs-1 fs-lg-1 fs-xxl-2">
+    <section className="py-0" id="home">
+    <div className="container">
+        <div className="row align-items-center min-vh-100 min-vh-md-100 vh-sm-100 vh-100">
+            <div className="col-sm-6 col-md-6 col-lg-6 text-sm-start text-center">
+                <h1 className="display-2 fw-semi-bold lh-sm fs-4 fs-lg-6 fs-xxl-8">Discover CellHit</h1>
+                <p className="mb-4 fs-1 fs-lg-1 fs-xxl-2">
                     Cell line response prediction model to
                     small molecule perturbation
                 </p>
                  <Button  className="btn-home  shadow-none" label="Explore now" loading={loading} onClick={load} />
-                <div class="row align-items-center row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 py-5 hide-mobile">
-                    <div class="col d-flex align-items-start vertical_line">
+                <div className="row align-items-center row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 py-5 hide-mobile">
+                    <div className="col d-flex align-items-start vertical_line">
                         <div>
-                            <h4 class="fw-bold mb-0"> 45 </h4>
+                            <h4 className="fw-bold mb-0"> 1000 </h4>
                             <p>Cell Lines</p>
                         </div>
                     </div>
-                    <div class="col d-flex align-items-start vertical_line">
+                    <div className="col d-flex align-items-start vertical_line">
                         <div>
-                            <h4 class="fw-bold mb-0">37</h4>
+                            <h4 className="fw-bold mb-0">33</h4>
                             <p>Cancer Types</p>
                         </div>
                     </div>
-                    <div class="col d-flex align-items-start vertical_line">
+                    <div className="col d-flex align-items-start vertical_line">
                         <div>
-                            <h4 class="fw-bold mb-0">1024</h4>
+                            <h4 className="fw-bold mb-0">286</h4>
                             <p>FDA-approved drugs</p>
                         </div>
                     </div>
-                    <div class="col d-flex align-items-start vertical_line">
+                    <div className="col d-flex align-items-start vertical_line">
                         <div>
-                            <h4 class="fw-bold mb-0">794</h4>
+                            <h4 className="fw-bold mb-0">794</h4>
                             <p>Genes</p>
                         </div>
                     </div>
                 </div>
             </div>
-             <div class="col-sm-6 col-md-6 col-lg-6 text-sm-start text-center">
+             <div className="col-sm-6 col-md-6 col-lg-6 text-sm-start text-center">
                <img src="/assets/images/bg.png" alt="Database" className="img-fluid"/>
              </div>
         </div>

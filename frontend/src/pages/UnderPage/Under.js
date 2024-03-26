@@ -12,7 +12,7 @@ const Under = () => {
       <Header/>
       <section className="py-0">
     <div className="bg-holder d-sm-block img-fluid bg" id="back"
-          style={{ backgroundImage: 'url(/images/bg.png)'}}>
+          style={{ backgroundImage: 'url(/assets/images/cell.webp)'}}>
     </div>
     <div className="container">
         <div className="row align-items-center min-vh-100">
