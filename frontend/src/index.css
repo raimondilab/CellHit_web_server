@@ -18843,7 +18843,7 @@ div:where(.swal2-container) .swal2-html-container {
     content: '';
     margin-right: 5px;
     border-left: 3px solid #004059;
-    height: 50px;
+    height: 70px;
 }
 
 .line::after{
