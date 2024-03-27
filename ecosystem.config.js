@@ -2,7 +2,7 @@ module.exports = {
   apps : [{
     name: 'cell_api',
     script: 'uvicorn',
-    args: 'api:app --host 0.0.0.0 --port 8002',
+    args: 'api:app --host 0.0.0.0 --port 8003',
     interpreter: 'python3',
     exec_mode: 'fork'
   }]
