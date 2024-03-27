@@ -108,7 +108,7 @@ class QueryResolver:
 
             for item in data_prism:
                 prism_item = schemas.Prism(
-                    gdsc_id=item.prism_id,
+                    prism_id=item.prism_id,
                     drug_name=item.drug_name,
                     drug_id=item.drug_id,
                     source=item.source,
