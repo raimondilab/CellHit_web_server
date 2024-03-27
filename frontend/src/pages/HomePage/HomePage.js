@@ -33,8 +33,7 @@ const load = () => {
             <div className="col-sm-6 col-md-6 col-lg-6 text-sm-start text-center">
                 <h1 className="display-2 fw-semi-bold lh-sm fs-4 fs-lg-6 fs-xxl-8">Discover CellHit</h1>
                 <p className="mb-4 fs-1 fs-lg-1 fs-xxl-2">
-                    Cell line response prediction model to
-                    small molecule perturbation
+                   Interpretable models for drug-response prediction
                 </p>
                  <Button  className="btn-home  shadow-none" label="Explore now" loading={loading} onClick={load} />
                 <div className="row align-items-center row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 py-5 hide-mobile">
