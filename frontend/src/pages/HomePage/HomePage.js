@@ -89,7 +89,7 @@ async function sendExploreData() {
 
         let navigateData = null;
         let type = "";
-        const apiUrl = 'http://127.0.0.1:8001/graphql';
+        const apiUrl = 'https://api.atlantis.bioinfolab.sns.it/graphql';
 
         navigateData = await axios.post(apiUrl, query);
 

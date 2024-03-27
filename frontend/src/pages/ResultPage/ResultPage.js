@@ -161,7 +161,7 @@ return (
             <div className="col-12">
                <h2 className="display-6 fw-bold mb-5">GDSC</h2>
                <Tooltip target=".export-buttons>button" position="bottom" />
-               <DataTable stripedRows lazy ref={dt} value={gdscData} paginator rows={10} paginator totalRecords={1000} removableSort header={header} filters={filters} onFilter={(e) => setFilters(e.filters)} tableStyle={{ minWidth: '50rem' }}>
+               <DataTable stripedRows  ref={dt} value={gdscData} paginator rows={10} paginator totalRecords={1000} removableSort header={header} filters={filters} onFilter={(e) => setFilters(e.filters)} tableStyle={{ minWidth: '50rem' }}>
                     {dynamicColumns}
                 </DataTable>
             </div>
@@ -170,7 +170,7 @@ return (
             <div className="col-12">
                <h2 className="display-6 fw-bold mb-5">PRISM</h2>
                <Tooltip target=".export-buttons>button" position="bottom" />
-
+                <p> table under construction<br/> Coming soon</p>
             </div>
         </div>
         </div>
