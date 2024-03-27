@@ -170,7 +170,7 @@ return (
             <div className="col-12">
                <h2 className="display-6 fw-bold mb-5">PRISM</h2>
                <Tooltip target=".export-buttons>button" position="bottom" />
-                <p> table under construction<br/> Coming soon</p>
+                <p> Table under construction<br/> Coming soon</p>
             </div>
         </div>
         </div>
