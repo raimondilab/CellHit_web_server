@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 
-DATABASE_URI = "mysql+mysqlconnector://clrp:clrpmolecule24#@localhost/cellhit"
+DATABASE_URI = "mysql+mysqlconnector://clrp:clrpmoleculE24#@localhost/cellhit"
 
 # Create the database engine
 engine = create_engine(DATABASE_URI)

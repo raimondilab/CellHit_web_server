@@ -5,7 +5,7 @@ USE cellhit;
 
 /** CREATE USER STATEMENTS **/
 
-CREATE USER 'clrp'@'localhost' IDENTIFIED BY 'clrpmolecule24#';
+CREATE USER 'clrp'@'localhost' IDENTIFIED BY 'clrpmoleculE24#';
 GRANT SELECT ON *.* TO 'clrp'@'localhost';
 
 
