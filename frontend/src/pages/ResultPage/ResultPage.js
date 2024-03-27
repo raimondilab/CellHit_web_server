@@ -14,6 +14,7 @@ import 'primeicons/primeicons.css';
 import { MultiSelect } from 'primereact/multiselect';
 import Swal from 'sweetalert2'
 
+
 const ResultPage = () => {
 
 const navigate = useNavigate();
@@ -26,66 +27,54 @@ useEffect(() => {
    }
 }, [location, navigate]);
 
-const state = location.state ||  [];
 
+const state = location.state ||  [];
+const data = state.data.data.databases || [];
+
+const filteredData = data.filter(item => item.__typename === "Gdsc");
+
+console.log(state)
+
+const [gdscData, setGdscData] = useState(filteredData || []);
+const [prismData, setPrismData] = useState([]);
 
 const dt = useRef(null);
-let data = null;
+const dtPrism = useRef(null);
 
-   const columns = [
-       { field: 'anPosition', header: 'Position' },
-       { field: 'unRefProtRe', header: 'Ref' }
-   ];
+   gdscData.forEach(obj => delete obj["__typename"]);
+   const columns = Object.keys(gdscData[0]);
+   //const columnsPrism = Object.keys(prismData);
 
-   const multiSelectOptions = columns.map(col => ({ label: col.header, value: col.field }));
+   console.log(gdscData)
+
+   const multiSelectOptions = columns.map(col => ({ label: col, value: col }));
+   //const multiSelectOptionsPrism = columns.map(col => ({ label: col, value: col }));
+
    const [visibleColumns, setVisibleColumns] = useState(columns);
+   //const [visibleColumnsPrism, setVisibleColumnsPrism] = useState(columns);
 
    const onColumnToggle = (event) => {
     const selectedFieldNames = event.value;
-    const updatedVisibleColumns = columns.filter(col => selectedFieldNames.includes(col.field));
+    const updatedVisibleColumns = columns.filter(col => selectedFieldNames.includes(col));
     setVisibleColumns(updatedVisibleColumns);
    };
 
-    const dynamicColumns = visibleColumns.map((col) => {
-    return <Column key={col.field} field={col.field} header={col.header} sortable />;
+//   const onColumnTogglePrism = (event) => {
+//    const selectedFieldNames = event.value;
+//    const updatedVisibleColumnsPrism = columnsPrism.filter(col => selectedFieldNames.includes(col));
+//    setVisibleColumnsPrism(updatedVisibleColumnsPrism);
+//   };
+
+   const dynamicColumns = visibleColumns.map((col) => {
+    return <Column key={col} field={col} header={col} sortable />;
    });
 
-   const exportColumns = columns.map((col) => ({ title: col.header, dataKey: col.field }));
+//   const dynamicColumnsPrism = visibleColumnsPrism.map((col) => {
+//    return <Column key={col} field={col} header={col} sortable />;
+//   });
 
-   const exportCSV = (selectionOnly) => {
-        dt.current.exportCSV({ selectionOnly });
-    };
-
-   const exportPdf = () => {
-    import('jspdf').then((jsPDF) => {
-        import('jspdf-autotable').then(() => {
-            const doc = new jsPDF.default();
-            doc.autoTable(exportColumns, data);
-            doc.save('data.pdf');
-            });
-        });
-    };
-
-    const exportExcel = async () => {
-    const xlsx = await import('xlsx');
-    const worksheet = xlsx.utils.json_to_sheet(data);
-    const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
-    const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
-    saveAsExcelFile(excelBuffer, 'data');
-    };
-
-    const saveAsExcelFile = (buffer, fileName) => {
-        import('file-saver').then((module) => {
-            if (module && module.default) {
-                let EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-                let EXCEL_EXTENSION = '.xlsx';
-                const data = new Blob([buffer], {
-                    type: EXCEL_TYPE
-                });
-
-                module.default.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
-            }
-        });
+   const exportCSV = (tableRef, selectionOnly) => {
+        tableRef.current.exportCSV({ selectionOnly });
     };
 
      const [filters, setFilters] = useState({
@@ -112,12 +101,12 @@ let data = null;
       <div className="col">
           <span className="p-input-icon-left">
               <i className="pi pi-search" />
-              <InputText type="search" value={value || ''} onChange={(e) => onGlobalFilterChange(e)} placeholder="Global Search" />
+              <InputText type="search" value={value || ''} onChange={(e) => onGlobalFilterChange(e)} placeholder="Search by drug" />
           </span>
       </div>
       <div className="col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
           <MultiSelect
-              value={visibleColumns.map(col => col.field)}
+              value={visibleColumns.map(col => col)}
               options={multiSelectOptions}
               onChange={onColumnToggle}
               optionLabel="label"
@@ -126,31 +115,40 @@ let data = null;
               display="chip"
               style={{ width: '200px', marginRight: '10px' }}
           />
-          <Button type="button" icon="pi pi-file" className="p-button-rounded p-mr-2" onClick={() => exportCSV(false)} data-pr-tooltip="CSV" />
-          <Button type="button" icon="pi pi-file-excel" className="p-button-success p-button-rounded p-mr-2" onClick={exportExcel} data-pr-tooltip="XLS" />
-          <Button type="button" icon="pi pi-file-pdf" className="p-button-warning p-button-rounded" onClick={exportPdf} data-pr-tooltip="PDF" />
+          <Button type="button" icon="pi pi-file" className="p-button-rounded p-mr-2" onClick={() => exportCSV(dt, false)} data-pr-tooltip="CSV" />
       </div>
   </div>
 );
 
-const onClickHandlerHelp = () => {
- Swal.fire({
-  html: `
-     <div className="container my-2">
-     <h2 className="display-6 fw-bold mb-2">Help</h2>
-     <p className="text-justify fs-1">We provides various filters that enable the visualization of the heatmap according to your specific requirements.
-     Please note that the available filters may be updated based on the available results.</p>
-     <p className="text-justify fs-1">For more information, please refer to the <a className="italic" href="/help/" target="_blank">help</a> page.</p>
-     </div>
-  `,
-  showCloseButton: true,
-});;
-};
+//  const headerPrism = (
+//  <div className="row align-items-center">
+//      <div className="col">
+//          <span className="p-input-icon-left">
+//              <i className="pi pi-search" />
+//              <InputText type="search" value={value || ''} onChange={(e) => onGlobalFilterChange(e)} placeholder="Search by drug" />
+//          </span>
+//      </div>
+//      <div className="col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+//          <MultiSelect
+//              value={visibleColumnsPrism.map(col => col)}
+//              options={multiSelectOptionsPrism}
+//              onChange={onColumnTogglePrism}
+//              optionLabel="label"
+//              optionValue="value"
+//              placeholder="Select Columns"
+//              display="chip"
+//              style={{ width: '200px', marginRight: '10px' }}
+//          />
+//          <Button type="button" icon="pi pi-file" className="p-button-rounded p-mr-2" onClick={() => exportCSV(dtPrism, false)} data-pr-tooltip="CSV" />
+//      </div>
+//  </div>
+//);
+
 
 return (
     <>
       <Helmet>
-        <title> CellHit</title>
+        <title> CellHit | Explore</title>
       </Helmet>
       <Header />
       <section className="py-9">
@@ -158,9 +156,6 @@ return (
         <div className="row mb-4">
             <div className="col-12">
              <h1 className="display-5 fw-bold mb-3 line">Explore
-             <span className="badge">
-                        <button type="button" className="btn btn-info"  onClick={onClickHandlerHelp}><ion-icon name="information-outline"></ion-icon></button>
-                 </span>
              </h1>
             </div>
           </div>
@@ -168,7 +163,7 @@ return (
             <div className="col-12">
                <h2 className="display-6 fw-bold mb-5">GDSC</h2>
                <Tooltip target=".export-buttons>button" position="bottom" />
-               <DataTable ref={dt} value={data} paginator rows={5} removableSort header={header} filters={filters} onFilter={(e) => setFilters(e.filters)} tableStyle={{ minWidth: '50rem' }}>
+               <DataTable stripedRows  ref={dt} value={gdscData} paginator rows={10} removableSort header={header} filters={filters} onFilter={(e) => setFilters(e.filters)} tableStyle={{ minWidth: '50rem' }}>
                     {dynamicColumns}
                 </DataTable>
             </div>
@@ -177,9 +172,7 @@ return (
             <div className="col-12">
                <h2 className="display-6 fw-bold mb-5">PRISM</h2>
                <Tooltip target=".export-buttons>button" position="bottom" />
-               <DataTable ref={dt} value={data} paginator rows={5} removableSort header={header} filters={filters} onFilter={(e) => setFilters(e.filters)} tableStyle={{ minWidth: '50rem' }}>
-                    {dynamicColumns}
-                </DataTable>
+
             </div>
         </div>
         </div>

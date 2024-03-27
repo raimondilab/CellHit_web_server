@@ -2,8 +2,18 @@ name: CLRP
 channels:
   - defaults
 dependencies:
-  - flask
-  - pandas
-  - pip
-  - python
+  - python==3.10
+  - pip:
+      - mysql-connector-python
+      - pandas
+      - pip
+      - pymysql
+      - uvicorn
+      - fastapi
+      - requests
+      - pydantic
+      - strawberry-graphql
+      - python-decouple
+      - sqlalchemy==1.4.51
+
 

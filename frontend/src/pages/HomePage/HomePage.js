@@ -6,19 +6,125 @@ import {useNavigate} from "react-router-dom";
 import { Container, Row, Col, Form } from 'react-bootstrap';
 import { Button } from 'primereact/button';
 import { Heading, Box, Text, Image, VStack, HStack, Divider } from '@chakra-ui/react';
+import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const HomePage = () => {
 
 const navigate = useNavigate();
 const [loading, setLoading] = useState(false);
 
+// Function to send form data to the API
+async function sendExploreData() {
+        try {
+
+        const query = {
+              query: `
+               query getData{
+                    databases {
+                      __typename
+                       ... on Gdsc {
+                        drugName
+                      drugId
+                      source
+                      sampleIndex
+                      predictions
+                      predictionsStd
+                      quantileScore
+                      experimentalMin
+                      experimentalMedian
+                      experimentalMax
+                      modelMse
+                      modelCorr
+                      transcrCcleNeigh
+                      transcrCcleNeighCelllinename
+                      transcrCcleNeighOncotree
+                      responseCcleNeigh
+                      responseCcleNeighCelllinename
+                      responseCcleNeighOncotree
+                      transcrTcgaNeigh
+                      transcrTcgaNeighDiagnosis
+                      transcrTcgaNeighSite
+                      responseTcgaNeigh
+                      responseTcgaNeighDiagnosis
+                      responseTcgaNeighSite
+                      putativeTarget
+                      topLocalShapGenes
+                      recoveredTarget
+                      }
+                       ... on Prism {
+                         __typename
+                         drugName
+                      drugId
+                      source
+                      sampleIndex
+                      predictions
+                      predictionsStd
+                      quantileScore
+                      experimentalMin
+                      experimentalMedian
+                      experimentalMax
+                      modelMse
+                      modelCorr
+                      transcrCcleNeigh
+                      transcrCcleNeighCelllinename
+                      transcrCcleNeighOncotree
+                      responseCcleNeigh
+                      responseCcleNeighCelllinename
+                      responseCcleNeighOncotree
+                      transcrTcgaNeigh
+                      transcrTcgaNeighDiagnosis
+                      transcrTcgaNeighSite
+                      responseTcgaNeigh
+                      responseTcgaNeighDiagnosis
+                      responseTcgaNeighSite
+                      putativeTarget
+                      topLocalShapGenes
+                      recoveredTarget
+                      }
+                    }
+                    }
+              `
+            };
+
+        let navigateData = null;
+        let type = "";
+        const apiUrl = 'http://127.0.0.1:8001/graphql';
+
+        navigateData = await axios.post(apiUrl, query);
+
+        if (!navigateData) {
+                setLoading(false);
+                Swal.fire({
+                    icon: "info",
+                    text: "No results found!"
+            });
+            return;
+        }else if (navigateData.data.errors){
+               setLoading(false);
+                Swal.fire({
+                    icon: "error",
+                    text: "Oops... \n An error has occurred!"
+                });
+                 return;
+        }else if (navigateData) {
+            setLoading(false);
+            navigate("/explore/", { state: { 'data': navigateData.data } });
+          }
+        }
+
+        catch (error) {
+         setLoading(false);
+          Swal.fire({
+              icon: "error",
+              text: error.message
+          });
+       }
+}
+
 const load = () => {
         setLoading(true);
-
-        setTimeout(() => {
-            setLoading(false);
-            navigate("/under/", { state: {'source': 'home'}});
-        }, 2000);
+        sendExploreData();
 };
 
   return (
