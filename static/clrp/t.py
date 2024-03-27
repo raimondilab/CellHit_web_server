@@ -15,7 +15,7 @@ def read_data(filename):
                'transcr_tcga_neigh', 'transcr_tcga_neigh_diagnosis', 'transcr_tcga_neigh_site', 'response_tcga_neigh',
                'response_tcga_neigh_diagnosis', 'response_tcga_neigh_site', 'putative_target', 'top_local_shap_genes',
                'recovered_target']
-    df = pd.read_csv(filename, header=None, names=columns, low_memory=False, sep=",")
+    df = pd.read_csv(filename, header=None, names=columns, low_memory=False, sep=",", skiprows=1)
     df = df.fillna(" ")
     return df
 
@@ -62,6 +62,7 @@ def dataframe_to_mysql_batch(data_file, table):
         for i in range(0, data_file.shape[0], batch_size):
             # Create a slice representing the current batch
             batch = data_file.iloc[i:i + batch_size]
+            print(batch)
             # Construct the SQL query template
             sql = f"INSERT INTO {table} (`" + cols + "`) VALUES (" + ",".join(["%s"] * len(batch.columns)) + ")"
             # Prepare the data for insertion
