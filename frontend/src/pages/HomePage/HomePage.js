@@ -40,26 +40,16 @@ const load = () => {
                 <div className="row align-items-center row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 py-5 hide-mobile">
                     <div className="col d-flex align-items-start vertical_line">
                         <div>
-                            <h4 className="fw-bold mb-0"> 1000 </h4>
-                            <p>Cell Lines</p>
+                            <h4 className="fw-bold mb-0">GDSC</h4>
+                            <p className="mb-0">887 Cell lines</p>
+                            <p>6337 Drugs</p>
                         </div>
                     </div>
                     <div className="col d-flex align-items-start vertical_line">
                         <div>
-                            <h4 className="fw-bold mb-0">33</h4>
-                            <p>Cancer Types</p>
-                        </div>
-                    </div>
-                    <div className="col d-flex align-items-start vertical_line">
-                        <div>
-                            <h4 className="fw-bold mb-0">286</h4>
-                            <p>FDA-approved drugs</p>
-                        </div>
-                    </div>
-                    <div className="col d-flex align-items-start vertical_line">
-                        <div>
-                            <h4 className="fw-bold mb-0">794</h4>
-                            <p>Genes</p>
+                            <h4 className="fw-bold mb-0">PRISM</h4>
+                            <p className="mb-0">686 Cell lines</p>
+                            <p>286 Drugs</p>
                         </div>
                     </div>
                 </div>
