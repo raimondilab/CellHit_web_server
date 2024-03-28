@@ -15,9 +15,9 @@ def read_data(filename):
                'transcr_tcga_neigh', 'transcr_tcga_neigh_diagnosis', 'transcr_tcga_neigh_site', 'response_tcga_neigh',
                'response_tcga_neigh_diagnosis', 'response_tcga_neigh_site', 'putative_target', 'top_local_shap_genes',
                'recovered_target']
-    df = pd.read_csv(filename, header=None, names=columns, low_memory=False, sep=",")
+    df = pd.read_csv(filename, header=None, names=columns, low_memory=False, sep=",", skiprows=3302931)
+    df = df.iloc[1:, :]
     df['quantile_score'] = df['quantile_score'].fillna(0)
-    df = df.iloc[1:, 3302931:]
     df = df.fillna(" ")
     return df
 
@@ -89,4 +89,4 @@ def mysql_err(err):
 
 
 if __name__ == "__main__":
-    dataframe_to_mysql(read_data("full_results_gdsc.csv"), "gdsc")
+    dataframe_to_mysql_batch(read_data("full_results_gdsc.csv"), "gdsc")
