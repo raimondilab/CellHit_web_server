@@ -16,7 +16,9 @@ def read_data(filename):
                'response_tcga_neigh_diagnosis', 'response_tcga_neigh_site', 'putative_target', 'top_local_shap_genes',
                'recovered_target']
     df = pd.read_csv(filename, header=None, names=columns, low_memory=False, sep=",", skiprows=1)
+    df['quantile_score'] = df['quantile_score'].fillna(0)
     df = df.fillna(" ")
+
     return df
 
 
@@ -34,7 +36,7 @@ def dataframe_to_mysql(data_file, table):
     cols = "`,`".join([str(i) for i in data_file.columns.tolist()])
 
     # Insert DataFrame records one by one.
-    for i, row in data_file.iterrows():
+    for i, row in data_file.iterrows()[155000:]:
         print(row)
         sql = f"INSERT INTO {table} (`" + cols + "`) VALUES (" + "%s," * (len(row) - 1) + "%s)"
         cursor.execute(sql, tuple(row))
