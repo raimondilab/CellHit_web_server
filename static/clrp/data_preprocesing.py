@@ -16,7 +16,8 @@ def read_data(filename):
                'response_tcga_neigh_diagnosis', 'response_tcga_neigh_site', 'putative_target', 'top_local_shap_genes',
                'recovered_target']
     df = pd.read_csv(filename, header=None, names=columns, low_memory=False, sep=",")
-    df = df.iloc[1:,:]
+    df['quantile_score'] = df['quantile_score'].fillna(0)
+    df = df.iloc[1:, 3302931:]
     df = df.fillna(" ")
     return df
 
