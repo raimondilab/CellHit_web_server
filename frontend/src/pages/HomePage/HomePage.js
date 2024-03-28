@@ -88,7 +88,6 @@ async function sendExploreData() {
             };
 
         let navigateData = null;
-        let type = "";
         const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
 
         navigateData = await axios.post(apiUrl, query);
