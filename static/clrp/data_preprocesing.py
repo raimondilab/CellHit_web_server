@@ -89,4 +89,4 @@ def mysql_err(err):
 
 
 if __name__ == "__main__":
-    dataframe_to_mysql_batch(read_data("full_results_prism.csv"), "prism")
+    dataframe_to_mysql(read_data("full_results_gdsc.csv"), "gdsc")
