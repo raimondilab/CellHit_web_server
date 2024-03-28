@@ -29,7 +29,7 @@ class QueryResolver:
 
         db = DBSession()
         try:
-            drug_data = db.query(models.Gdsc).filter(models.Gdsc.drug_name == drug).all()
+            drug_data = db.query(models.Gdsc).filter(models.Gdsc.drug_name.like(f"%{drug}%")).all()
 
         finally:
             db.close()
@@ -56,7 +56,7 @@ class QueryResolver:
 
         db = DBSession()
         try:
-            drug_data = db.query(models.Prism).filter(models.Prism.drug_name == drug).all()
+            drug_data = db.query(models.Prism).filter(models.Prism.drug_name.like(f"%{drug}%")).all()
 
         finally:
             db.close()
