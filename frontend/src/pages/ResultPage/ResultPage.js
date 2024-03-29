@@ -27,7 +27,7 @@ useEffect(() => {
 
 const state = location.state ||  [];
 state.data = state.data || []
-
+state.data.data = state.data.data || [];
 const data = state.data.data.databases || [];
 const gdscDrugs = require('../../gdsc_drugs.json');
 

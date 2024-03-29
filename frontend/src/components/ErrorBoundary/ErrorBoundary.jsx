@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 import { Helmet } from 'react-helmet';
@@ -10,9 +9,16 @@ class ErrorBoundary extends Component {
     this.state = { hasError: false, error: null, errorInfo: null };
   }
 
+
   resetErrorState = () => {
-  this.setState({ hasError: false, error: null, errorInfo: null });
+    this.setState({ hasError: false, error: null, errorInfo: null });
   };
+
+     resetErrorStateAndNavigateHome = () => {
+      this.resetErrorState(); // Reset the error state
+      this.props.navigate('/'); // Use navigate function to navigate home
+    };
+
 
   // Use this lifecycle method to update state so the next render will show the fallback UI.
   static getDerivedStateFromError(error) {
@@ -48,14 +54,14 @@ class ErrorBoundary extends Component {
             <div className="col-sm-12 text-sm-start text-center">
                 <h1 className="fw-light font-base fs-6 fs-xxl-7">Oops...</h1>
                 <h2 className="fw-light font-base fs-6 fs-xxl-7">An <strong>error</strong> has occurred</h2>
-                <p className="fs-1 mb-5"> <details style={{ whiteSpace: 'pre-wrap' }}>
-                      {this.state.error && this.state.error.toString()}
-                      <br />
-                      {this.state.errorInfo ? this.state.errorInfo.componentStack : "Error details are not available."}
+                <p className="fs-1 mb-5">
+                    <details style={{ whiteSpace: 'pre-wrap' }}>
+                       I'm sorry, but the action you're attempting to perform is not allowed.
+                       <br/>Please return to the Home page.
                     </details></p>
-                      <Link to="/" className="btn btn-primary mb-1 btn-form">
+                     <button onClick={this.resetErrorStateAndNavigateHome} className="btn btn-primary mb-1 btn-form">
                       Go Home
-                    </Link>
+                    </button>
             </div>
         </div>
     </div>
