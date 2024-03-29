@@ -8,12 +8,11 @@ import {Column} from 'primereact/column';
 import { Tooltip } from 'primereact/tooltip';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
-import { FilterMatchMode, FilterOperator } from 'primereact/api';
+import { FilterMatchMode } from 'primereact/api';
 import 'animate.css';
 import 'primeicons/primeicons.css';
 import { MultiSelect } from 'primereact/multiselect';
-import Swal from 'sweetalert2'
-
+import axios from 'axios';
 
 const ResultPage = () => {
 
@@ -30,26 +29,43 @@ useEffect(() => {
 
 const state = location.state ||  [];
 const data = state.data.data.databases || [];
+const gdscDrugs = require('../../gdsc_drugs.json');
 
 const filteredData = data.filter(item => item.__typename === "Gdsc");
+const filteredDataPrism = data.filter(item => item.__typename === "Prism");
 
-console.log(state)
+const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
 
 const [gdscData, setGdscData] = useState(filteredData || []);
-const [prismData, setPrismData] = useState([]);
+const [prismData, setPrismData] = useState(filteredDataPrism || []);
+const [loading, setLoading] = useState(false);
+const [loadingPrism, setLoadingPrism] = useState(false);
+const [value, setValue] = useState('');
+const [totalRecords, setTotalRecords] = useState(4060342);
+const [totalRecordsPrism, setTotalRecordsPrism] = useState(17803038);
+
+const [lazyState, setLazyState] = useState({
+    first: 0,
+    rows: 10,
+    page: 1,
+    sortField: null,
+    sortOrder: null,
+    filters: {drugName: { value: null, matchMode: FilterMatchMode.CONTAINS }}
+});
 
 const dt = useRef(null);
 const dtPrism = useRef(null);
 
    gdscData.forEach(obj => delete obj["__typename"]);
+   prismData.forEach(obj => delete obj["__typename"]);
    const columns = Object.keys(gdscData[0]);
-   //const columnsPrism = Object.keys(prismData);
+   const columnsPrism = Object.keys(prismData[0]);
 
    const multiSelectOptions = columns.map(col => ({ label: col, value: col }));
-   //const multiSelectOptionsPrism = columns.map(col => ({ label: col, value: col }));
+   const multiSelectOptionsPrism = columnsPrism.map(col => ({ label: col, value: col }));
 
    const [visibleColumns, setVisibleColumns] = useState(columns);
-   //const [visibleColumnsPrism, setVisibleColumnsPrism] = useState(columns);
+   const [visibleColumnsPrism, setVisibleColumnsPrism] = useState(columnsPrism);
 
    const onColumnToggle = (event) => {
     const selectedFieldNames = event.value;
@@ -57,49 +73,237 @@ const dtPrism = useRef(null);
     setVisibleColumns(updatedVisibleColumns);
    };
 
-//   const onColumnTogglePrism = (event) => {
-//    const selectedFieldNames = event.value;
-//    const updatedVisibleColumnsPrism = columnsPrism.filter(col => selectedFieldNames.includes(col));
-//    setVisibleColumnsPrism(updatedVisibleColumnsPrism);
-//   };
+   const onColumnTogglePrism = (event) => {
+    const selectedFieldNames = event.value;
+    const updatedVisibleColumnsPrism = columnsPrism.filter(col => selectedFieldNames.includes(col));
+    setVisibleColumnsPrism(updatedVisibleColumnsPrism);
+   };
 
    const dynamicColumns = visibleColumns.map((col) => {
-    return <Column key={col} field={col} header={col} sortable />;
+    return <Column key={col} field={col} header={col}  />;
    });
 
-//   const dynamicColumnsPrism = visibleColumnsPrism.map((col) => {
-//    return <Column key={col} field={col} header={col} sortable />;
-//   });
+   const dynamicColumnsPrism = visibleColumnsPrism.map((col) => {
+    return <Column key={col} field={col} header={col}  />;
+   });
 
    const exportCSV = (tableRef, selectionOnly) => {
         tableRef.current.exportCSV({ selectionOnly });
     };
 
-     const [filters, setFilters] = useState({
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        name: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
-        'country.name': { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
-        representative: { value: null, matchMode: FilterMatchMode.IN },
-        status: { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] }
-    });
 
-    const value = filters['global'] ? filters['global'].value : '';
-
-    const onGlobalFilterChange = (event) => {
-        const value = event.target.value;
-        let _filters = { ...filters };
-
-        _filters['global'].value = value;
-
-        setFilters(_filters);
+async function sendExploreData(value) {
+    const query = {
+        query: `
+            query getGDSCDrug{
+                gdscDrug(drug: "${value}") {
+                    gdscId
+                    drugName
+                    drugId
+                    source
+                    sampleIndex
+                    predictions
+                    predictionsStd
+                    quantileScore
+                    experimentalMin
+                    experimentalMedian
+                    experimentalMax
+                    modelMse
+                    modelCorr
+                    transcrCcleNeigh
+                    transcrCcleNeighCelllinename
+                    transcrCcleNeighOncotree
+                    responseCcleNeigh
+                    responseCcleNeighCelllinename
+                    responseCcleNeighOncotree
+                    transcrTcgaNeigh
+                    transcrTcgaNeighDiagnosis
+                    transcrTcgaNeighSite
+                    responseTcgaNeigh
+                    responseTcgaNeighDiagnosis
+                    responseTcgaNeighSite
+                    putativeTarget
+                    topLocalShapGenes
+                    recoveredTarget
+                }
+            }
+        `
     };
+    try {
+        setLoading(true);
+        let navigateData = null;
+        navigateData = await axios.post(apiUrl, query);
 
-  const header = (
+        console.log(navigateData)
+
+         setGdscData(navigateData.data.data.gdscDrug || Object.keys(gdscData[0]));
+         setLoading(false);
+
+    } catch (error) {
+        setLoading(false);
+    }
+}
+
+function isValidGdscDrug(input) {
+  const found = gdscDrugs.some(drug => drug.drug_name === input.trim());
+  return found;
+}
+
+const onDrugFilterChange = (event) => {
+    setValue(event.target.value);
+
+};
+
+async function getGDSCData(page, elementForPage) {
+
+  const offset = page * elementForPage;
+
+  const query = {
+    query: `
+    query getGDSC($offset: Int!, $limit: Int!) {
+        gdsc(pagination: {offset: $offset, limit: $limit}) {
+            gdscId
+            drugName
+            drugId
+            source
+            sampleIndex
+            predictions
+            predictionsStd
+            quantileScore
+            experimentalMin
+            experimentalMedian
+            experimentalMax
+            modelMse
+            modelCorr
+            transcrCcleNeigh
+            transcrCcleNeighCelllinename
+            transcrCcleNeighOncotree
+            responseCcleNeigh
+            responseCcleNeighCelllinename
+            responseCcleNeighOncotree
+            transcrTcgaNeigh
+            transcrTcgaNeighDiagnosis
+            transcrTcgaNeighSite
+            responseTcgaNeigh
+            responseTcgaNeighDiagnosis
+            responseTcgaNeighSite
+            putativeTarget
+            topLocalShapGenes
+            recoveredTarget
+        }
+    }
+    `,
+    variables: {
+        offset: offset,
+        limit: elementForPage
+    }
+};
+
+
+  try {
+    setLoading(true);
+    const response = await axios.post(apiUrl, query);
+    console.log(response)
+    setGdscData(response.data.data.gdsc || Object.keys(gdscData[0]));
+    setLoading(false);
+
+  } catch (error) {
+    setLoading(false);
+    console.error(error);
+  }
+}
+
+const onPage = (event) => {
+   setLoading(true);
+   setTotalRecords(4060342);
+   setLazyState(event);
+   getGDSCData(event.page, event.rows);
+};
+
+const onSort = (event) => {
+    setLazyState(event);
+};
+
+const onFilter = (event) => {
+   setValue(event.target.value);
+
+    if(isValidGdscDrug(event.target.value)){
+        sendExploreData(event.target.value);
+        setLazyState(event);
+    }
+};
+
+
+async function getPRISMData(page, elementForPage) {
+
+  const offset = page * elementForPage;
+
+  const query = {
+    query: `
+    query getPRISM($offset: Int!, $limit: Int!) {
+        prism(pagination: {offset: $offset, limit: $limit}) {
+            prismId
+            drugName
+            drugId
+            source
+            sampleIndex
+            predictions
+            predictionsStd
+            quantileScore
+            experimentalMin
+            experimentalMedian
+            experimentalMax
+            modelMse
+            modelCorr
+            transcrCcleNeigh
+            transcrCcleNeighCelllinename
+            transcrCcleNeighOncotree
+            responseCcleNeigh
+            responseCcleNeighCelllinename
+            responseCcleNeighOncotree
+            transcrTcgaNeigh
+            transcrTcgaNeighDiagnosis
+            transcrTcgaNeighSite
+            responseTcgaNeigh
+            responseTcgaNeighDiagnosis
+            responseTcgaNeighSite
+            putativeTarget
+            topLocalShapGenes
+            recoveredTarget
+        }
+    }
+    `,
+    variables: {
+        offset: offset,
+        limit: elementForPage
+    }
+};
+
+  try {
+    setLoadingPrism(true);
+    const response = await axios.post(apiUrl, query);
+    setPrismData(response.data.data.prism || Object.keys(prismData[0]));
+    setLoadingPrism(false);
+
+  } catch (error) {
+    setLoadingPrism(false);
+    console.error(error);
+  }
+}
+
+const onPagePrism = (event) => {
+   setLoadingPrism(true);
+   setTotalRecords(17803038);
+   setLazyState(event);
+   getPRISMData(event.page, event.rows);
+};
+
+const header = (
   <div className="row align-items-center">
       <div className="col">
           <span className="p-input-icon-left">
               <i className="pi pi-search" />
-              <InputText type="search" value={value || ''} onChange={(e) => onGlobalFilterChange(e)} placeholder="Search by drug" />
+              <InputText type="search" value={value} onChange={(e) => onFilter(e)} placeholder="Search by drug" />
           </span>
       </div>
       <div className="col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
@@ -113,34 +317,34 @@ const dtPrism = useRef(null);
               display="chip"
               style={{ width: '200px', marginRight: '10px' }}
           />
-          <Button type="button" icon="pi pi-file" className="p-button-rounded p-mr-2" onClick={() => exportCSV(dt, false)} data-pr-tooltip="CSV" />
+          <Button type="button" label="Export" icon="pi pi-download" className="p-button-rounded p-mr-2" onClick={() => exportCSV(dt, false)} data-pr-tooltip="CSV" />
       </div>
   </div>
 );
 
-//  const headerPrism = (
-//  <div className="row align-items-center">
-//      <div className="col">
-//          <span className="p-input-icon-left">
-//              <i className="pi pi-search" />
-//              <InputText type="search" value={value || ''} onChange={(e) => onGlobalFilterChange(e)} placeholder="Search by drug" />
-//          </span>
-//      </div>
-//      <div className="col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-//          <MultiSelect
-//              value={visibleColumnsPrism.map(col => col)}
-//              options={multiSelectOptionsPrism}
-//              onChange={onColumnTogglePrism}
-//              optionLabel="label"
-//              optionValue="value"
-//              placeholder="Select Columns"
-//              display="chip"
-//              style={{ width: '200px', marginRight: '10px' }}
-//          />
-//          <Button type="button" icon="pi pi-file" className="p-button-rounded p-mr-2" onClick={() => exportCSV(dtPrism, false)} data-pr-tooltip="CSV" />
-//      </div>
-//  </div>
-//);
+  const headerPrism = (
+  <div className="row align-items-center">
+      <div className="col">
+          <span className="p-input-icon-left">
+              <i className="pi pi-search" />
+              <InputText type="search" value={value} onChange={(e) => onDrugFilterChange(e)} placeholder="Search by drug" />
+          </span>
+      </div>
+      <div className="col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+          <MultiSelect
+              value={visibleColumnsPrism.map(col => col)}
+              options={multiSelectOptionsPrism}
+              onChange={onColumnTogglePrism}
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Select Columns"
+              display="chip"
+              style={{ width: '200px', marginRight: '10px' }}
+          />
+          <Button type="button" label="Export" icon="pi pi-download" className="p-button-rounded p-mr-2" onClick={() => exportCSV(dtPrism, false)} data-pr-tooltip="CSV" />
+      </div>
+  </div>
+);
 
 
 return (
@@ -161,7 +365,12 @@ return (
             <div className="col-12">
                <h2 className="display-6 fw-bold mb-5">GDSC</h2>
                <Tooltip target=".export-buttons>button" position="bottom" />
-               <DataTable stripedRows lazy ref={dt} value={gdscData} paginator rows={10} paginator totalRecords={4060341} removableSort header={header} filters={filters} onFilter={(e) => setFilters(e.filters)} tableStyle={{ minWidth: '50rem' }}>
+               <DataTable stripedRows lazy ref={dt} value={gdscData} paginator first={lazyState.first}
+               rows={10}  rowsPerPageOptions={[10, 25, 50, 100]} totalRecords={totalRecords}  header={header}
+               onPage={onPage} dataKey="gdscId"
+                    paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                    currentPageReportTemplate="{first} to {last} of {totalRecords}"
+                    loading={loading} tableStyle={{ minWidth: '50rem' }}>
                     {dynamicColumns}
                 </DataTable>
             </div>
@@ -170,7 +379,13 @@ return (
             <div className="col-12">
                <h2 className="display-6 fw-bold mb-5">PRISM</h2>
                <Tooltip target=".export-buttons>button" position="bottom" />
-                <p> Table under construction<br/> Coming soon</p>
+                 <DataTable stripedRows lazy ref={dtPrism} value={prismData} paginator first={lazyState.first}  rows={10}
+                 dataKey="prismId" onPage={onPagePrism}
+                  paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                    currentPageReportTemplate="{first} to {last} of {totalRecords}" rowsPerPageOptions={[10, 25, 50, 100]}
+                 totalRecords={totalRecordsPrism}  header={headerPrism}   loading={loadingPrism}  tableStyle={{ minWidth: '50rem' }}>
+                    {dynamicColumnsPrism}
+                </DataTable>
             </div>
         </div>
         </div>

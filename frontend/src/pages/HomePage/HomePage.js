@@ -3,9 +3,7 @@ import { Helmet } from 'react-helmet';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 import {useNavigate} from "react-router-dom";
-import { Container, Row, Col, Form } from 'react-bootstrap';
 import { Button } from 'primereact/button';
-import { Heading, Box, Text, Image, VStack, HStack, Divider } from '@chakra-ui/react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
@@ -24,6 +22,7 @@ async function sendExploreData() {
                     databases {
                       __typename
                        ... on Gdsc {
+                       gdscId
                         drugName
                       drugId
                       source
@@ -54,6 +53,7 @@ async function sendExploreData() {
                       }
                        ... on Prism {
                          __typename
+                         prismId
                          drugName
                       drugId
                       source
