@@ -20,8 +20,7 @@ const navigate = useNavigate();
 const location = useLocation();
 
 useEffect(() => {
-   if (!location.state) {
-     // Redirect to the home page
+   if (!location ) {
      navigate('/');
    }
 }, [location, navigate]);
@@ -66,6 +65,7 @@ const dtPrism = useRef(null);
 
    gdscData.forEach(obj => delete obj["__typename"]);
    prismData.forEach(obj => delete obj["__typename"]);
+
    const columns = Object.keys(gdscData[0]);
    const columnsPrism = Object.keys(prismData[0]);
 
@@ -306,7 +306,7 @@ const header = (
       <div className="col">
           <span className="p-input-icon-left">
               <i className="pi pi-search" />
-              <InputText type="search" value={value} onChange={(e) => onFilter(e)} placeholder="Search by drug" />
+              <InputText type="search" value={value} onChange={(e) => onFilter(e)} placeholder="Search by drug" disabled />
           </span>
       </div>
       <div className="col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
@@ -330,7 +330,7 @@ const header = (
       <div className="col">
           <span className="p-input-icon-left">
               <i className="pi pi-search" />
-              <InputText type="search" value={value} onChange={(e) => onDrugFilterChange(e)} placeholder="Search by drug" />
+              <InputText type="search" value={value} onChange={(e) => onDrugFilterChange(e)} placeholder="Search by drug" disabled/>
           </span>
       </div>
       <div className="col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
