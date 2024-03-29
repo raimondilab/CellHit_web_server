@@ -26,7 +26,6 @@ useEffect(() => {
    }
 }, [location, navigate]);
 
-
 const state = location.state ||  [];
 const data = state.data.data.databases || [];
 const gdscDrugs = require('../../gdsc_drugs.json');
@@ -45,6 +44,15 @@ const [totalRecords, setTotalRecords] = useState(4060342);
 const [totalRecordsPrism, setTotalRecordsPrism] = useState(17803038);
 
 const [lazyState, setLazyState] = useState({
+    first: 0,
+    rows: 10,
+    page: 1,
+    sortField: null,
+    sortOrder: null,
+    filters: {drugName: { value: null, matchMode: FilterMatchMode.CONTAINS }}
+});
+
+const [lazyStatePrism, setLazyStatePrism] = useState({
     first: 0,
     rows: 10,
     page: 1,
@@ -203,7 +211,6 @@ async function getGDSCData(page, elementForPage) {
   try {
     setLoading(true);
     const response = await axios.post(apiUrl, query);
-    console.log(response)
     setGdscData(response.data.data.gdsc || Object.keys(gdscData[0]));
     setLoading(false);
 
@@ -218,10 +225,6 @@ const onPage = (event) => {
    setTotalRecords(4060342);
    setLazyState(event);
    getGDSCData(event.page, event.rows);
-};
-
-const onSort = (event) => {
-    setLazyState(event);
 };
 
 const onFilter = (event) => {
@@ -293,8 +296,8 @@ async function getPRISMData(page, elementForPage) {
 
 const onPagePrism = (event) => {
    setLoadingPrism(true);
-   setTotalRecords(17803038);
-   setLazyState(event);
+   setTotalRecordsPrism(17803038);
+   setLazyStatePrism(event);
    getPRISMData(event.page, event.rows);
 };
 
@@ -366,7 +369,7 @@ return (
                <h2 className="display-6 fw-bold mb-5">GDSC</h2>
                <Tooltip target=".export-buttons>button" position="bottom" />
                <DataTable stripedRows lazy ref={dt} value={gdscData} paginator first={lazyState.first}
-               rows={10}  rowsPerPageOptions={[10, 25, 50, 100]} totalRecords={totalRecords}  header={header}
+               rows={lazyState.rows}  rowsPerPageOptions={[10, 25, 50, 100]} totalRecords={totalRecords}  header={header}
                onPage={onPage} dataKey="gdscId"
                     paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
                     currentPageReportTemplate="{first} to {last} of {totalRecords}"
@@ -379,11 +382,11 @@ return (
             <div className="col-12">
                <h2 className="display-6 fw-bold mb-5">PRISM</h2>
                <Tooltip target=".export-buttons>button" position="bottom" />
-                 <DataTable stripedRows lazy ref={dtPrism} value={prismData} paginator first={lazyState.first}  rows={10}
+                 <DataTable stripedRows lazy ref={dtPrism} value={prismData} paginator first={lazyStatePrism.first}  rows={lazyStatePrism.rows}
                  dataKey="prismId" onPage={onPagePrism}
                   paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
                     currentPageReportTemplate="{first} to {last} of {totalRecords}" rowsPerPageOptions={[10, 25, 50, 100]}
-                 totalRecords={totalRecordsPrism}  header={headerPrism}   loading={loadingPrism}  tableStyle={{ minWidth: '50rem' }}>
+                 totalRecords={totalRecordsPrism}  header={headerPrism}  loading={loadingPrism}  tableStyle={{ minWidth: '50rem' }}>
                     {dynamicColumnsPrism}
                 </DataTable>
             </div>
