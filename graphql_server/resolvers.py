@@ -16,7 +16,7 @@ class QueryResolver:
             query = db.query(models.Gdsc)
 
             if pagination is not None:
-                query = query.offset(pagination.offset).limit(10)
+                query = query.offset(pagination.offset).limit(pagination.limit)
 
             data = query.all()
 
@@ -43,7 +43,7 @@ class QueryResolver:
             query = db.query(models.Prism)
 
             if pagination is not None:
-                query = query.offset(pagination.offset).limit(10)
+                query = query.offset(pagination.offset).limit(pagination.limit)
 
             data = query.all()
 

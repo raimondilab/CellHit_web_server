@@ -72,3 +72,4 @@ DatabaseUnion = strawberry.union("DatabaseUnion", types=(Gdsc, Prism))
 @strawberry.input
 class PaginationInput:
     offset: int
+    limit: int
