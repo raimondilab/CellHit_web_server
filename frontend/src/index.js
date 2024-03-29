@@ -4,6 +4,7 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from 'react-router-dom';
+import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 
 import 'primeicons/primeicons.css';
 import "primereact/resources/themes/lara-light-cyan/theme.css";
@@ -17,10 +18,13 @@ import ErrorPage from './pages/ErrorPage/ErrorPage'
 import ResultPage from './pages/ResultPage/ResultPage'
 
 
-
 const router = createBrowserRouter([ {
       path: "/",
-      element: <HomePage/>,
+      element: (
+      <ErrorBoundary>
+        <HomePage />
+      </ErrorBoundary>
+      ),
       errorElement: <ErrorPage error={"Sorry for the inconvenience, we're working on it!"}/>
     },
     {
@@ -29,7 +33,11 @@ const router = createBrowserRouter([ {
     },
     {
       path: "/explore/",
-      element: <ResultPage/>,
+      element: (
+      <ErrorBoundary>
+        <ResultPage />
+      </ErrorBoundary>
+      )
     },
     {
       path: "*",
@@ -39,4 +47,7 @@ const router = createBrowserRouter([ {
  );
 
 createRoot(document.getElementById("root")).render(
-<RouterProvider router={router}/>);
+  <ErrorBoundary>
+    <RouterProvider router={router} />
+  </ErrorBoundary>
+);

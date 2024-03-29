@@ -20,12 +20,14 @@ const navigate = useNavigate();
 const location = useLocation();
 
 useEffect(() => {
-   if (!location ) {
+   if (!location.state) {
      navigate('/');
    }
 }, [location, navigate]);
 
 const state = location.state ||  [];
+state.data = state.data || []
+
 const data = state.data.data.databases || [];
 const gdscDrugs = require('../../gdsc_drugs.json');
 
