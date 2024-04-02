@@ -18866,3 +18866,9 @@ div:where(.swal2-container) .swal2-html-container {
   background-color: #359ccf;
   border-color: #3293c3;
 }
+
+
+ul.p-autocomplete-multiple-container  {
+margin-bottom: 0rem !important;
+
+}

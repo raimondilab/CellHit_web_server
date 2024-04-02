@@ -1,860 +1,860 @@
 [
   {
-    "drug_name": 123138
+    "name": 123138
   },
   {
-    "drug_name": 123829
+    "name": 123829
   },
   {
-    "drug_name": 150412
+    "name": 150412
   },
   {
-    "drug_name": "5-Fluorouracil"
+    "name": "5-Fluorouracil"
   },
   {
-    "drug_name": "5-azacytidine"
+    "name": "5-azacytidine"
   },
   {
-    "drug_name": 50869
+    "name": 50869
   },
   {
-    "drug_name": 615590
+    "name": 615590
   },
   {
-    "drug_name": 630600
+    "name": 630600
   },
   {
-    "drug_name": 667880
+    "name": 667880
   },
   {
-    "drug_name": 720427
+    "name": 720427
   },
   {
-    "drug_name": 729189
+    "name": 729189
   },
   {
-    "drug_name": 741909
+    "name": 741909
   },
   {
-    "drug_name": 743380
+    "name": 743380
   },
   {
-    "drug_name": 765771
+    "name": 765771
   },
   {
-    "drug_name": 776928
+    "name": 776928
   },
   {
-    "drug_name": "A-366"
+    "name": "A-366"
   },
   {
-    "drug_name": "ABT737"
+    "name": "ABT737"
   },
   {
-    "drug_name": "AGI-5198"
+    "name": "AGI-5198"
   },
   {
-    "drug_name": "AGI-6780"
+    "name": "AGI-6780"
   },
   {
-    "drug_name": "AGK2"
+    "name": "AGK2"
   },
   {
-    "drug_name": "AMG-319"
+    "name": "AMG-319"
   },
   {
-    "drug_name": "AT13148"
+    "name": "AT13148"
   },
   {
-    "drug_name": "AZ6102"
+    "name": "AZ6102"
   },
   {
-    "drug_name": "AZ960"
+    "name": "AZ960"
   },
   {
-    "drug_name": "AZD1208"
+    "name": "AZD1208"
   },
   {
-    "drug_name": "AZD1332"
+    "name": "AZD1332"
   },
   {
-    "drug_name": "AZD2014"
+    "name": "AZD2014"
   },
   {
-    "drug_name": "AZD3759"
+    "name": "AZD3759"
   },
   {
-    "drug_name": "AZD4547"
+    "name": "AZD4547"
   },
   {
-    "drug_name": "AZD5153"
+    "name": "AZD5153"
   },
   {
-    "drug_name": "AZD5363"
+    "name": "AZD5363"
   },
   {
-    "drug_name": "AZD5438"
+    "name": "AZD5438"
   },
   {
-    "drug_name": "AZD5582"
+    "name": "AZD5582"
   },
   {
-    "drug_name": "AZD5991"
+    "name": "AZD5991"
   },
   {
-    "drug_name": "AZD6482"
+    "name": "AZD6482"
   },
   {
-    "drug_name": "AZD6738"
+    "name": "AZD6738"
   },
   {
-    "drug_name": "AZD7762"
+    "name": "AZD7762"
   },
   {
-    "drug_name": "AZD8055"
+    "name": "AZD8055"
   },
   {
-    "drug_name": "AZD8186"
+    "name": "AZD8186"
   },
   {
-    "drug_name": "Acetalax"
+    "name": "Acetalax"
   },
   {
-    "drug_name": "Afatinib"
+    "name": "Afatinib"
   },
   {
-    "drug_name": "Afuresertib"
+    "name": "Afuresertib"
   },
   {
-    "drug_name": "Alisertib"
+    "name": "Alisertib"
   },
   {
-    "drug_name": "Alpelisib"
+    "name": "Alpelisib"
   },
   {
-    "drug_name": "Avagacestat"
+    "name": "Avagacestat"
   },
   {
-    "drug_name": "Axitinib"
+    "name": "Axitinib"
   },
   {
-    "drug_name": "BDF00022089a"
+    "name": "BDF00022089a"
   },
   {
-    "drug_name": "BDILV000379a"
+    "name": "BDILV000379a"
   },
   {
-    "drug_name": "BDOCA000347a"
+    "name": "BDOCA000347a"
   },
   {
-    "drug_name": "BDP-00009066"
+    "name": "BDP-00009066"
   },
   {
-    "drug_name": "BEN"
+    "name": "BEN"
   },
   {
-    "drug_name": "BI-2536"
+    "name": "BI-2536"
   },
   {
-    "drug_name": "BIBR-1532"
+    "name": "BIBR-1532"
   },
   {
-    "drug_name": "BMS-345541"
+    "name": "BMS-345541"
   },
   {
-    "drug_name": "BMS-536924"
+    "name": "BMS-536924"
   },
   {
-    "drug_name": "BMS-754807"
+    "name": "BMS-754807"
   },
   {
-    "drug_name": "BPD-00008900"
+    "name": "BPD-00008900"
   },
   {
-    "drug_name": "BX795"
+    "name": "BX795"
   },
   {
-    "drug_name": "Bicalutamide"
+    "name": "Bicalutamide"
   },
   {
-    "drug_name": "Bleomycin"
+    "name": "Bleomycin"
   },
   {
-    "drug_name": "Bleomycin (50 uM)"
+    "name": "Bleomycin (50 uM)"
   },
   {
-    "drug_name": "Bortezomib"
+    "name": "Bortezomib"
   },
   {
-    "drug_name": "Bosutinib"
+    "name": "Bosutinib"
   },
   {
-    "drug_name": "Bromosporine"
+    "name": "Bromosporine"
   },
   {
-    "drug_name": "Buparlisib"
+    "name": "Buparlisib"
   },
   {
-    "drug_name": "CCT-018159"
+    "name": "CCT-018159"
   },
   {
-    "drug_name": "CCT007093"
+    "name": "CCT007093"
   },
   {
-    "drug_name": "CDK9_5038"
+    "name": "CDK9_5038"
   },
   {
-    "drug_name": "CDK9_5576"
+    "name": "CDK9_5576"
   },
   {
-    "drug_name": "CHIR-99021"
+    "name": "CHIR-99021"
   },
   {
-    "drug_name": "CPI-637"
+    "name": "CPI-637"
   },
   {
-    "drug_name": "CT7033-2"
+    "name": "CT7033-2"
   },
   {
-    "drug_name": "CZC24832"
+    "name": "CZC24832"
   },
   {
-    "drug_name": "Camptothecin"
+    "name": "Camptothecin"
   },
   {
-    "drug_name": "Cediranib"
+    "name": "Cediranib"
   },
   {
-    "drug_name": "Cisplatin"
+    "name": "Cisplatin"
   },
   {
-    "drug_name": "Crizotinib"
+    "name": "Crizotinib"
   },
   {
-    "drug_name": "Cyclophosphamide"
+    "name": "Cyclophosphamide"
   },
   {
-    "drug_name": "Cytarabine"
+    "name": "Cytarabine"
   },
   {
-    "drug_name": "Dabrafenib"
+    "name": "Dabrafenib"
   },
   {
-    "drug_name": "Dacarbazine"
+    "name": "Dacarbazine"
   },
   {
-    "drug_name": "Dactinomycin"
+    "name": "Dactinomycin"
   },
   {
-    "drug_name": "Dactolisib"
+    "name": "Dactolisib"
   },
   {
-    "drug_name": "Daporinad"
+    "name": "Daporinad"
   },
   {
-    "drug_name": "Dasatinib"
+    "name": "Dasatinib"
   },
   {
-    "drug_name": "Dihydrorotenone"
+    "name": "Dihydrorotenone"
   },
   {
-    "drug_name": "Dinaciclib"
+    "name": "Dinaciclib"
   },
   {
-    "drug_name": "Docetaxel"
+    "name": "Docetaxel"
   },
   {
-    "drug_name": "Doramapimod"
+    "name": "Doramapimod"
   },
   {
-    "drug_name": "EHT-1864"
+    "name": "EHT-1864"
   },
   {
-    "drug_name": "EPZ004777"
+    "name": "EPZ004777"
   },
   {
-    "drug_name": "EPZ5676"
+    "name": "EPZ5676"
   },
   {
-    "drug_name": "ERK_2440"
+    "name": "ERK_2440"
   },
   {
-    "drug_name": "ERK_6604"
+    "name": "ERK_6604"
   },
   {
-    "drug_name": "Eg5_9814"
+    "name": "Eg5_9814"
   },
   {
-    "drug_name": "Elephantin"
+    "name": "Elephantin"
   },
   {
-    "drug_name": "Elesclomol"
+    "name": "Elesclomol"
   },
   {
-    "drug_name": "Entinostat"
+    "name": "Entinostat"
   },
   {
-    "drug_name": "Entospletinib"
+    "name": "Entospletinib"
   },
   {
-    "drug_name": "Epirubicin"
+    "name": "Epirubicin"
   },
   {
-    "drug_name": "Erlotinib"
+    "name": "Erlotinib"
   },
   {
-    "drug_name": "Fludarabine"
+    "name": "Fludarabine"
   },
   {
-    "drug_name": "Foretinib"
+    "name": "Foretinib"
   },
   {
-    "drug_name": "Fulvestrant"
+    "name": "Fulvestrant"
   },
   {
-    "drug_name": "GDC0810"
+    "name": "GDC0810"
   },
   {
-    "drug_name": "GNE-317"
+    "name": "GNE-317"
   },
   {
-    "drug_name": "GSK-LSD1"
+    "name": "GSK-LSD1"
   },
   {
-    "drug_name": "GSK-LSD1-2HCl"
+    "name": "GSK-LSD1-2HCl"
   },
   {
-    "drug_name": "GSK1904529A"
+    "name": "GSK1904529A"
   },
   {
-    "drug_name": "GSK2110183B"
+    "name": "GSK2110183B"
   },
   {
-    "drug_name": "GSK2256098C"
+    "name": "GSK2256098C"
   },
   {
-    "drug_name": "GSK2276186C"
+    "name": "GSK2276186C"
   },
   {
-    "drug_name": "GSK2578215A"
+    "name": "GSK2578215A"
   },
   {
-    "drug_name": "GSK2606414"
+    "name": "GSK2606414"
   },
   {
-    "drug_name": "GSK269962A"
+    "name": "GSK269962A"
   },
   {
-    "drug_name": "GSK2801"
+    "name": "GSK2801"
   },
   {
-    "drug_name": "GSK2830371"
+    "name": "GSK2830371"
   },
   {
-    "drug_name": "GSK2830371A"
+    "name": "GSK2830371A"
   },
   {
-    "drug_name": "GSK3337463A"
+    "name": "GSK3337463A"
   },
   {
-    "drug_name": "GSK343"
+    "name": "GSK343"
   },
   {
-    "drug_name": "GSK591"
+    "name": "GSK591"
   },
   {
-    "drug_name": "GSK626616AC"
+    "name": "GSK626616AC"
   },
   {
-    "drug_name": "GW441756"
+    "name": "GW441756"
   },
   {
-    "drug_name": "Gallibiscoquinazole"
+    "name": "Gallibiscoquinazole"
   },
   {
-    "drug_name": "Gefitinib"
+    "name": "Gefitinib"
   },
   {
-    "drug_name": "Gemcitabine"
+    "name": "Gemcitabine"
   },
   {
-    "drug_name": "HKMTI-1-005"
+    "name": "HKMTI-1-005"
   },
   {
-    "drug_name": "I-BET-762"
+    "name": "I-BET-762"
   },
   {
-    "drug_name": "I-BRD9"
+    "name": "I-BRD9"
   },
   {
-    "drug_name": "IAP_5620"
+    "name": "IAP_5620"
   },
   {
-    "drug_name": "ICL-SIRT078"
+    "name": "ICL-SIRT078"
   },
   {
-    "drug_name": "IGF1R_3801"
+    "name": "IGF1R_3801"
   },
   {
-    "drug_name": "IOX2"
+    "name": "IOX2"
   },
   {
-    "drug_name": "IRAK4_4710"
+    "name": "IRAK4_4710"
   },
   {
-    "drug_name": "IWP-2"
+    "name": "IWP-2"
   },
   {
-    "drug_name": "Ibrutinib"
+    "name": "Ibrutinib"
   },
   {
-    "drug_name": "Ipatasertib"
+    "name": "Ipatasertib"
   },
   {
-    "drug_name": "Irinotecan"
+    "name": "Irinotecan"
   },
   {
-    "drug_name": "JAK1_8709"
+    "name": "JAK1_8709"
   },
   {
-    "drug_name": "JAK_8517"
+    "name": "JAK_8517"
   },
   {
-    "drug_name": "JNK Inhibitor VIII"
+    "name": "JNK Inhibitor VIII"
   },
   {
-    "drug_name": "JQ1"
+    "name": "JQ1"
   },
   {
-    "drug_name": "KRAS (G12C) Inhibitor-12"
+    "name": "KRAS (G12C) Inhibitor-12"
   },
   {
-    "drug_name": "KU-55933"
+    "name": "KU-55933"
   },
   {
-    "drug_name": "L-Oxonoreleagnine"
+    "name": "L-Oxonoreleagnine"
   },
   {
-    "drug_name": "LCL161"
+    "name": "LCL161"
   },
   {
-    "drug_name": "LGK974"
+    "name": "LGK974"
   },
   {
-    "drug_name": "LJI308"
+    "name": "LJI308"
   },
   {
-    "drug_name": "LMB_AB1"
+    "name": "LMB_AB1"
   },
   {
-    "drug_name": "LMB_AB2"
+    "name": "LMB_AB2"
   },
   {
-    "drug_name": "LMB_AB3"
+    "name": "LMB_AB3"
   },
   {
-    "drug_name": "LMP744"
+    "name": "LMP744"
   },
   {
-    "drug_name": "LY2109761"
+    "name": "LY2109761"
   },
   {
-    "drug_name": "Lapatinib"
+    "name": "Lapatinib"
   },
   {
-    "drug_name": "Leflunomide"
+    "name": "Leflunomide"
   },
   {
-    "drug_name": "Lenalidomide"
+    "name": "Lenalidomide"
   },
   {
-    "drug_name": "Lestaurtinib"
+    "name": "Lestaurtinib"
   },
   {
-    "drug_name": "Linsitinib"
+    "name": "Linsitinib"
   },
   {
-    "drug_name": "Luminespib"
+    "name": "Luminespib"
   },
   {
-    "drug_name": "MG-132"
+    "name": "MG-132"
   },
   {
-    "drug_name": "MIM1"
+    "name": "MIM1"
   },
   {
-    "drug_name": "MIRA-1"
+    "name": "MIRA-1"
   },
   {
-    "drug_name": "MK-1775"
+    "name": "MK-1775"
   },
   {
-    "drug_name": "MK-2206"
+    "name": "MK-2206"
   },
   {
-    "drug_name": "MK-8776"
+    "name": "MK-8776"
   },
   {
-    "drug_name": "ML323"
+    "name": "ML323"
   },
   {
-    "drug_name": "MN-64"
+    "name": "MN-64"
   },
   {
-    "drug_name": "Methotrexate"
+    "name": "Methotrexate"
   },
   {
-    "drug_name": "Mirin"
+    "name": "Mirin"
   },
   {
-    "drug_name": "Mitoxantrone"
+    "name": "Mitoxantrone"
   },
   {
-    "drug_name": "Motesanib"
+    "name": "Motesanib"
   },
   {
-    "drug_name": "Mycophenolic acid"
+    "name": "Mycophenolic acid"
   },
   {
-    "drug_name": "N-acetyl cysteine"
+    "name": "N-acetyl cysteine"
   },
   {
-    "drug_name": "N25720-51-A1"
+    "name": "N25720-51-A1"
   },
   {
-    "drug_name": "N27922-53-1"
+    "name": "N27922-53-1"
   },
   {
-    "drug_name": "N29087-69-1"
+    "name": "N29087-69-1"
   },
   {
-    "drug_name": "N30652-18-1"
+    "name": "N30652-18-1"
   },
   {
-    "drug_name": "NU7441"
+    "name": "NU7441"
   },
   {
-    "drug_name": "NVP-ADW742"
+    "name": "NVP-ADW742"
   },
   {
-    "drug_name": "Navitoclax"
+    "name": "Navitoclax"
   },
   {
-    "drug_name": "Nelarabine"
+    "name": "Nelarabine"
   },
   {
-    "drug_name": "Nilotinib"
+    "name": "Nilotinib"
   },
   {
-    "drug_name": "Niraparib"
+    "name": "Niraparib"
   },
   {
-    "drug_name": "Nutlin-3a (-)"
+    "name": "Nutlin-3a (-)"
   },
   {
-    "drug_name": "OF-1"
+    "name": "OF-1"
   },
   {
-    "drug_name": "OSI-027"
+    "name": "OSI-027"
   },
   {
-    "drug_name": "OTX015"
+    "name": "OTX015"
   },
   {
-    "drug_name": "Obatoclax Mesylate"
+    "name": "Obatoclax Mesylate"
   },
   {
-    "drug_name": "Olaparib"
+    "name": "Olaparib"
   },
   {
-    "drug_name": "Osimertinib"
+    "name": "Osimertinib"
   },
   {
-    "drug_name": "Oxaliplatin"
+    "name": "Oxaliplatin"
   },
   {
-    "drug_name": "P22077"
+    "name": "P22077"
   },
   {
-    "drug_name": "PAK_5339"
+    "name": "PAK_5339"
   },
   {
-    "drug_name": "PBD-288"
+    "name": "PBD-288"
   },
   {
-    "drug_name": "PCI-34051"
+    "name": "PCI-34051"
   },
   {
-    "drug_name": "PD0325901"
+    "name": "PD0325901"
   },
   {
-    "drug_name": "PD173074"
+    "name": "PD173074"
   },
   {
-    "drug_name": "PF-4708671"
+    "name": "PF-4708671"
   },
   {
-    "drug_name": "PFI-1"
+    "name": "PFI-1"
   },
   {
-    "drug_name": "PFI3"
+    "name": "PFI3"
   },
   {
-    "drug_name": "PLX-4720"
+    "name": "PLX-4720"
   },
   {
-    "drug_name": "POMHEX"
+    "name": "POMHEX"
   },
   {
-    "drug_name": "PRIMA-1MET"
+    "name": "PRIMA-1MET"
   },
   {
-    "drug_name": "PRT062607"
+    "name": "PRT062607"
   },
   {
-    "drug_name": "Paclitaxel"
+    "name": "Paclitaxel"
   },
   {
-    "drug_name": "Palbociclib"
+    "name": "Palbociclib"
   },
   {
-    "drug_name": "Pevonedistat"
+    "name": "Pevonedistat"
   },
   {
-    "drug_name": "Picolinici-acid"
+    "name": "Picolinici-acid"
   },
   {
-    "drug_name": "Pictilisib"
+    "name": "Pictilisib"
   },
   {
-    "drug_name": "Piperlongumine"
+    "name": "Piperlongumine"
   },
   {
-    "drug_name": "Podophyllotoxin bromide"
+    "name": "Podophyllotoxin bromide"
   },
   {
-    "drug_name": "Pyridostatin"
+    "name": "Pyridostatin"
   },
   {
-    "drug_name": "RO-3306"
+    "name": "RO-3306"
   },
   {
-    "drug_name": "RVX-208"
+    "name": "RVX-208"
   },
   {
-    "drug_name": "Rapamycin"
+    "name": "Rapamycin"
   },
   {
-    "drug_name": "Refametinib"
+    "name": "Refametinib"
   },
   {
-    "drug_name": "Remodelin"
+    "name": "Remodelin"
   },
   {
-    "drug_name": "Ribociclib"
+    "name": "Ribociclib"
   },
   {
-    "drug_name": "Romidepsin"
+    "name": "Romidepsin"
   },
   {
-    "drug_name": "Rucaparib"
+    "name": "Rucaparib"
   },
   {
-    "drug_name": "Ruxolitinib"
+    "name": "Ruxolitinib"
   },
   {
-    "drug_name": "SB216763"
+    "name": "SB216763"
   },
   {
-    "drug_name": "SB505124"
+    "name": "SB505124"
   },
   {
-    "drug_name": "SB590885"
+    "name": "SB590885"
   },
   {
-    "drug_name": "SCH772984"
+    "name": "SCH772984"
   },
   {
-    "drug_name": "SGC-CBP30"
+    "name": "SGC-CBP30"
   },
   {
-    "drug_name": "SGC0946"
+    "name": "SGC0946"
   },
   {
-    "drug_name": "SL0101"
+    "name": "SL0101"
   },
   {
-    "drug_name": "SN-38"
+    "name": "SN-38"
   },
   {
-    "drug_name": "Sabutoclax"
+    "name": "Sabutoclax"
   },
   {
-    "drug_name": "Sapitinib"
+    "name": "Sapitinib"
   },
   {
-    "drug_name": "Savolitinib"
+    "name": "Savolitinib"
   },
   {
-    "drug_name": "Schweinfurthin A"
+    "name": "Schweinfurthin A"
   },
   {
-    "drug_name": "Selumetinib"
+    "name": "Selumetinib"
   },
   {
-    "drug_name": "Sepantronium bromide"
+    "name": "Sepantronium bromide"
   },
   {
-    "drug_name": "Serdemetan"
+    "name": "Serdemetan"
   },
   {
-    "drug_name": "Sinularin"
+    "name": "Sinularin"
   },
   {
-    "drug_name": "Sorafenib"
+    "name": "Sorafenib"
   },
   {
-    "drug_name": "Staurosporine"
+    "name": "Staurosporine"
   },
   {
-    "drug_name": "TAF1_5496"
+    "name": "TAF1_5496"
   },
   {
-    "drug_name": "THR-101"
+    "name": "THR-101"
   },
   {
-    "drug_name": "THR-102"
+    "name": "THR-102"
   },
   {
-    "drug_name": "THR-103"
+    "name": "THR-103"
   },
   {
-    "drug_name": "TW 37"
+    "name": "TW 37"
   },
   {
-    "drug_name": "Talazoparib"
+    "name": "Talazoparib"
   },
   {
-    "drug_name": "Tamoxifen"
+    "name": "Tamoxifen"
   },
   {
-    "drug_name": "Tanespimycin"
+    "name": "Tanespimycin"
   },
   {
-    "drug_name": "Taselisib"
+    "name": "Taselisib"
   },
   {
-    "drug_name": "Telomerase Inhibitor IX"
+    "name": "Telomerase Inhibitor IX"
   },
   {
-    "drug_name": "Temozolomide"
+    "name": "Temozolomide"
   },
   {
-    "drug_name": "Temsirolimus"
+    "name": "Temsirolimus"
   },
   {
-    "drug_name": "Teniposide"
+    "name": "Teniposide"
   },
   {
-    "drug_name": "Topotecan"
+    "name": "Topotecan"
   },
   {
-    "drug_name": "Tozasertib"
+    "name": "Tozasertib"
   },
   {
-    "drug_name": "Trametinib"
+    "name": "Trametinib"
   },
   {
-    "drug_name": "Tretinoin"
+    "name": "Tretinoin"
   },
   {
-    "drug_name": "ULK1_4989"
+    "name": "ULK1_4989"
   },
   {
-    "drug_name": "UMI-77"
+    "name": "UMI-77"
   },
   {
-    "drug_name": "UNC0379"
+    "name": "UNC0379"
   },
   {
-    "drug_name": "UNC0638"
+    "name": "UNC0638"
   },
   {
-    "drug_name": "Ulixertinib"
+    "name": "Ulixertinib"
   },
   {
-    "drug_name": "Uprosertib"
+    "name": "Uprosertib"
   },
   {
-    "drug_name": "VE-822"
+    "name": "VE-822"
   },
   {
-    "drug_name": "VE821"
+    "name": "VE821"
   },
   {
-    "drug_name": "VSP34_8731"
+    "name": "VSP34_8731"
   },
   {
-    "drug_name": "VTP-A"
+    "name": "VTP-A"
   },
   {
-    "drug_name": "VTP-B"
+    "name": "VTP-B"
   },
   {
-    "drug_name": "VX-11e"
+    "name": "VX-11e"
   },
   {
-    "drug_name": "Veliparib"
+    "name": "Veliparib"
   },
   {
-    "drug_name": "Venetoclax"
+    "name": "Venetoclax"
   },
   {
-    "drug_name": "Vinblastine"
+    "name": "Vinblastine"
   },
   {
-    "drug_name": "Vinorelbine"
+    "name": "Vinorelbine"
   },
   {
-    "drug_name": "Vismodegib"
+    "name": "Vismodegib"
   },
   {
-    "drug_name": "Vorinostat"
+    "name": "Vorinostat"
   },
   {
-    "drug_name": "WEHI-539"
+    "name": "WEHI-539"
   },
   {
-    "drug_name": "WIKI4"
+    "name": "WIKI4"
   },
   {
-    "drug_name": "WZ4003"
+    "name": "WZ4003"
   },
   {
-    "drug_name": "Wee1 Inhibitor"
+    "name": "Wee1 Inhibitor"
   },
   {
-    "drug_name": "Wnt-C59"
+    "name": "Wnt-C59"
   },
   {
-    "drug_name": "XAV939"
+    "name": "XAV939"
   },
   {
-    "drug_name": "YK-4-279"
+    "name": "YK-4-279"
   },
   {
-    "drug_name": "ZM447439"
+    "name": "ZM447439"
   },
   {
-    "drug_name": "Zoledronate"
+    "name": "Zoledronate"
   },
   {
-    "drug_name": "alpha-lipoic acid"
+    "name": "alpha-lipoic acid"
   },
   {
-    "drug_name": "ascorbate (vitamin C)"
+    "name": "ascorbate (vitamin C)"
   },
   {
-    "drug_name": "glutathione"
+    "name": "glutathione"
   }
 ]

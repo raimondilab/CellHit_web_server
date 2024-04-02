@@ -13,6 +13,7 @@ import 'animate.css';
 import 'primeicons/primeicons.css';
 import { MultiSelect } from 'primereact/multiselect';
 import axios from 'axios';
+import { AutoComplete } from "primereact/autocomplete";
 
 const ResultPage = () => {
 
@@ -36,13 +37,17 @@ const filteredDataPrism = data.filter(item => item.__typename === "Prism");
 
 const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
 
-const [gdscData, setGdscData] = useState(filteredData || []);
-const [prismData, setPrismData] = useState(filteredDataPrism || []);
+const [gdscData, setGdscData] = useState(filteredData);
+const [prismData, setPrismData] = useState(filteredDataPrism);
 const [loading, setLoading] = useState(false);
 const [loadingPrism, setLoadingPrism] = useState(false);
 const [value, setValue] = useState('');
 const [totalRecords, setTotalRecords] = useState(4060342);
 const [totalRecordsPrism, setTotalRecordsPrism] = useState(17803038);
+
+
+const [selectedDrug, setSelectedDrug] = useState(null);
+const [filteredDrugs, setFilteredDrugs] = useState(null);
 
 const [lazyState, setLazyState] = useState({
     first: 0,
@@ -140,13 +145,18 @@ async function sendExploreData(value) {
         `
     };
     try {
+
         setLoading(true);
         let navigateData = null;
         navigateData = await axios.post(apiUrl, query);
 
-        console.log(navigateData)
+        if (navigateData.data.data.gdscDrug){
 
-         setGdscData(navigateData.data.data.gdscDrug || Object.keys(gdscData[0]));
+            setGdscData(navigateData.data.data.gdscDrug );
+            setTotalRecords(navigateData.data.data.gdscDrug.length)
+
+        }
+
          setLoading(false);
 
     } catch (error) {
@@ -154,10 +164,6 @@ async function sendExploreData(value) {
     }
 }
 
-function isValidGdscDrug(input) {
-  const found = gdscDrugs.some(drug => drug.drug_name === input.trim());
-  return found;
-}
 
 const onDrugFilterChange = (event) => {
     setValue(event.target.value);
@@ -213,7 +219,12 @@ async function getGDSCData(page, elementForPage) {
   try {
     setLoading(true);
     const response = await axios.post(apiUrl, query);
-    setGdscData(response.data.data.gdsc || Object.keys(gdscData[0]));
+
+    console.log(response)
+
+    if (response.data.data.gdsc){
+         setGdscData(response.data.data.gdsc);
+    }
     setLoading(false);
 
   } catch (error) {
@@ -230,12 +241,36 @@ const onPage = (event) => {
 };
 
 const onFilter = (event) => {
-   setValue(event.target.value);
 
-    if(isValidGdscDrug(event.target.value)){
-        sendExploreData(event.target.value);
-        setLazyState(event);
+   let _filteredDrugs;
+
+   if (!event.query.trim().length) {
+        _filteredDrugs = [...gdscDrugs];
+    } else {
+        _filteredDrugs = gdscDrugs.filter(drug => {
+             return drug.name.toString().toLowerCase().startsWith(event.query.toString().toLowerCase());
+      });
     }
+
+   setFilteredDrugs(_filteredDrugs);
+
+};
+
+const handleDrugSelection = (event) => {
+
+   if (selectedDrug){
+
+      sendExploreData(selectedDrug.name);
+
+      setLazyState({
+        first: 0,
+        rows: 10,
+        page: 1,
+        sortField: null,
+        sortOrder: null,
+        filters: null
+     })
+   }
 };
 
 
@@ -303,13 +338,29 @@ const onPagePrism = (event) => {
    getPRISMData(event.page, event.rows);
 };
 
+
+const handleResetData = (event) => {
+   setLoading(true);
+   setTotalRecords(4060342);
+   setLazyState({
+        first: 0,
+        rows: 10,
+        page: 1,
+        sortField: null,
+        sortOrder: null,
+        filters: null
+     });
+   getGDSCData(0, 10);
+   setSelectedDrug(null);
+};
+
 const header = (
   <div className="row align-items-center">
       <div className="col">
-          <span className="p-input-icon-left">
-              <i className="pi pi-search" />
-              <InputText type="search" value={value} onChange={(e) => onFilter(e)} placeholder="Search by drug" disabled />
-          </span>
+         <AutoComplete field="name"  value={selectedDrug} suggestions={filteredDrugs} completeMethod={onFilter}
+          onChange={(e) => setSelectedDrug(e.value)}  forceSelection  placeholder="Search by drug"/>
+         <Button type="button"  icon="pi pi-filter" className="p-button-rounded p-mr-2 ms-xxl-1"
+              onClick={handleDrugSelection} label="Filter"/>
       </div>
       <div className="col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
           <MultiSelect
@@ -322,7 +373,8 @@ const header = (
               display="chip"
               style={{ width: '200px', marginRight: '10px' }}
           />
-          <Button type="button" label="Export" icon="pi pi-download" className="p-button-rounded p-mr-2" onClick={() => exportCSV(dt, false)} data-pr-tooltip="CSV" />
+          <Button type="button" text icon="pi pi-download" className="p-button-rounded p-mr-2" onClick={() => exportCSV(dt, false)} data-pr-tooltip="CSV" />
+          <Button type="button" icon="pi pi-refresh" text  onClick={handleResetData}/>
       </div>
   </div>
 );
