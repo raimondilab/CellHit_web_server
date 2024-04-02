@@ -35,7 +35,7 @@ const gdscDrugs = require('../../gdsc_drugs.json');
 const filteredData = data.filter(item => item.__typename === "Gdsc");
 const filteredDataPrism = data.filter(item => item.__typename === "Prism");
 
-const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
+const apiUrl = ' http://127.0.0.1:8001/graphql';
 
 const [gdscData, setGdscData] = useState(filteredData);
 const [prismData, setPrismData] = useState(filteredDataPrism);
@@ -170,14 +170,14 @@ const onDrugFilterChange = (event) => {
 
 };
 
-async function getGDSCData(page, elementForPage) {
+async function getGDSCData(page, elementForPage, selectedDrug) {
 
   const offset = page * elementForPage;
 
   const query = {
     query: `
-    query getGDSC($offset: Int!, $limit: Int!) {
-        gdsc(pagination: {offset: $offset, limit: $limit}) {
+    query getGDSC($offset: Int!, $limit: Int!, $drug: String!) {
+        gdsc(pagination: {offset: $offset, limit: $limit, drug: $drug}) {
             gdscId
             drugName
             drugId
@@ -211,8 +211,10 @@ async function getGDSCData(page, elementForPage) {
     `,
     variables: {
         offset: offset,
-        limit: elementForPage
+        limit: elementForPage,
+        drug: selectedDrug.name
     }
+
 };
 
 
@@ -220,12 +222,12 @@ async function getGDSCData(page, elementForPage) {
     setLoading(true);
     const response = await axios.post(apiUrl, query);
 
-    console.log(response)
-
     if (response.data.data.gdsc){
          setGdscData(response.data.data.gdsc);
+         setTotalRecords(totalRecords)
     }
     setLoading(false);
+
 
   } catch (error) {
     setLoading(false);
@@ -235,9 +237,8 @@ async function getGDSCData(page, elementForPage) {
 
 const onPage = (event) => {
    setLoading(true);
-   setTotalRecords(4060342);
    setLazyState(event);
-   getGDSCData(event.page, event.rows);
+   getGDSCData(event.page, event.rows, selectedDrug);
 };
 
 const onFilter = (event) => {
@@ -260,7 +261,7 @@ const handleDrugSelection = (event) => {
 
    if (selectedDrug){
 
-      sendExploreData(selectedDrug.name);
+      sendExploreData(selectedDrug.name.toString());
 
       setLazyState({
         first: 0,

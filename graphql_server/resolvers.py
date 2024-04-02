@@ -1,5 +1,5 @@
 from . import schemas
-from typing import List, Union
+from typing import List, Optional
 
 # other imports
 from model import models
@@ -9,17 +9,22 @@ from model.database import DBSession
 class QueryResolver:
 
     @staticmethod
-    def get_gdsc(pagination: (schemas.PaginationInput | None) = None) -> List[schemas.Gdsc]:
+    def get_gdsc(pagination:(schemas.PaginationInput | None) = None) -> List[schemas.Gdsc]:
+
+        print(pagination.drug)
 
         db = DBSession()
         try:
             query = db.query(models.Gdsc)
 
+            if pagination.drug is not None:
+                query = query.filter(
+                    models.Gdsc.drug_name == pagination.drug).offset(pagination.offset).limit(pagination.limit)
+
             if pagination is not None:
                 query = query.offset(pagination.offset).limit(pagination.limit)
 
             data = query.all()
-
         finally:
             db.close()
         return data
