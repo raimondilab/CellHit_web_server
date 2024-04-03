@@ -28,7 +28,7 @@ useEffect(() => {
     </div>
     <div className="container">
         <div className="row align-items-center min-vh-100 min-vh-md-100 vh-sm-100 vh-100">
-            <div className="col-sm-12 text-sm-start text-center">
+            <div className="col-sm-12 text-sm-start text-center bg-white">
                 <h1 className="fw-light font-base fs-6 fs-xxl-7">Oops...</h1>
                 <h2 className="fw-light font-base fs-6 fs-xxl-7">An <strong>error</strong> has occurred</h2>
                 <p className="fs-1 mb-5">{ error }</p>

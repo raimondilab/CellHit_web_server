@@ -474,8 +474,8 @@ const header = (
       <div className="col">
          <AutoComplete field="name"  value={selectedDrug} suggestions={filteredDrugs} completeMethod={onFilter}
           onChange={(e) => setSelectedDrug(e.value)}  forceSelection  placeholder="Filter by drug"/>
-         <Button type="button"  icon="pi pi-filter" className="p-button-rounded p-mr-2 ms-xxl-1"
-              onClick={handleDrugSelection} label="Filter"/>
+         <Button type="button"  icon="pi pi-filter" className="p-button-rounded p-mr-2 ms-1"
+              onClick={handleDrugSelection} />
       </div>
       <div className="col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
           <MultiSelect
@@ -499,8 +499,8 @@ const header = (
       <div className="col">
          <AutoComplete field="name"  value={value} suggestions={filteredDrugsPrism} completeMethod={onFilterPrism}
           onChange={(e) => setValue(e.value)}  forceSelection  placeholder="Filter by drug"/>
-         <Button type="button"  icon="pi pi-filter" className="p-button-rounded p-mr-2 ms-xxl-1"
-              onClick={handleDrugSelectionPrism} label="Filter"/>
+         <Button type="button"  icon="pi pi-filter" className="p-button-rounded p-mr-2 ms-1"
+              onClick={handleDrugSelectionPrism} />
       </div>
       <div className="col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
           <MultiSelect

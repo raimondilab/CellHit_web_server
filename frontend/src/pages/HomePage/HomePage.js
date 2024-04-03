@@ -132,7 +132,7 @@ const load = () => {
         <title>CellHit | Home</title>
       </Helmet>
       <Header />
-    <section className="py-0" id="home">
+    <section className="py-1" id="home">
     <div className="container">
         <div className="row align-items-center min-vh-100 min-vh-md-100 vh-sm-100 vh-100">
             <div className="col-sm-6 col-md-6 col-lg-6 text-sm-start text-center">

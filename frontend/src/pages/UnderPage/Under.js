@@ -16,7 +16,7 @@ const Under = () => {
     </div>
     <div className="container">
         <div className="row align-items-center min-vh-100">
-            <div className="col-sm-12 text-sm-start text-center">
+            <div className="col-sm-12 text-sm-start text-center bg-white">
                 <h1 className="fw-light font-base fs-6 fs-xxl-7">Under<strong> construction </strong></h1>
                 <p className="fs-1 mb-5">Page is under construction <br />
                Coming soon</p>
