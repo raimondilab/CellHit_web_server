@@ -44,8 +44,8 @@ const [prismData, setPrismData] = useState(filteredDataPrism || []);
 const [loading, setLoading] = useState(false);
 const [loadingPrism, setLoadingPrism] = useState(false);
 const [value, setValue] = useState('');
-const [totalRecords, setTotalRecords] = useState(4060350);
-const [totalRecordsPrism, setTotalRecordsPrism] = useState(17804040);
+const [totalRecords, setTotalRecords] = useState(4060342);
+const [totalRecordsPrism, setTotalRecordsPrism] = useState(17958038);
 
 
 const [selectedDrug, setSelectedDrug] = useState(null);
@@ -449,7 +449,7 @@ const handleResetData = (event) => {
    setSelectedDrug("");
    getGDSCData(0, 10);
    setLoading(false);
-   setTotalRecords(4060350);
+   setTotalRecords(4060342);
 };
 
 const handleResetDataPrism = (event) => {
@@ -465,7 +465,7 @@ const handleResetDataPrism = (event) => {
    setValue("");
    getPRISMData(0, 10);
    setLoadingPrism(false);
-   setTotalRecordsPrism(17804040);
+   setTotalRecordsPrism(17958038);
 };
 
 
