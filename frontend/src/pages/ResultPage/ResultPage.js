@@ -33,13 +33,14 @@ const data = state.data.data.databases || [];
 const gdscDrugs = require('../../gdsc_drugs.json');
 const prismDrugs = require('../../prism_drugs.json');
 
+
 const filteredData = data.filter(item => item.__typename === "Gdsc");
 const filteredDataPrism = data.filter(item => item.__typename === "Prism");
 
 const apiUrl = ' http://127.0.0.1:8001/graphql';
 
-const [gdscData, setGdscData] = useState(filteredData);
-const [prismData, setPrismData] = useState(filteredDataPrism);
+const [gdscData, setGdscData] = useState(filteredData || []);
+const [prismData, setPrismData] = useState(filteredDataPrism || []);
 const [loading, setLoading] = useState(false);
 const [loadingPrism, setLoadingPrism] = useState(false);
 const [value, setValue] = useState('');
@@ -75,8 +76,8 @@ const dtPrism = useRef(null);
    gdscData.forEach(obj => delete obj["__typename"]);
    prismData.forEach(obj => delete obj["__typename"]);
 
-   const columns = Object.keys(gdscData[0]);
-   const columnsPrism = Object.keys(prismData[0]);
+   const columns = Object.keys(gdscData[0] || ['']);
+   const columnsPrism = Object.keys(prismData[0] || ['']);
 
    const multiSelectOptions = columns.map(col => ({ label: col, value: col }));
    const multiSelectOptionsPrism = columnsPrism.map(col => ({ label: col, value: col }));
@@ -472,7 +473,7 @@ const header = (
   <div className="row align-items-center">
       <div className="col">
          <AutoComplete field="name"  value={selectedDrug} suggestions={filteredDrugs} completeMethod={onFilter}
-          onChange={(e) => setSelectedDrug(e.value)}  forceSelection  placeholder="Search by drug"/>
+          onChange={(e) => setSelectedDrug(e.value)}  forceSelection  placeholder="Filter by drug"/>
          <Button type="button"  icon="pi pi-filter" className="p-button-rounded p-mr-2 ms-xxl-1"
               onClick={handleDrugSelection} label="Filter"/>
       </div>
@@ -497,7 +498,7 @@ const header = (
   <div className="row align-items-center">
       <div className="col">
          <AutoComplete field="name"  value={value} suggestions={filteredDrugsPrism} completeMethod={onFilterPrism}
-          onChange={(e) => setValue(e.value)}  forceSelection  placeholder="Search by drug"/>
+          onChange={(e) => setValue(e.value)}  forceSelection  placeholder="Filter by drug"/>
          <Button type="button"  icon="pi pi-filter" className="p-button-rounded p-mr-2 ms-xxl-1"
               onClick={handleDrugSelectionPrism} label="Filter"/>
       </div>
