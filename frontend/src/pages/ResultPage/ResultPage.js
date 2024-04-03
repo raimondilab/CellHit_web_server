@@ -31,6 +31,7 @@ state.data = state.data || []
 state.data.data = state.data.data || [];
 const data = state.data.data.databases || [];
 const gdscDrugs = require('../../gdsc_drugs.json');
+const prismDrugs = require('../../prism_drugs.json');
 
 const filteredData = data.filter(item => item.__typename === "Gdsc");
 const filteredDataPrism = data.filter(item => item.__typename === "Prism");
@@ -42,12 +43,13 @@ const [prismData, setPrismData] = useState(filteredDataPrism);
 const [loading, setLoading] = useState(false);
 const [loadingPrism, setLoadingPrism] = useState(false);
 const [value, setValue] = useState('');
-const [totalRecords, setTotalRecords] = useState(4060342);
-const [totalRecordsPrism, setTotalRecordsPrism] = useState(17803038);
+const [totalRecords, setTotalRecords] = useState(4060350);
+const [totalRecordsPrism, setTotalRecordsPrism] = useState(17804040);
 
 
 const [selectedDrug, setSelectedDrug] = useState(null);
 const [filteredDrugs, setFilteredDrugs] = useState(null);
+const [filteredDrugsPrism, setFilteredDrugsPrism] = useState(null);
 
 const [lazyState, setLazyState] = useState({
     first: 0,
@@ -165,8 +167,19 @@ async function sendExploreData(value) {
 }
 
 
-const onDrugFilterChange = (event) => {
-    setValue(event.target.value);
+const onFilterPrism = (event) => {
+
+    let _filteredDrugs;
+
+   if (!event.query.trim().length) {
+        _filteredDrugs = [...prismDrugs];
+    } else {
+        _filteredDrugs = prismDrugs.filter(drug => {
+             return drug.name.toString().toLowerCase().startsWith(event.query.toString().toLowerCase());
+      });
+    }
+
+   setFilteredDrugsPrism(_filteredDrugs);
 
 };
 
@@ -224,7 +237,10 @@ async function getGDSCData(page, elementForPage, selectedDrug) {
 
     if (response.data.data.gdsc){
          setGdscData(response.data.data.gdsc);
-         setTotalRecords(totalRecords)
+
+         if (selectedDrug.name){
+             setTotalRecords(totalRecords);
+         }
     }
     setLoading(false);
 
@@ -275,14 +291,92 @@ const handleDrugSelection = (event) => {
 };
 
 
-async function getPRISMData(page, elementForPage) {
+
+
+async function getDataDrugPrism(value) {
+
+    const query = {
+        query: `
+            query getPRISMDrug{
+                prismDrug(drug: "${value}") {
+                    prismId
+                    drugName
+                    drugId
+                    source
+                    sampleIndex
+                    predictions
+                    predictionsStd
+                    quantileScore
+                    experimentalMin
+                    experimentalMedian
+                    experimentalMax
+                    modelMse
+                    modelCorr
+                    transcrCcleNeigh
+                    transcrCcleNeighCelllinename
+                    transcrCcleNeighOncotree
+                    responseCcleNeigh
+                    responseCcleNeighCelllinename
+                    responseCcleNeighOncotree
+                    transcrTcgaNeigh
+                    transcrTcgaNeighDiagnosis
+                    transcrTcgaNeighSite
+                    responseTcgaNeigh
+                    responseTcgaNeighDiagnosis
+                    responseTcgaNeighSite
+                    putativeTarget
+                    topLocalShapGenes
+                    recoveredTarget
+                }
+            }
+        `
+    };
+    try {
+
+        setLoadingPrism(true);
+        let navigateData = null;
+        navigateData = await axios.post(apiUrl, query);
+
+        if (navigateData.data.data.prismDrug){
+
+            setPrismData(navigateData.data.data.prismDrug );
+            setTotalRecordsPrism(navigateData.data.data.prismDrug.length)
+
+        }
+
+         setLoadingPrism(false);
+
+    } catch (error) {
+        setLoading(false);
+    }
+}
+
+const handleDrugSelectionPrism = (event) => {
+
+   if (value){
+
+      getDataDrugPrism(value.name.toString());
+
+      setLazyStatePrism({
+        first: 0,
+        rows: 10,
+        page: 1,
+        sortField: null,
+        sortOrder: null,
+        filters: null
+     })
+   }
+};
+
+
+async function getPRISMData(page, elementForPage, value) {
 
   const offset = page * elementForPage;
 
   const query = {
     query: `
-    query getPRISM($offset: Int!, $limit: Int!) {
-        prism(pagination: {offset: $offset, limit: $limit}) {
+    query getPRISM($offset: Int!, $limit: Int!, $drug: String) {
+        prism(pagination: {offset: $offset, limit: $limit, drug: $drug}) {
             prismId
             drugName
             drugId
@@ -316,7 +410,8 @@ async function getPRISMData(page, elementForPage) {
     `,
     variables: {
         offset: offset,
-        limit: elementForPage
+        limit: elementForPage,
+        drug: value ? value.name : null,
     }
 };
 
@@ -334,15 +429,14 @@ async function getPRISMData(page, elementForPage) {
 
 const onPagePrism = (event) => {
    setLoadingPrism(true);
-   setTotalRecordsPrism(17803038);
+   setTotalRecordsPrism(17804040);
    setLazyStatePrism(event);
-   getPRISMData(event.page, event.rows);
+   getPRISMData(event.page, event.rows, value);
 };
 
 
 const handleResetData = (event) => {
    setLoading(true);
-   setTotalRecords(4060342);
    setLazyState({
         first: 0,
         rows: 10,
@@ -354,7 +448,25 @@ const handleResetData = (event) => {
    setSelectedDrug("");
    getGDSCData(0, 10);
    setLoading(false);
+   setTotalRecords(4060350);
 };
+
+const handleResetDataPrism = (event) => {
+   setLoadingPrism(true);
+   setLazyStatePrism({
+        first: 0,
+        rows: 10,
+        page: 1,
+        sortField: null,
+        sortOrder: null,
+        filters: null
+     });
+   setValue("");
+   getPRISMData(0, 10);
+   setLoadingPrism(false);
+   setTotalRecordsPrism(17804040);
+};
+
 
 const header = (
   <div className="row align-items-center">
@@ -384,10 +496,10 @@ const header = (
   const headerPrism = (
   <div className="row align-items-center">
       <div className="col">
-          <span className="p-input-icon-left">
-              <i className="pi pi-search" />
-              <InputText type="search" value={value} onChange={(e) => onDrugFilterChange(e)} placeholder="Search by drug" disabled/>
-          </span>
+         <AutoComplete field="name"  value={value} suggestions={filteredDrugsPrism} completeMethod={onFilterPrism}
+          onChange={(e) => setValue(e.value)}  forceSelection  placeholder="Search by drug"/>
+         <Button type="button"  icon="pi pi-filter" className="p-button-rounded p-mr-2 ms-xxl-1"
+              onClick={handleDrugSelectionPrism} label="Filter"/>
       </div>
       <div className="col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
           <MultiSelect
@@ -400,7 +512,8 @@ const header = (
               display="chip"
               style={{ width: '200px', marginRight: '10px' }}
           />
-          <Button type="button" label="Export" icon="pi pi-download" className="p-button-rounded p-mr-2" onClick={() => exportCSV(dtPrism, false)} data-pr-tooltip="CSV" />
+          <Button type="button" text icon="pi pi-download" className="p-button-rounded p-mr-2" onClick={() => exportCSV(dtPrism, false)} data-pr-tooltip="CSV" />
+          <Button type="button" icon="pi pi-refresh" text  onClick={handleResetDataPrism}/>
       </div>
   </div>
 );

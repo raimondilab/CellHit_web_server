@@ -13,16 +13,14 @@ class QueryResolver:
 
         db = DBSession()
         try:
-            query = db.query(models.Gdsc)
 
             if pagination and pagination.drug is not None:
-                query = query.filter(
-                    models.Gdsc.drug_name == pagination.drug).offset(pagination.offset).limit(pagination.limit)
+                data = db.query(models.Gdsc).filter(
+                    models.Gdsc.drug_name == pagination.drug).offset(pagination.offset).limit(pagination.limit).all()
 
             if pagination is not None:
-                query = query.offset(pagination.offset).limit(pagination.limit)
+                data = db.query(models.Gdsc).offset(pagination.offset).limit(pagination.limit).all()
 
-            data = query.all()
         finally:
             db.close()
         return data
@@ -43,12 +41,13 @@ class QueryResolver:
 
         db = DBSession()
         try:
-            query = db.query(models.Prism)
+
+            if pagination and pagination.drug is not None:
+                data = db.query(models.Prism).filter(
+                    models.Gdsc.drug_name == pagination.drug).offset(pagination.offset).limit(pagination.limit).all()
 
             if pagination is not None:
-                query = query.offset(pagination.offset).limit(pagination.limit)
-
-            data = query.all()
+                data = db.query(models.Prism).offset(pagination.offset).limit(pagination.limit).all()
 
         finally:
             db.close()
