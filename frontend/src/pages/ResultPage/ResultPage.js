@@ -37,7 +37,7 @@ const prismDrugs = require('../../prism_drugs.json');
 const filteredData = data.filter(item => item.__typename === "Gdsc");
 const filteredDataPrism = data.filter(item => item.__typename === "Prism");
 
-const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
+const apiUrl = 'http://127.0.0.1:8001/graphql';
 
 const [gdscData, setGdscData] = useState(filteredData || []);
 const [prismData, setPrismData] = useState(filteredDataPrism || []);
@@ -170,17 +170,17 @@ async function sendExploreData(value) {
 
 const onFilterPrism = (event) => {
 
-    let _filteredDrugs;
+    let _filteredDrugsP;
 
    if (!event.query.trim().length) {
-        _filteredDrugs = [...prismDrugs];
+        _filteredDrugsP = [...prismDrugs];
     } else {
-        _filteredDrugs = prismDrugs.filter(drug => {
+        _filteredDrugsP = prismDrugs.filter(drug => {
              return drug.name.toString().toLowerCase().startsWith(event.query.toString().toLowerCase());
       });
     }
 
-   setFilteredDrugsPrism(_filteredDrugs);
+   setFilteredDrugsPrism(_filteredDrugsP);
 
 };
 
@@ -239,8 +239,8 @@ async function getGDSCData(page, elementForPage, selectedDrug) {
     if (response.data.data.gdsc){
          setGdscData(response.data.data.gdsc);
 
-         if (selectedDrug.name){
-             setTotalRecords(totalRecords);
+         if (!selectedDrug.name){
+             setTotalRecords(4060342);
          }
     }
     setLoading(false);
@@ -339,9 +339,8 @@ async function getDataDrugPrism(value) {
         navigateData = await axios.post(apiUrl, query);
 
         if (navigateData.data.data.prismDrug){
-
             setPrismData(navigateData.data.data.prismDrug );
-            setTotalRecordsPrism(navigateData.data.data.prismDrug.length)
+            setTotalRecordsPrism(navigateData.data.data.prismDrug.length);
 
         }
 
@@ -376,7 +375,7 @@ async function getPRISMData(page, elementForPage, value) {
 
   const query = {
     query: `
-    query getPRISM($offset: Int!, $limit: Int!, $drug: String) {
+    query getPrism($offset: Int!, $limit: Int!, $drug: String) {
         prism(pagination: {offset: $offset, limit: $limit, drug: $drug}) {
             prismId
             drugName
@@ -419,7 +418,15 @@ async function getPRISMData(page, elementForPage, value) {
   try {
     setLoadingPrism(true);
     const response = await axios.post(apiUrl, query);
-    setPrismData(response.data.data.prism || Object.keys(prismData[0]));
+
+      if (response.data.data.prism){
+            setPrismData(response.data.data.prism);
+
+            if(!value.name){
+                setTotalRecordsPrism(17958038);
+            }
+     }
+
     setLoadingPrism(false);
 
   } catch (error) {
@@ -430,7 +437,6 @@ async function getPRISMData(page, elementForPage, value) {
 
 const onPagePrism = (event) => {
    setLoadingPrism(true);
-   setTotalRecordsPrism(17804040);
    setLazyStatePrism(event);
    getPRISMData(event.page, event.rows, value);
 };
@@ -473,9 +479,9 @@ const header = (
   <div className="row align-items-center">
       <div className="col">
          <AutoComplete field="name"  value={selectedDrug} suggestions={filteredDrugs} completeMethod={onFilter}
-          onChange={(e) => setSelectedDrug(e.value)}  forceSelection  placeholder="Filter by drug" disabled/>
+          onChange={(e) => setSelectedDrug(e.value)}  forceSelection  placeholder="Filter by drug" />
          <Button type="button"  icon="pi pi-filter" className="p-button-rounded p-mr-2 ms-1"
-              onClick={handleDrugSelection} disabled/>
+              onClick={handleDrugSelection} />
       </div>
       <div className="col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
           <MultiSelect
@@ -498,9 +504,9 @@ const header = (
   <div className="row align-items-center">
       <div className="col">
          <AutoComplete field="name"  value={value} suggestions={filteredDrugsPrism} completeMethod={onFilterPrism}
-          onChange={(e) => setValue(e.value)}  forceSelection  placeholder="Filter by drug" disabled/>
+          onChange={(e) => setValue(e.value)}  forceSelection  placeholder="Filter by drug" />
          <Button type="button"  icon="pi pi-filter" className="p-button-rounded p-mr-2 ms-1"
-              onClick={handleDrugSelectionPrism} disabled/>
+              onClick={handleDrugSelectionPrism} />
       </div>
       <div className="col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
           <MultiSelect
