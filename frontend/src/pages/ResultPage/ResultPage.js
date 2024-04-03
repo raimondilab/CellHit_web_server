@@ -176,7 +176,7 @@ async function getGDSCData(page, elementForPage, selectedDrug) {
 
   const query = {
     query: `
-    query getGDSC($offset: Int!, $limit: Int!, $drug: String!) {
+    query getGDSC($offset: Int!, $limit: Int!, $drug: String) {
         gdsc(pagination: {offset: $offset, limit: $limit, drug: $drug}) {
             gdscId
             drugName
@@ -212,7 +212,7 @@ async function getGDSCData(page, elementForPage, selectedDrug) {
     variables: {
         offset: offset,
         limit: elementForPage,
-        drug: selectedDrug.name
+        drug: selectedDrug ? selectedDrug.name : null,
     }
 
 };
@@ -351,8 +351,9 @@ const handleResetData = (event) => {
         sortOrder: null,
         filters: null
      });
+   setSelectedDrug("");
    getGDSCData(0, 10);
-   setSelectedDrug(null);
+   setLoading(false);
 };
 
 const header = (

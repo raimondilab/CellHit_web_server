@@ -18849,7 +18849,7 @@ div:where(.swal2-container) .swal2-html-container {
 .line::after{
     display: block;
     content: '';
-    margin-top: 10px;
+    margin-top: 15px;
     border-bottom: 5px solid #359ccf;
     width: 50px;
 }

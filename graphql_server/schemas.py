@@ -1,5 +1,5 @@
 import strawberry
-from typing import Union
+from typing import Optional
 
 
 @strawberry.type
@@ -73,4 +73,4 @@ DatabaseUnion = strawberry.union("DatabaseUnion", types=(Gdsc, Prism))
 class PaginationInput:
     offset: int
     limit: int
-    drug: str
+    drug: Optional[str]

@@ -9,15 +9,13 @@ from model.database import DBSession
 class QueryResolver:
 
     @staticmethod
-    def get_gdsc(pagination:(schemas.PaginationInput | None) = None) -> List[schemas.Gdsc]:
-
-        print(pagination.drug)
+    def get_gdsc(pagination: (schemas.PaginationInput | None) = None) -> List[schemas.Gdsc]:
 
         db = DBSession()
         try:
             query = db.query(models.Gdsc)
 
-            if pagination.drug is not None:
+            if pagination and pagination.drug is not None:
                 query = query.filter(
                     models.Gdsc.drug_name == pagination.drug).offset(pagination.offset).limit(pagination.limit)
 
