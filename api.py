@@ -3,10 +3,16 @@ from fastapi import FastAPI
 import uvicorn
 from graphql_server import graphql_app
 from starlette.middleware.cors import CORSMiddleware
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn="https://863b659d00cb837a8f025676cb0aba36@o4505080802312192.ingest.us.sentry.io/4507022847770624",
+    traces_sample_rate=1.0,
+    profiles_sample_rate=1.0,
+)
 
 # Create API
 app = FastAPI()
-
 
 app.add_middleware(
     CORSMiddleware,
