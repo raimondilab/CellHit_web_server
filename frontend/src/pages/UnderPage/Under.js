@@ -11,12 +11,12 @@ const Under = () => {
       </Helmet>
       <Header/>
       <section className="py-0">
-    <div className="bg-holder d-sm-block img-fluid bg" id="back"
+    <div className="bg-holder d-sm-block img-fluid bg hide-mobile" id="back"
           style={{ backgroundImage: 'url(/assets/images/cell.webp)'}}>
     </div>
     <div className="container">
         <div className="row align-items-center min-vh-100">
-            <div className="col-sm-12 text-sm-start text-center bg-white">
+            <div className="col-sm-12 text-sm-start text-center">
                 <h1 className="fw-light font-base fs-6 fs-xxl-7">Under<strong> construction </strong></h1>
                 <p className="fs-1 mb-5">Page is under construction <br />
                Coming soon</p>

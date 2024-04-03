@@ -23,12 +23,12 @@ useEffect(() => {
       </Helmet>
       <Header/>
       <section className="py-0">
-    <div className="bg-holder d-sm-block img-fluid bg" id="back"
+    <div className="bg-holder d-sm-block img-fluid bg hide-mobile" id="back"
           style={{ backgroundImage: 'url(/assets/images/cell.webp)'}}>
     </div>
     <div className="container">
         <div className="row align-items-center min-vh-100 min-vh-md-100 vh-sm-100 vh-100">
-            <div className="col-sm-12 text-sm-start text-center bg-white">
+            <div className="col-sm-12 text-sm-start text-center">
                 <h1 className="fw-light font-base fs-6 fs-xxl-7">Oops...</h1>
                 <h2 className="fw-light font-base fs-6 fs-xxl-7">An <strong>error</strong> has occurred</h2>
                 <p className="fs-1 mb-5">{ error }</p>
