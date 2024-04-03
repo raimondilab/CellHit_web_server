@@ -37,7 +37,7 @@ const prismDrugs = require('../../prism_drugs.json');
 const filteredData = data.filter(item => item.__typename === "Gdsc");
 const filteredDataPrism = data.filter(item => item.__typename === "Prism");
 
-const apiUrl = 'http://127.0.0.1:8001/graphql';
+const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
 
 const [gdscData, setGdscData] = useState(filteredData || []);
 const [prismData, setPrismData] = useState(filteredDataPrism || []);
