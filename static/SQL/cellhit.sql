@@ -74,3 +74,6 @@ CREATE TABLE prism (
 );
 
 
+/** INDEXES **/
+CREATE INDEX GDSC_IDX ON gdsc (drug_name);
+CREATE INDEX PRISM_IDX ON prism (drug_name);
