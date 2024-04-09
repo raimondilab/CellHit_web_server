@@ -8,7 +8,8 @@ const Header = () => {
     <header className="gy-3">
       <nav className="navbar navbar-expand-lg navbar-light fixed-top py-3 backdrop" data-navbar-on-scroll="data-navbar-on-scroll">
         <div className="container">
-          <h1 className="navbar-brand d-flex align-items-center fw-bolder fs-2 fst-italic">CellHit</h1>
+          <h1 className="navbar-brand d-flex align-items-center fw-bolder fs-2 fst-italic">
+          <Link aria-current="page" to="/">CellHit</Link></h1>
           <button className="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span className="navbar-toggler-icon"></span></button>
           <div className="collapse navbar-collapse border-top border-lg-0 mt-4 mt-lg-0" id="navbarSupportedContent">
             <ul className="navbar-nav ms-auto pt-2 pt-lg-0">
