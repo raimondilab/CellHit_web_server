@@ -15,5 +15,7 @@ dependencies:
       - strawberry-graphql
       - python-decouple
       - sqlalchemy==1.4.51
+      - schedule
+      - sentry-sdk
 
 

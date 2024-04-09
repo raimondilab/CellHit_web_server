@@ -6,7 +6,7 @@ module.exports = {
     interpreter: 'python3',
     exec_mode: 'fork',
     env: {
-      CONDA_PREFIX: '/data/SW/anaconda3/envs/functional_database/'
+      CONDA_PREFIX: '/data/SW/anaconda3/envs/CLRP/'
     }
   }]
 };
