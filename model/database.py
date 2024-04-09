@@ -53,4 +53,4 @@ def run_schedule():
 
 
 # Start the scheduling in the background
-run_schedule()
+#run_schedule()
