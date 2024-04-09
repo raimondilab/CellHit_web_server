@@ -1,9 +1,6 @@
 from sqlalchemy import create_engine, exc
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from mysql.connector import MySQLConnection
-import schedule
-import time
 
 DATABASE_URI = "mysql+mysqlconnector://clrp:clrpmoleculE24#@localhost/cellhit"
 

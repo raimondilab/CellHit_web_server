@@ -17,5 +17,7 @@ dependencies:
       - sqlalchemy==1.4.51
       - schedule
       - sentry-sdk
+      - sqlalchemy
+      - starlette
 
 
