@@ -18867,6 +18867,18 @@ div:where(.swal2-container) .swal2-html-container {
   border-color: #3293c3;
 }
 
+.btn-home-two {
+    color: #004059;
+    background: #ffffff;
+    border-color: #004059;
+}
+
+.btn-home-two:hover{
+  text-decoration: none;
+  color: #fff;
+  background-color: #359ccf;
+  border-color: #3293c3;
+}
 
 ul.p-autocomplete-multiple-container  {
 margin-bottom: 0rem !important;
