@@ -144,22 +144,6 @@ const HomePage = () => {
                                 <Button className="btn-home shadow-none me-3"  size="large" label="Explore now" loading={loading} onClick={load} />
                                 <Button className="btn-home-two shadow-none"  size="large" label="Run CellHit" />
                             </div>
-                            <div className="row align-items-center hide-mobile">
-                                <div className="col">
-                                    <Card className="text-start">
-                                        <h4 className="fw-bold mb-1">GDSC</h4>
-                                        <p className="mb-1">887 Cell lines</p>
-                                        <p>6337 Drugs</p>
-                                    </Card>
-                                </div>
-                                <div className="col">
-                                    <Card className="text-start">
-                                        <h4 className="fw-bold mb-1">PRISM</h4>
-                                        <p className="mb-1">686 Cell lines</p>
-                                        <p>286 Drugs</p>
-                                    </Card>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
