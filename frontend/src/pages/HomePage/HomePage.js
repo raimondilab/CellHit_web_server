@@ -125,6 +125,11 @@ const HomePage = () => {
         sendExploreData();
     };
 
+    // Navigate to run page
+    const runPage = () =>{
+         navigate("/under/");
+    };
+
     return (
         <>
             <Helmet>
@@ -141,8 +146,12 @@ const HomePage = () => {
                                 Interpretable models for drug-response prediction
                             </p>
                             <div className="mb-4">
-                                <Button className="btn-home shadow-none me-3"  size="large" label="Explore now" loading={loading} onClick={load} />
-                                <Button className="btn-home-two shadow-none"  size="large" label="Run CellHit" />
+                            <Button className="btn-example shadow-none me-3 mb-1"  loading={loading} onClick={load} label="Explore now&nbsp;">
+                                <img alt="logo" src="/assets/images/resistance.png" className="img-fluid btn-img"></img>
+                            </Button>
+                            <Button className="btn-example shadow-none mb-1"  label="Run CellHit&nbsp;" onClick={runPage}>
+                                <img alt="logo" src="/assets/images/nanomedicine.png" className="img-fluid btn-img"></img>
+                            </Button>
                             </div>
                         </div>
                     </div>

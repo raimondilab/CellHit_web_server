@@ -9,7 +9,7 @@ const Header = () => {
       <nav className="navbar navbar-expand-lg navbar-light fixed-top py-3 backdrop" data-navbar-on-scroll="data-navbar-on-scroll">
         <div className="container">
           <h1 className="navbar-brand d-flex align-items-center fw-bolder fs-2 fst-italic">
-          <Link aria-current="page" to="/"><img src="/assets/images/lo.svg" alt="Database" className="img-fluid w-50"/></Link></h1>
+          <Link aria-current="page" to="/"><img src="/assets/images/lo.svg" alt="Database" className="img-fluid w-40"/></Link></h1>
           <button className="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span className="navbar-toggler-icon"></span></button>
           <div className="collapse navbar-collapse border-top border-lg-0 mt-4 mt-lg-0" id="navbarSupportedContent">
             <ul className="navbar-nav ms-auto pt-2 pt-lg-0">

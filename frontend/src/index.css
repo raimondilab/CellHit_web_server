@@ -7609,6 +7609,10 @@ transition-property: border-color,box-shadow,color;
   width: 30% !important;
 }
 
+
+.w-40 {
+  width: 40% !important;
+}
 .w-50 {
   width: 50% !important;
 }
@@ -18875,9 +18879,9 @@ div:where(.swal2-container) .swal2-html-container {
 
 .btn-home-two:hover{
   text-decoration: none;
-  color: #fff;
-  background-color: #359ccf;
-  border-color: #3293c3;
+  color: #000000;
+  background-color: #f8f9fa;
+  border-color: #f8f9fa;
 }
 
 ul.p-autocomplete-multiple-container  {
@@ -18893,4 +18897,20 @@ margin-bottom: 0rem !important;
 .cm__btn:hover{
   background-color: #359ccf !important;
   border-color: #3293c3 !important;
+}
+
+.btn-example {
+  color: #231f1b;
+  background-color: #f8f9fa;
+  border-color: #f8f9fa;
+  outline: none !important;
+  border-radius: 6px;
+}
+
+.btn-example:hover{
+color: #231f1b;
+background-color:#ffffff;
+border-color:#e2e6ea;
+outline: none !important;
+text-decoration: none;
 }
