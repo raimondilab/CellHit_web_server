@@ -127,7 +127,7 @@ const HomePage = () => {
 
     // Navigate to run page
     const runPage = () =>{
-         navigate("/under/");
+         navigate("/analysis/");
     };
 
     return (
@@ -149,7 +149,7 @@ const HomePage = () => {
                             <Button className="btn-example shadow-none me-3 mb-1"  loading={loading} onClick={load} label="Explore now&nbsp;">
                                 <img alt="logo" src="/assets/images/resistance.png" className="img-fluid btn-img"></img>
                             </Button>
-                            <Button className="btn-example shadow-none mb-1"  label="Run CellHit&nbsp;" onClick={runPage}>
+                            <Button className="btn-run shadow-none mb-1"  label="Run CellHit&nbsp;" onClick={runPage}>
                                 <img alt="logo" src="/assets/images/nanomedicine.png" className="img-fluid btn-img"></img>
                             </Button>
                             </div>

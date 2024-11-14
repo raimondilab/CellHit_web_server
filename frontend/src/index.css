@@ -18901,8 +18901,8 @@ margin-bottom: 0rem !important;
 
 .btn-example {
   color: #231f1b;
-  background-color: #f8f9fa;
-  border-color: #f8f9fa;
+  background-color: #f7f9fc;
+  border-color: #f7f9fc;
   outline: none !important;
   border-radius: 6px;
 }
@@ -18914,3 +18914,92 @@ border-color:#e2e6ea;
 outline: none !important;
 text-decoration: none;
 }
+
+.btn-run{
+color: #231f1b;
+background-color:#ffffff;
+border-color:#e2e6ea;
+outline: none !important;
+text-decoration: none;
+  border-radius: 6px;
+}
+
+.btn-run:hover{
+  color: #231f1b;
+  background-color: #f7f9fc;
+  border-color: #f7f9fc;
+  outline: none !important;
+  border-radius: 6px;
+}
+
+.label-btn {
+  display: inline-block;
+  text-transform: uppercase;
+  color: #fff;
+  background: #004059;
+  text-align: center;
+  padding: 15px 10px;
+  font-size: inherit;
+  letter-spacing: 2px;
+  user-select: none;
+  cursor: pointer;
+  box-shadow: 5px 15px 25px rgba(0,0,0,0.35);
+  border-radius: 3px;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+.label-btn ion-icon {
+  font-size: 0.85rem;
+  margin-right: 1px;
+}
+
+.label-btn:active{
+ transform: scale(0.9);
+}
+
+.label-btn:hover{
+  text-decoration: none;
+  color: #fff;
+  background-color: #359ccf;
+  border-color: #3293c3;
+}
+
+.button{
+    display: none;
+}
+
+.btn-dialog{
+  width: 1rem !important;
+  padding: 0px !important;
+}
+
+.split-layout__divider {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+@media screen and (min-width: 30em) {
+  .split-layout__divider {
+    flex-direction: column;
+  }
+
+  .split-layout__rule {
+    border-width: 0 1px 0 0;
+  }
+}
+
+.split-layout__rule {
+  flex: 1;
+  border-style: solid;
+  border-color: #04afa4;
+  border-width: 20px 0 0 0;
+}
+
+.split-layout__label {
+  padding: 1em;
+}
+
