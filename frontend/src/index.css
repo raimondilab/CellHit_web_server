@@ -18994,12 +18994,13 @@ input[type="file"] {
 
 .split-layout__rule {
   flex: 1;
-  border-style: solid;
-  border-color: #04afa4;
-  border-width: 20px 0 0 0;
 }
 
 .split-layout__label {
   padding: 1em;
 }
 
+.p-input {
+  outline: none !important;
+  box-shadow: none !important;
+}

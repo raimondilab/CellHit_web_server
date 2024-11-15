@@ -47,11 +47,11 @@ const DataSubmission = () => {
               <Link className="" to="/about/" target="_blank"><b> about</b></Link> page.
             </p>
           </Dialog>
+          <Card title="Enter your data or reload previous results by task ID">
+          <div className="container col-12 d-flex flex-wrap flex-md-nowrap justify-content-start align-items-start">
 
-          <Card title="Enter your data">
-          <div className="container col-12 d-flex flex-wrap justify-content-start align-items-start">
-            {/* Primeira Coluna */}
-            <div className="col-4">
+            {/* First Column */}
+            <div className="col-md-6 mb-3">
               <form id="search-box" method="post" className="mb-2" action="/result/">
                 <div className="form-group">
                   <input type="file" id="databaseBtn" name="dataset" />
@@ -63,25 +63,23 @@ const DataSubmission = () => {
                 </div>
               </form>
               <span>
-                Please click <b><a href="/static/clrp/upload_example_LRRK2.csv" download>here</a></b> for an example input file.
+                Please click <b><a href="/static/clrp/upload_example_LRRK2.csv" download>here</a></b> for an example input file
               </span>
             </div>
 
-            {/* Divisor */}
-            <div className="col-2">
-              <div className="split-layout__divider">
-                <div className="split-layout__rule"></div>
-                <div className="split-layout__label">or</div>
-                <div className="split-layout__rule"></div>
-              </div>
-            </div>
-
-            {/* Terceira Coluna */}
-            <div className="col-6">
-              <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+            {/* Second Column */}
+            <div className="col-md-6 position-relative pt-0 justify-content-start">
+              <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', width: '100%' }} className="mb-3">
                 <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                   <span className="p-input-icon-left" style={{ width: '100%', position: 'relative' }}>
-                    <InputText className="p-input text-lg" name="target" value={formValues.target} onChange={onChangeHandler} style={{ width: '100%' }} placeholder="Reload previous results by task ID" />
+                    <InputText
+                      className="p-input text-lg"
+                      name="target"
+                      value={formValues.target}
+                      onChange={onChangeHandler}
+                      style={{ width: '100%' }}
+                      placeholder="Task ID"
+                    />
                     <Button
                       type="submit"
                       className="btn-form p-button-rounded p-button-secondary search-button"
@@ -95,9 +93,13 @@ const DataSubmission = () => {
                   </span>
                 </div>
               </form>
+              <span>
+                e.g. rs1042522-2f3677b5-e69d-4500-840f-295d67cce939
+              </span>
             </div>
-            </div>
-          </Card>
+
+          </div>
+        </Card>
         </div>
 
         <div className="row">
@@ -105,7 +107,7 @@ const DataSubmission = () => {
             <img
               tabIndex="1"
               src="/assets/images/learning_workflow.png"
-              className="img-fluid center-help"
+              className="img-fluid center-help mb-5"
               data-toggle="tooltip"
               data-placement="top"
               title="Click to zoom-in"
