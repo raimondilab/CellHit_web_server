@@ -19004,3 +19004,8 @@ input[type="file"] {
   outline: none !important;
   box-shadow: none !important;
 }
+
+.border-circle {
+  border-radius: 5px !important;
+  padding: 10px;
+}

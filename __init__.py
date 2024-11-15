@@ -23,13 +23,6 @@ UPLOAD_DATA_FOLDER = path + '/static/tmp/'
 app.config['UPLOAD_FOLDER'] = UPLOAD_DATA_FOLDER
 
 
-# Homepage
-@app.route('/')
-@app.route('/index/')
-def index():
-    return render_template("index.html")
-
-
 # Upload user data
 @app.route('/result/', methods=['GET', 'POST'])
 def result():
@@ -75,24 +68,6 @@ def get_subtype_list():
             subtypes.insert(0, "All")
 
     return json.dumps(subtypes)
-
-
-@app.route('/compound', methods=['GET', 'POST'])
-def get_compound_desc():
-
-    if request.method == 'POST':
-        target = request.get_json(force=True)
-        target = target.get('compound_name')
-        target = str(target.strip())
-
-        df = pd.read_csv("static/clrp/small_molecule_drugbank.csv", sep=",", header=0)
-        df = df[df['NAME'].str.contains(target)].reset_index(drop=True)
-
-        if not df.empty:
-            data = [{"compound_name": df.iloc[0, 1].replace('"', ""), "structure": df.iloc[0, 3].replace('"', ""), "description": df.iloc[0, 9].replace('"', "")}]
-            return json.dumps(data)
-
-    return json.dumps([])
 
 
 # Check allowed file extensions

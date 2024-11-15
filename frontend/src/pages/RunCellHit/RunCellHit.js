@@ -15,6 +15,7 @@ import { MultiSelect } from 'primereact/multiselect';
 import axios from 'axios';
 import { AutoComplete } from "primereact/autocomplete";
 import DataSubmission from '../../components/DataSubmission/DataSubmission';
+import ProgressionRun from '../../components/ProgressionRun/ProgressionRun';
 
 const RunCellHit = () => {
 
@@ -29,7 +30,8 @@ return (
         <div className="row mb-4">
             <div className="col-12">
              <h1 className="display-5 fw-bold line mb-4">CellHit</h1>
-             <DataSubmission/>
+                          <DataSubmission />
+                          <ProgressionRun/>
             </div>
           </div>
         </div>

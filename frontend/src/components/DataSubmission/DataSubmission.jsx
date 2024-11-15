@@ -4,8 +4,10 @@ import { Card } from 'primereact/card';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
+import HeaderTitleRunCellHit from '../../components/HeaderTitleRunCellHit/HeaderTitleRunCellHit';
 
 const DataSubmission = () => {
+
   const [position, setPosition] = useState('center');
   const [visible, setVisible] = useState(false);
   const initialValues = { target: "" };
@@ -29,24 +31,10 @@ const DataSubmission = () => {
 
   return (
     <>
+      <HeaderTitleRunCellHit />
+
       <div className="row">
-        <div className="col-md-12 mb-5">
-          <h2 className="display-6 fw-bold mb-5">Run analysis<sup><Button icon="pi pi-info"
-            onClick={() => show('top-right')} text size="small" className="btn-dialog" /></sup></h2>
-          {/* Help message */}
-          <Dialog header="CellHit" visible={visible} position={position} style={{ width: '50vw' }} onHide={() => setVisible(false)}
-            draggable={false} resizable={false} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
-            <p className="m-0 mb-1 text-justify">
-              We trained explainable machine learning algorithms by employing cell
-              line transcriptomics to predict the growth inhibitory potential of drugs. We used large
-              language models (LLMs) to expand descriptions of the mechanisms of action (MOA) for
-              each drug starting from available annotations, which were matched to the semantically
-              closest pathways from reference knowledge bases.
-            </p>
-            <p className="m-0 mb-1 text-justify">For more information, please refer to the
-              <Link className="" to="/about/" target="_blank"><b> about</b></Link> page.
-            </p>
-          </Dialog>
+        <div className="col-md-12">
           <Card title="Enter your data or reload previous results by task ID">
           <div className="container col-12 d-flex flex-wrap flex-md-nowrap justify-content-start align-items-start">
 
@@ -94,7 +82,7 @@ const DataSubmission = () => {
                 </div>
               </form>
               <span>
-                e.g. rs1042522-2f3677b5-e69d-4500-840f-295d67cce939
+                e.g. 455234e0-f0ea-4a39-bbe9-e3947e248503
               </span>
             </div>
 
@@ -102,7 +90,7 @@ const DataSubmission = () => {
         </Card>
         </div>
 
-        <div className="row">
+        <div className="row mt-4">
           <div className="col-md-12">
             <img
               tabIndex="1"
