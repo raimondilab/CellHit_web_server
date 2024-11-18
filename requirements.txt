@@ -1,4 +1,4 @@
-flask
+flask~=3.0.3
 pandas~=2.2.1
 pip
 sqlalchemy~=1.4.51
@@ -8,3 +8,6 @@ starlette~=0.36.3
 mysql-connector-python~=8.3.0
 pymysql~=1.1.0
 schedule~=1.2.1
+celery~=4.4.0
+redis~=3.5.3
+werkzeug~=3.0.6

@@ -18,7 +18,7 @@ const HeaderTitleRunCellHit = () => {
     return (
     <>
       <div className="row">
-        <div className="col-md-12 mb-2">
+        <div className="col-md-12">
           <h2 className="display-6 fw-bold mb-5">Run analysis<sup><Button icon="pi pi-info"
             onClick={() => show('top-right')} text size="small" className="btn-dialog" /></sup></h2>
           {/* Help message */}

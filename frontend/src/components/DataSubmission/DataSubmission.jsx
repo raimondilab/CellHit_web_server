@@ -4,9 +4,11 @@ import { Card } from 'primereact/card';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
+import axios from 'axios';
 import HeaderTitleRunCellHit from '../../components/HeaderTitleRunCellHit/HeaderTitleRunCellHit';
+import Swal from 'sweetalert2';
 
-const DataSubmission = () => {
+const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
 
   const [position, setPosition] = useState('center');
   const [visible, setVisible] = useState(false);
@@ -24,10 +26,65 @@ const DataSubmission = () => {
     setFormValues({ ...formValues, [name]: value.toUpperCase().trim() });
   };
 
+  // Send file to analysis
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    // Your submit logic here
+    setIsSubmit(true);
+    sendFile();
   };
+
+  // Get results by taskId
+  const handleFormSubmitTask = (e) => {
+    e.preventDefault();
+  };
+
+
+// Send file to back-end and get TaskId
+async function sendFile() {
+
+ try {
+   const query = {
+              query: `
+               query getTaskId {
+                  getTaskId {
+                    taskId
+                    status
+                  }
+                }
+              `
+            };
+
+    let taskData = null;
+    const apiUrl = 'http://127.0.0.1:8003/graphql';
+
+    taskData = await axios.post(apiUrl, query);
+
+    if (!taskData) {
+                setIsSubmit(false);
+                Swal.fire({
+                    icon: "info",
+                    text: "No results found!"
+                });
+                return;
+    } else if (taskData.data.errors) {
+                setIsSubmit(false);
+                Swal.fire({
+                    icon: "error",
+                    text: "Oops... \n An error has occurred!"
+                });
+                return;
+            } else if (taskData) {
+                setTaskId(taskData.data.data.getTaskId.taskId);
+                setTaskStatus(taskData.data.data.getTaskId.status);
+            }
+    } catch (error) {
+            setIsSubmit(false);
+            Swal.fire({
+                icon: "error",
+                text: error.message
+            });
+        }
+};
 
   return (
     <>
@@ -40,9 +97,9 @@ const DataSubmission = () => {
 
             {/* First Column */}
             <div className="col-md-6 mb-3">
-              <form id="search-box" method="post" className="mb-2" action="/result/">
+              <form id="search-box" onSubmit={handleFormSubmit} className="mb-2">
                 <div className="form-group">
-                  <input type="file" id="databaseBtn" name="dataset" />
+                  <input type="file" id="databaseBtn" name="dataset" required />
                   <label htmlFor="databaseBtn" className="label-btn me-2">
                     Upload dataset
                   </label>
@@ -57,7 +114,7 @@ const DataSubmission = () => {
 
             {/* Second Column */}
             <div className="col-md-6 position-relative pt-0 justify-content-start">
-              <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', width: '100%' }} className="mb-3">
+              <form onSubmit={handleFormSubmitTask} style={{ display: 'flex', flexDirection: 'column', width: '100%' }} className="mb-3">
                 <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                   <span className="p-input-icon-left" style={{ width: '100%', position: 'relative' }}>
                     <InputText
@@ -82,7 +139,7 @@ const DataSubmission = () => {
                 </div>
               </form>
               <span>
-                e.g. 455234e0-f0ea-4a39-bbe9-e3947e248503
+                e.g. 14049663-6257-4a1f-81e5-563c714e90af
               </span>
             </div>
 

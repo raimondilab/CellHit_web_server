@@ -19,6 +19,10 @@ import ProgressionRun from '../../components/ProgressionRun/ProgressionRun';
 
 const RunCellHit = () => {
 
+ const [isSubmit, setIsSubmit] = useState(false);
+ const [taskId, setTaskId] = useState("");
+ const [taskStatus, setTaskStatus] = useState("");
+
 return (
     <>
       <Helmet>
@@ -30,8 +34,11 @@ return (
         <div className="row mb-4">
             <div className="col-12">
              <h1 className="display-5 fw-bold line mb-4">CellHit</h1>
-                          <DataSubmission />
-                          <ProgressionRun/>
+                   { (isSubmit && taskId) ? (
+                         <ProgressionRun taskID={taskId}  statusTask={taskStatus}/>
+                      ) : (
+                         <DataSubmission setIsSubmit={setIsSubmit} setTaskId={setTaskId} setTaskStatus={setTaskStatus} />
+                      )}
             </div>
           </div>
         </div>

@@ -74,3 +74,10 @@ class PaginationInput:
     offset: int
     limit: int
     drug: Optional[str]
+
+
+@strawberry.type
+class Task:
+    task_id: str
+    status: str
+    result: str

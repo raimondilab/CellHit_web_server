@@ -5,6 +5,8 @@ from typing import List, Optional
 from model import models
 from model.database import DBSession
 from sqlalchemy.exc import OperationalError
+from tasks import worker as task
+
 
 class QueryResolver:
 
@@ -73,7 +75,8 @@ class QueryResolver:
             query = db.query(models.Prism)
 
             if pagination is not None and pagination.drug is not None:
-                query = query.filter(models.Prism.drug_name == pagination.drug).offset(pagination.offset).limit(pagination.limit)
+                query = query.filter(models.Prism.drug_name == pagination.drug).offset(pagination.offset).limit(
+                    pagination.limit)
 
             if pagination is not None and pagination.drug is None:
                 query = query.offset(pagination.offset).limit(pagination.limit)
@@ -279,3 +282,13 @@ class QueryResolver:
             db.close()
 
         return final_data
+
+    @staticmethod
+    def run_task() -> schemas.Task:
+        result = task.create_task.delay(1)
+        return schemas.Task(task_id=result.id, status="Data sending", result="")
+
+    @staticmethod
+    def get_task_status(task_id: str) -> schemas.Task:
+        status = task.get_status(task_id)
+        return schemas.Task(task_id=task_id, status=status, result="")
