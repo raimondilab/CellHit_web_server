@@ -1,12 +1,7 @@
 import strawberry
 from typing import Optional
 
-
-@strawberry.type
-class Task:
-    task_id: str
-    status: str
-    result: str
+from pydantic import json
 
 
 @strawberry.type
@@ -82,3 +77,9 @@ class PaginationInput:
     limit: int
     drug: Optional[str]
 
+
+@strawberry.type
+class Task:
+    task_id: str
+    status: str
+    result: str

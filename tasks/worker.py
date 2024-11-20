@@ -23,7 +23,6 @@ celery.conf.update(
 
 
 def start_flower():
-    """Inicia o Flower para monitorar as tarefas Celery."""
     flower_cmd = [
         "celery",
         "-A",
@@ -33,15 +32,13 @@ def start_flower():
     ]
     try:
         process = Popen(flower_cmd)
-        print(f"Flower iniciado em http://localhost:5555")
         return process
     except Exception as e:
-        print(f"Erro ao iniciar o Flower: {e}")
+        print(f"Error Flower: {e}")
         return None
 
 
 def start_celery():
-    """Inicia o Flower para monitorar as tarefas Celery."""
     celery_cmd = [
         "celery",
         "-A",
@@ -59,7 +56,7 @@ def start_celery():
 
 
 @celery.task
-def get_status(task_id):
+def get_task(task_id):
     res = AsyncResult(task_id)
     return res
 
@@ -72,3 +69,42 @@ def divide_numbers(x, y):
         return x / y
     except Exception as e:
         return str(e)
+
+
+@celery.task(bind=True)
+def analysis(self):
+    # Step 1: Processing
+    self.update_state(state='PROGRESS', meta='Processing')
+    time.sleep(1)
+
+    # Step 2: Classification
+    self.update_state(state='PROGRESS', meta='Classification')
+    time.sleep(2)
+
+    # Step 3: Batch correction
+    self.update_state(state='PROGRESS', meta='Batch correction')
+    time.sleep(5)
+
+    # Step 4: Imputation
+    self.update_state(state='PROGRESS', meta='Imputation')
+    time.sleep(10)
+
+    # Step 5: Transform
+    self.update_state(state='PROGRESS', meta='Transform')
+    time.sleep(15)
+
+    # Step 6: Inference
+    self.update_state(state='PROGRESS', meta='Inference')
+    time.sleep(20)
+
+    result = {
+        "heatmap": "completed",
+        "table": {
+            "data_loading": "success"
+        },
+        "celligner": {
+            "records_processed": 1000
+        },
+    }
+
+    return str(result)

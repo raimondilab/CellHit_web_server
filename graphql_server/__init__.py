@@ -12,8 +12,9 @@ class Query:
     prism: List[Prism] = strawberry.field(resolver=QueryResolver.get_prism)
     prism_drug: List[Prism] = strawberry.field(resolver=QueryResolver.get_prism_drug)
     databases: List[Union[Gdsc, Prism]] = strawberry.field(resolver=QueryResolver.get_databases)
-    get_task_status: Task = strawberry.field(resolver=QueryResolver.get_task_status)
+    get_task: Task = strawberry.field(resolver=QueryResolver.get_task)
     divide: Task = strawberry.field(resolver=QueryResolver.divide)
+    run_analysis: Task = strawberry.field(resolver=QueryResolver.run_analysis)
 
 
 schema = strawberry.Schema(query=Query)

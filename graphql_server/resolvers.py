@@ -1,4 +1,4 @@
-from time import sleep
+from time import sleep, time
 
 from . import schemas
 from typing import List, Optional
@@ -289,9 +289,12 @@ class QueryResolver:
         return final_data
 
     @staticmethod
-    def get_task_status(task_id: str) -> schemas.Task:
-        task = worker.get_status(task_id)
-        return schemas.Task(task_id=task.id, status=task.status, result=task.result)
+    def get_task(task_id: str) -> schemas.Task:
+        task = worker.get_task(task_id)
+
+        result = task.result or "unknown"
+
+        return schemas.Task(task_id=task.id, status=task.info, result=result)
 
     @staticmethod
     async def divide(x: int, y: int) -> schemas.Task:
@@ -320,3 +323,8 @@ class QueryResolver:
             status=async_result.status,
             result=result
         )
+
+    @staticmethod
+    async def run_analysis() -> schemas.Task:
+        task = worker.analysis.s().delay()
+        return schemas.Task(task_id=task.id, status='Data sending', result="")
