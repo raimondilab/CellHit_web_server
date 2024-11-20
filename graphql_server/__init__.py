@@ -7,13 +7,13 @@ from typing import List, Union
 
 @strawberry.type
 class Query:
-    gdsc:  List[Gdsc] = strawberry.field(resolver=QueryResolver.get_gdsc)
+    gdsc: List[Gdsc] = strawberry.field(resolver=QueryResolver.get_gdsc)
     gdsc_drug: List[Gdsc] = strawberry.field(resolver=QueryResolver.get_gdsc_drug)
     prism: List[Prism] = strawberry.field(resolver=QueryResolver.get_prism)
     prism_drug: List[Prism] = strawberry.field(resolver=QueryResolver.get_prism_drug)
     databases: List[Union[Gdsc, Prism]] = strawberry.field(resolver=QueryResolver.get_databases)
-    get_task_id: Task = strawberry.field(resolver=QueryResolver.run_task)
     get_task_status: Task = strawberry.field(resolver=QueryResolver.get_task_status)
+    divide: Task = strawberry.field(resolver=QueryResolver.divide)
 
 
 schema = strawberry.Schema(query=Query)

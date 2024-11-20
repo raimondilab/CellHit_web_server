@@ -99,7 +99,7 @@ async function sendFile() {
             <div className="col-md-6 mb-3">
               <form id="search-box" onSubmit={handleFormSubmit} className="mb-2">
                 <div className="form-group">
-                  <input type="file" id="databaseBtn" name="dataset" required />
+                  <input type="file" id="databaseBtn" name="dataset" accept=".csv" required />
                   <label htmlFor="databaseBtn" className="label-btn me-2">
                     Upload dataset
                   </label>
@@ -160,9 +160,9 @@ async function sendFile() {
             />
             <h5 className="display-6 fw-bold mb-3">Instructions</h5>
             <p className="fs-1 mb-5 text-justify mb-2">
-              We extracted a list of all the UniProt accession numbers from the file containing the FASTA sequence for
-              the entire human proteome database. Next, we extracted and mapped each residue's structural
-              and functional annotation layers. Following that, we calculated the contacts for each PDB and AF structure.
+              We trained explainable machine learning algorithms by employing cell line transcriptomics to predict the growth inhibitory
+              potential of drugs. We used large language models (LLMs) to expand descriptions of the mechanisms of action (MOA) for
+               each drug starting from available annotations, which were matched to the semantically closest pathways from reference knowledge bases.
             </p>
           </div>
         </div>

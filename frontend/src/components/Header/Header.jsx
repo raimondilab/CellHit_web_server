@@ -19,7 +19,7 @@ const Header = () => {
               <li className="nav-item px-2"><Link className="nav-link fw-medium" to="/under/">FAQs</Link></li>
               <li className="nav-item px-2"><Link className="nav-link fw-medium" to="https://bioinfolab.sns.it/" target="_blank" rel="noopener noreferrer">Bioinfolab</Link></li>
               <li className="nav-item px-2"><Link className="nav-link fw-medium" to="http://laboratoriobiologia.sns.it/" target="_blank" rel="noopener noreferrer">Bio@SNS</Link></li>
-              <li className="nav-item px-2"><Link className="nav-link fw-medium" to="https://github.com/raimondilab/" target="_blank" rel="noopener noreferrer"><ion-icon name="logo-github"></ion-icon></Link></li>
+              <li className="nav-item px-2"><Link className="nav-link fw-medium" to="https://github.com/raimondilab/CellHit" target="_blank" rel="noopener noreferrer"><ion-icon name="logo-github"></ion-icon></Link></li>
             </ul>
           </div>
         </div>

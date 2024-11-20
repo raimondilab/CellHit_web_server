@@ -1,3 +1,5 @@
+from time import sleep
+
 from . import schemas
 from typing import List, Optional
 
@@ -5,7 +7,10 @@ from typing import List, Optional
 from model import models
 from model.database import DBSession
 from sqlalchemy.exc import OperationalError
-from tasks import worker as task
+from tasks import worker
+from celery.result import AsyncResult
+import asyncio
+import logging
 
 
 class QueryResolver:
@@ -284,11 +289,34 @@ class QueryResolver:
         return final_data
 
     @staticmethod
-    def run_task() -> schemas.Task:
-        result = task.create_task.delay(1)
-        return schemas.Task(task_id=result.id, status="Data sending", result="")
+    def get_task_status(task_id: str) -> schemas.Task:
+        task = worker.get_status(task_id)
+        return schemas.Task(task_id=task.id, status=task.status, result=task.result)
 
     @staticmethod
-    def get_task_status(task_id: str) -> schemas.Task:
-        status = task.get_status(task_id)
-        return schemas.Task(task_id=task_id, status=status, result="")
+    async def divide(x: int, y: int) -> schemas.Task:
+        task = worker.divide_numbers.delay(x, y)
+
+        async def wait_for_result(task_id):
+            while True:
+                async_result = AsyncResult(task_id)
+                if async_result.ready():
+                    return async_result
+                await asyncio.sleep(1)
+
+        async_result = await wait_for_result(task.id)
+
+        result = async_result.result
+        if isinstance(result, Exception):
+            # Handle error, e.g., log the error and return an error message
+            return schemas.Task(
+                task_id=async_result.id,
+                status=async_result.status,
+                result=str(result)
+            )
+
+        return schemas.Task(
+            task_id=async_result.id,
+            status=async_result.status,
+            result=result
+        )

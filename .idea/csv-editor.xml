@@ -3,7 +3,7 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
-        <entry key="\static\clrp\gdsc_drugs.csv">
+        <entry key="\frontend\node_modules\papaparse\tests\sample-header.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -11,13 +11,6 @@
           </value>
         </entry>
         <entry key="\static\clrp\map_lineage.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\static\clrp\prism_drugs.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

@@ -3,6 +3,13 @@ from typing import Optional
 
 
 @strawberry.type
+class Task:
+    task_id: str
+    status: str
+    result: str
+
+
+@strawberry.type
 class Gdsc:
     gdsc_id: int
     drug_name: str
@@ -75,9 +82,3 @@ class PaginationInput:
     limit: int
     drug: Optional[str]
 
-
-@strawberry.type
-class Task:
-    task_id: str
-    status: str
-    result: str
