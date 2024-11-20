@@ -73,6 +73,7 @@ def divide_numbers(x, y):
 
 @celery.task(bind=True)
 def analysis(self):
+
     # Step 1: Processing
     self.update_state(state='PROGRESS', meta='Processing')
     time.sleep(1)
@@ -87,15 +88,15 @@ def analysis(self):
 
     # Step 4: Imputation
     self.update_state(state='PROGRESS', meta='Imputation')
-    time.sleep(10)
+    time.sleep(2)
 
     # Step 5: Transform
     self.update_state(state='PROGRESS', meta='Transform')
-    time.sleep(15)
+    time.sleep(2)
 
     # Step 6: Inference
     self.update_state(state='PROGRESS', meta='Inference')
-    time.sleep(20)
+    time.sleep(2)
 
     result = {
         "heatmap": "completed",
@@ -106,5 +107,4 @@ def analysis(self):
             "records_processed": 1000
         },
     }
-
-    return str(result)
+    return result

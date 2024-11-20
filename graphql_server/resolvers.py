@@ -290,11 +290,13 @@ class QueryResolver:
 
     @staticmethod
     def get_task(task_id: str) -> schemas.Task:
+
         task = worker.get_task(task_id)
 
-        result = task.result or "unknown"
+        while not task.ready():
+            return schemas.Task(task_id=task.state, status=task.info, result="")
 
-        return schemas.Task(task_id=task.id, status=task.info, result=result)
+        return schemas.Task(task_id=task.id, status=task.status, result=task.result)
 
     @staticmethod
     async def divide(x: int, y: int) -> schemas.Task:
