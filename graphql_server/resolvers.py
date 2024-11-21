@@ -299,34 +299,19 @@ class QueryResolver:
         return schemas.Task(task_id=task.id, status=task.status, result=task.result)
 
     @staticmethod
-    async def divide(x: int, y: int) -> schemas.Task:
-        task = worker.divide_numbers.delay(x, y)
-
-        async def wait_for_result(task_id):
-            while True:
-                async_result = AsyncResult(task_id)
-                if async_result.ready():
-                    return async_result
-                await asyncio.sleep(1)
-
-        async_result = await wait_for_result(task.id)
-
-        result = async_result.result
-        if isinstance(result, Exception):
-            # Handle error, e.g., log the error and return an error message
-            return schemas.Task(
-                task_id=async_result.id,
-                status=async_result.status,
-                result=str(result)
-            )
-
-        return schemas.Task(
-            task_id=async_result.id,
-            status=async_result.status,
-            result=result
-        )
-
-    @staticmethod
     async def run_analysis() -> schemas.Task:
         task = worker.analysis.s().delay()
         return schemas.Task(task_id=task.id, status='Data sending', result="")
+
+    @staticmethod
+    def get_results(task_id: str, step: str) -> schemas.Task:
+
+        task = worker.get_task(task_id)
+
+        while not task.ready():
+            return schemas.Task(task_id=task.state, status=task.info, result="")
+
+        if task.result:
+            result = task.result.get(step)
+
+        return schemas.Task(task_id=task.id, status=task.status, result=result)
