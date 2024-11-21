@@ -45,8 +45,8 @@ async function sendFile() {
  try {
    const query = {
               query: `
-               query getTaskId {
-                  getTaskId {
+               query runAnalysis {
+                  runAnalysis {
                     taskId
                     status
                   }
@@ -74,8 +74,8 @@ async function sendFile() {
                 });
                 return;
             } else if (taskData) {
-                setTaskId(taskData.data.data.getTaskId.taskId);
-                setTaskStatus(taskData.data.data.getTaskId.status);
+                setTaskId(taskData.data.data.runAnalysis.taskId);
+                setTaskStatus(taskData.data.data.runAnalysis.status);
             }
     } catch (error) {
             setIsSubmit(false);

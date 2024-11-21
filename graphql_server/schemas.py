@@ -2,6 +2,8 @@ import json
 
 import strawberry
 from typing import Optional
+import typing
+from strawberry.file_uploads import Upload
 
 
 @strawberry.type
@@ -90,3 +92,9 @@ class Task:
     task_id: str
     status: str
     result: JSON
+
+
+@strawberry.input
+class FolderInput:
+    files: typing.List[Upload]
+

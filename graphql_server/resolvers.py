@@ -1,5 +1,3 @@
-from time import sleep, time
-
 from . import schemas
 from typing import List, Optional
 
@@ -8,9 +6,8 @@ from model import models
 from model.database import DBSession
 from sqlalchemy.exc import OperationalError
 from tasks import worker
-from celery.result import AsyncResult
-import asyncio
-import logging
+from strawberry.file_uploads import Upload
+from pathlib import Path
 
 
 class QueryResolver:
@@ -300,8 +297,19 @@ class QueryResolver:
 
     @staticmethod
     async def run_analysis() -> schemas.Task:
-        task = worker.analysis.s().delay()
-        return schemas.Task(task_id=task.id, status='Data sending', result="")
+        try:
+            # Save the uploaded file temporarily
+            #saved_file_path = await save_uploaded_file(file)
+
+            # Delay execution of the analysis task using Celery
+            task = worker.analysis.s().delay()
+
+            # Return task metadata with initial status
+            return schemas.Task(task_id=task.id, status='Data sending', result="")
+        except Exception as e:
+            # Handle potential errors during file saving or Celery invocation
+            print(f"Error during analysis initiation: {e}")
+            raise  # Re-raise the exception for further handling
 
     @staticmethod
     def get_results(task_id: str, step: str) -> schemas.Task:
@@ -315,3 +323,5 @@ class QueryResolver:
             result = task.result.get(step)
 
         return schemas.Task(task_id=task.id, status=task.status, result=result)
+
+

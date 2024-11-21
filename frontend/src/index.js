@@ -16,6 +16,7 @@ import HomePage from './pages/HomePage/HomePage'
 import Under from './pages/UnderPage/Under'
 import ErrorPage from './pages/ErrorPage/ErrorPage'
 import ResultPage from './pages/ResultPage/ResultPage'
+import ResultPageAnalysis from './pages/ResultPageAnalysis/ResultPageAnalysis'
 import RunCellHit from './pages/RunCellHit/RunCellHit'
 
 
@@ -43,6 +44,14 @@ const router = createBrowserRouter([ {
       element: (
       <ErrorBoundaryWrapper>
         <RunCellHit />
+      </ErrorBoundaryWrapper>
+      )
+    },
+    {
+      path: "/result/",
+      element: (
+      <ErrorBoundaryWrapper>
+        <ResultPageAnalysis />
       </ErrorBoundaryWrapper>
       )
     },

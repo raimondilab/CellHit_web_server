@@ -1,5 +1,7 @@
 import os
 import time
+import pandas as pd
+import numpy as np
 
 from celery import Celery
 from celery.result import AsyncResult
@@ -74,25 +76,29 @@ def divide_numbers(x, y):
 @celery.task(bind=True)
 def analysis(self):
 
+    # d = file.read().decode("utf-8")
+    # print(d)
+
     # Step 1: Processing
     self.update_state(state='PROGRESS', meta='Processing')
-    time.sleep(1)
+    #gbm = read_GBM(data_path)
+    #print(gbm)
 
     # Step 2: Classification
     self.update_state(state='PROGRESS', meta='Classification')
-    time.sleep(2)
+    time.sleep(20)
 
     # Step 3: Batch correction
     self.update_state(state='PROGRESS', meta='Batch correction')
-    time.sleep(5)
+    time.sleep(50)
 
     # Step 4: Imputation
     self.update_state(state='PROGRESS', meta='Imputation')
-    time.sleep(2)
+    time.sleep(20)
 
     # Step 5: Transform
     self.update_state(state='PROGRESS', meta='Transform')
-    time.sleep(2)
+    time.sleep(20)
 
     # Step 6: Inference
     self.update_state(state='PROGRESS', meta='Inference')
@@ -108,3 +114,33 @@ def analysis(self):
         },
     }
     return result
+
+
+# Load and preprocess GBM data
+def read_GBM(data_path):
+
+    gbm = pd.read_csv(data_path, sep='\t').transpose()
+    gbm.columns = [i.split('_')[1] for i in gbm.columns]
+    gbm = gbm.loc[:, gbm.std() != 0]
+
+    # take the average of duplicate columns
+    gbm = gbm.groupby(gbm.columns, axis=1).mean()
+
+    gbm = gbm.reset_index()
+    gbm['index'] = gbm['index'].apply(lambda x: 'FPS_' + x)
+    gbm = gbm.set_index('index')
+
+    # add one to all values and than take log2
+    gbm = gbm.apply(lambda x: np.log2(x + 1))
+
+    return gbm
+
+
+def data_frame_completer(df, genes,return_genes=False,fill_value=np.nan):
+    missing_genes = list(set(genes) - set(df.columns))
+    common_genes = list(set(df.columns).intersection(genes))
+    df = df.reindex(columns=genes, fill_value=fill_value)
+    if return_genes:
+        return df, missing_genes,common_genes
+    else:
+        return df
