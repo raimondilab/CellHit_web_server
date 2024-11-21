@@ -1,7 +1,7 @@
+import json
+
 import strawberry
 from typing import Optional
-
-from pydantic import json
 
 
 @strawberry.type
@@ -78,8 +78,15 @@ class PaginationInput:
     drug: Optional[str]
 
 
+@strawberry.scalar
+class JSON:
+    @staticmethod
+    def serialize(value: dict) -> str:
+        return json.dumps(value)
+
+
 @strawberry.type
 class Task:
     task_id: str
     status: str
-    result: str
+    result: JSON
