@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
+import ScatterPlot from '../../components/ScatterPlot/ScatterPlot';
 import { Helmet } from 'react-helmet';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 import { Link } from 'react-router-dom';
 import { Dialog } from 'primereact/dialog';
+
+
 import { TabView, TabPanel } from 'primereact/tabview';
 
 
@@ -22,8 +25,6 @@ useEffect(() => {
 
         const query = new URLSearchParams(location.search);
         const urlTask = query.get('taskId');
-
-                    console.log(task)
 
         if (!location.state) {
 
@@ -68,6 +69,8 @@ useEffect(() => {
         }
     }, [location.search, location.state, navigate]);
 
+
+  // Dialog settings
   const [position, setPosition] = useState('center');
   const [visible, setVisible] = useState(false);
 
@@ -75,6 +78,33 @@ useEffect(() => {
     setPosition(position);
     setVisible(true);
   };
+
+  // Select lineage
+  const mapLineage = require('../../map_lineage.json');
+  const [lineage, setLineage ] = useState("");
+  const [subtype, setSubtype] = useState("");
+  const [subtypesByLineage, setSubtypesByLineage ] = useState([]);
+  const uniqueLineage = [...new Set(mapLineage.map(lineage => lineage.lineage))];
+
+  // Set lineage
+  const handleLineage = (e) => {
+
+  const selectedLineage = e.target.value;
+  setLineage(selectedLineage);
+
+  // Filter subtypes based on the selected lineage and remove duplicates
+  const filteredSubtypes = mapLineage
+    .filter(item => item.lineage === selectedLineage)
+    .map(item => item.subtype);
+
+  setSubtypesByLineage([...new Set(filteredSubtypes)]); // Update subtypes state
+};
+
+ // Set subtype
+ const handleSubtype = (e) => {
+  setSubtype(e.target.value);
+ }
+
 
     return (
     <>
@@ -105,34 +135,49 @@ useEffect(() => {
         </div>
         <div className="row">
             <TabView>
-                <TabPanel header="Celligner">
+                <TabPanel header="Cell line">
                 <h4 className="display-6 fw-bold mb-5">Cell line<sup><Button icon="pi pi-info"
-            onClick={() => show('top-right')} text size="small" className="btn-dialog" /></sup></h4>
-                <div className="col-3">
-                    <div className="p-3 rounded-3 shadow">
-                        <div className="form-floating border rounded mb-3">
-                            <select className="form-select form-select-transparent" id="lineage" data-control="lineage">
-                            </select>
-                            <label>Select lineage</label>
-                        </div>
-                        <div className="form-floating border rounded mb-3">
-                            <select className="form-select form-select-transparent" id="subtypes"></select>
-                            <label>Select subtype</label>
-                        </div>
-                        <div className="form-floating border rounded mb-3">
-                            <select type="text" className="form-select form-select-lg" aria-label="color by">
-                                <option value="Lineage" selected>Lineage</option>
-                                <option value="Subtypes">Subtypes</option>
-                                <option value="Origin">Origin</option>
-                            </select>
-                            <label>Color by</label>
-                        </div>
+                onClick={() => show('top-right')} text size="small" className="btn-dialog" /></sup></h4>
+                 <div className="row">
+                <div className="col-md-2 mb-2">
+                  <div className="bg-light rounded-3">
+                    <div className="p-3">
+                      <div className="mb-2">
+                        <label htmlFor="lineage" className="form-label">Lineage&nbsp;</label>
+                        <select className="form-select mb-3" name="lineage"  value={lineage}
+                                    onChange={handleLineage}>
+                          <option value=""></option>
+                          {uniqueLineage.sort((a, b) => a - b).map(lineage => (
+                            <option key={lineage} value={lineage}>
+                              {lineage.charAt(0).toUpperCase() + lineage.slice(1)}
+                            </option>
+                          ))}
+                        </select>
+                        <label htmlFor="subtype" className="form-label">Subtype&nbsp;</label>
+                        <select className="form-select mb-3" name="subtype" value={subtype}
+                                    onChange={handleSubtype} >
+                        {subtypesByLineage.sort((a, b) => a - b).map(subtype => (
+                            <option key={subtype} value={subtype}>
+                              {subtype.charAt(0).toUpperCase() + subtype.slice(1)}
+                            </option>
+                          ))}
+
+                        </select>
+                        <label htmlFor="color" className="form-label">Color by&nbsp;</label>
+                        <select className="form-select mb-3" name="color" >
+                            <option value="lineage" defaultValue>Lineage</option>
+                            <option value="subtypes">Subtypes</option>
+                            <option value="origin">Origin</option>
+                        </select>
+                      </div>
                     </div>
+                  </div>
+                  </div>
+                <div className="col-10 mb-1">
+                <div className="p-3 ">
+                    <ScatterPlot/>
                 </div>
-                <div class="col-9 mb-1">
-                <div class="p-3 ">
-                    <div id="scatter_plot"></div>
-                </div>
+                  </div>
                </div>
                 </TabPanel>
                 <TabPanel header="Inference">

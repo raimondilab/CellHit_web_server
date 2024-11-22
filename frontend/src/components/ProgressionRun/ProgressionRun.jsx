@@ -102,7 +102,7 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus }) => {
                     const url = new URL(window.location.href);
                     url.searchParams.set('taskId', taskID);
 
-                    // Correct navigate function usage
+                    // Navigate to result page
                     navigate('/result/' + url.search, { state: { taskID: taskID } });
                 }
 
