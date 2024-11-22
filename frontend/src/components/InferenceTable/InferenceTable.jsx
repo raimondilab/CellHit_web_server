@@ -19,6 +19,7 @@ const InferenceTable = ({ inferenceData }) => {
       { field: 'sampleIndex', header: 'Sample' },
       { field: 'predictions', header: 'Predictions' },
       { field: 'predictionsStd', header: 'Predictions Std' },
+      { field: 'quantileScore', header: 'Quantile Score' },
       { field: 'putativeTarget', header: 'Putative Target' },
       { field: 'topLocalShapGenes', header: 'Top Genes' }
     ];
