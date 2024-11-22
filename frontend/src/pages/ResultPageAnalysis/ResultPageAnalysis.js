@@ -4,6 +4,7 @@ import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 import ScatterPlot from '../../components/ScatterPlot/ScatterPlot';
 import InferenceTable from '../../components/InferenceTable/InferenceTable';
+import HeatMap from '../../components/HeatMap/HeatMap';
 import { Helmet } from 'react-helmet';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
@@ -71,6 +72,9 @@ useEffect(() => {
     }, [location.search, location.state, navigate]);
 
 
+  const [height, setHeight] = useState("819.26");
+
+
   // Dialog settings
   const [position, setPosition] = useState('center');
   const [visible, setVisible] = useState(false);
@@ -106,6 +110,7 @@ useEffect(() => {
   setSubtype(e.target.value);
  }
 
+const jsonData = "{}"
 
     return (
     <>
@@ -185,18 +190,21 @@ useEffect(() => {
                    <h4 className="display-6 fw-bold mb-5">Inference<sup><Button icon="pi pi-info"
                    onClick={() => show('top-right')} text size="small" className="btn-dialog" /></sup></h4>
                     <div className="row">
-                      <div className="col-12">
+                      <div className="col-12 nopadding">
                           <InferenceTable inferenceData={[]}/>
                     </div>
                     </div>
                 </TabPanel>
                 <TabPanel header="Heatmap">
-                    <p className="m-0">
-                        At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti
-                        quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in
-                        culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio.
-                        Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus.
-                    </p>
+                    <h4 className="display-6 fw-bold mb-5">Heatmap<sup><Button icon="pi pi-info"
+                   onClick={() => show('top-right')} text size="small" className="btn-dialog" /></sup></h4>
+                    <div className="row">
+                      <div className="col-12 nopadding">
+                        <div className="rounded-3 shadow img-fluid" style={{ height: height}}>
+                         <HeatMap jsonData={jsonData}/>
+                    </div>
+                    </div>
+                    </div>
                 </TabPanel>
             </TabView>
             </div>
