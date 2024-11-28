@@ -11,6 +11,10 @@ import { InputIcon } from 'primereact/inputicon';
 
 const InferenceTable = ({ inferenceData }) => {
 
+  const handleClick = () => {
+    navigator.clipboard.writeText(window.location.href);
+  };
+
   const dt = useRef(null);
 
   const columnsDefault = [
@@ -36,6 +40,13 @@ const InferenceTable = ({ inferenceData }) => {
         { label: 'Prism', value: 'Prism' }
         ];
 
+     const [drugName, setDrugName] = useState();
+     const drugNames = inferenceData .map(inference => ({
+                        drugName: inference.drugName.trim()
+                    }));
+
+    // Extract unique drugs
+    const uniqueDrugs = [...new Set(drugNames.map(r => r.drugName))];
 
    const onColumnToggle = (event) => {
     const selectedFieldNames = event.value;
@@ -111,7 +122,7 @@ const exportCSV = (tableRef, selectionOnly) => {
           <div className="flex justify-content-end">
                 <IconField iconPosition="left">
                     <InputIcon className="pi pi-search" />
-                    <InputText value={value || ''} onChange={onGlobalFilterChange} placeholder="Keyword Search" />
+                    <InputText value={value || ''} onChange={onGlobalFilterChange} placeholder="Global Search" />
                 </IconField>
             </div>
       </div>
@@ -124,7 +135,18 @@ const exportCSV = (tableRef, selectionOnly) => {
               optionLabel="label"
               optionValue="value"
               display="chip"
-              placeholder="Select dataset"
+              placeholder="Select datasets"
+              style={{ width: '200px', marginRight: '10px' }}
+          />
+          <MultiSelect
+              value={drugName}
+              options={multiSelectOptions}
+              onChange={(e) => setDrugName(e.value)}
+              options={drugNames}
+              optionLabel="label"
+              optionValue="value"
+              display="chip"
+              placeholder="Select drugs"
               style={{ width: '200px', marginRight: '10px' }}
           />
           <MultiSelect
@@ -140,6 +162,7 @@ const exportCSV = (tableRef, selectionOnly) => {
           <Button type="button" icon="pi pi-file" className="p-button-rounded p-mr-2" onClick={() => exportCSV(dt, false)} data-pr-tooltip="CSV" />
           <Button type="button" icon="pi pi-file-excel" className="p-button-success p-button-rounded p-mr-2" onClick={() => exportExcel(inferenceData)} data-pr-tooltip="XLS" />
           <Button type="button" icon="pi pi-file-pdf" className="p-button-warning p-button-rounded" onClick={() => exportPdf(inferenceData, columns)} data-pr-tooltip="PDF" />
+          <Button type="button" icon="pi pi-link" severity="help"  className="p-button-rounded p-mr-2" onClick={handleClick}/>
       </div>
   </div>
 );

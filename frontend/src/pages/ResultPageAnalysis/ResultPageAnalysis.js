@@ -141,8 +141,8 @@ const jsonData = "{}"
         </div>
         <div className="row">
             <TabView>
-                <TabPanel header="Cell line">
-                <h4 className="display-6 fw-bold mb-5">Cell line<sup><Button icon="pi pi-info"
+                <TabPanel header="UMAP">
+                <h4 className="display-6 fw-bold mb-5">UMAP<sup><Button icon="pi pi-info"
                 onClick={() => show('top-right')} text size="small" className="btn-dialog" /></sup></h4>
                  <div className="row">
                 <div className="col-md-2 mb-2">

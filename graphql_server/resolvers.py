@@ -6,8 +6,9 @@ from model import models
 from model.database import DBSession
 from sqlalchemy.exc import OperationalError
 from tasks import worker
+from starlette.datastructures import UploadFile
 from strawberry.file_uploads import Upload
-from pathlib import Path
+import typing
 
 
 class QueryResolver:
@@ -296,16 +297,27 @@ class QueryResolver:
         return schemas.Task(task_id=task.id, status=task.status, result=task.result)
 
     @staticmethod
-    async def run_analysis() -> schemas.Task:
+    async def run_analysis(file: Upload) -> schemas.Task:
+
         try:
-            # Save the uploaded file temporarily
-            #saved_file_path = await save_uploaded_file(file)
+            print(file[0])
+
+            # # Access the file data
+            # uploaded_file = await file[0].read()
+            #
+            # csv_content = uploaded_file.decode("utf-8")
+            # print("CSV Content:", csv_content)
+            #
+            # # Save the uploaded file temporarily
+            # temp_path = f"/tmp/{file.filename}"
+            # with open(temp_path, "wb") as f:
+            #     f.write(uploaded_file)
 
             # Delay execution of the analysis task using Celery
-            task = worker.analysis.s().delay()
+            #task = worker.analysis.s().delay()
 
             # Return task metadata with initial status
-            return schemas.Task(task_id=task.id, status='Data sending', result="")
+            return schemas.Task(task_id="task.id", status='Data sending', result="")
         except Exception as e:
             # Handle potential errors during file saving or Celery invocation
             print(f"Error during analysis initiation: {e}")
@@ -323,5 +335,4 @@ class QueryResolver:
             result = task.result.get(step)
 
         return schemas.Task(task_id=task.id, status=task.status, result=result)
-
 

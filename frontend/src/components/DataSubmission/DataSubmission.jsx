@@ -14,6 +14,7 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
   const [visible, setVisible] = useState(false);
   const initialValues = { target: "" };
   const [formValues, setFormValues] = useState(initialValues);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setIsLoading] = useState(false);
 
   const show = (position) => {
@@ -21,9 +22,13 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
     setVisible(true);
   };
 
+  const handleFileChange = (e) => {
+    setSelectedFile(e.target.files[0]);
+  };
+
   const onChangeHandler = (e) => {
     const { name, value } = e.target;
-    setFormValues({ ...formValues, [name]: value.toUpperCase().trim() });
+    setFormValues({ ...formValues, [name]: value.trim() });
   };
 
   // Send file to analysis
@@ -40,22 +45,23 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
 
 
 // Send file to back-end and get TaskId
-async function sendFile() {
+  async function sendFile() {
+    try {
 
- try {
-   const query = {
-              query: `
-               query runAnalysis {
-                  runAnalysis {
-                    taskId
-                    status
-                  }
-                }
-              `
-            };
+
+      const query = {
+        query: `
+          query runAnalysis {
+            runAnalysis(file: ${selectedFile}) {
+              taskId
+              status
+            }
+          }
+        `
+      };
 
     let taskData = null;
-    const apiUrl = 'http://127.0.0.1:8003/graphql';
+    const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
 
     taskData = await axios.post(apiUrl, query);
 
@@ -99,7 +105,7 @@ async function sendFile() {
             <div className="col-md-6 mb-3">
               <form id="search-box" onSubmit={handleFormSubmit} className="mb-2">
                 <div className="form-group">
-                  <input type="file" id="databaseBtn" name="dataset" accept=".csv" required />
+                  <input type="file" id="databaseBtn" name="dataset" accept=".csv" required onChange={handleFileChange}/>
                   <label htmlFor="databaseBtn" className="label-btn me-2">
                     Upload dataset
                   </label>
