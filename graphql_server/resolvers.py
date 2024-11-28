@@ -313,10 +313,10 @@ class QueryResolver:
             #     f.write(uploaded_file)
 
             # Delay execution of the analysis task using Celery
-            #task = worker.analysis.s().delay()
+            task = worker.analysis.s().delay()
 
             # Return task metadata with initial status
-            return schemas.Task(task_id="task.id", status='Data sending', result="")
+            return schemas.Task(task_id=task.id, status='Data sending', result="")
         except Exception as e:
             # Handle potential errors during file saving or Celery invocation
             print(f"Error during analysis initiation: {e}")
