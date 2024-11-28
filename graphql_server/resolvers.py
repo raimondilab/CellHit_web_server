@@ -300,7 +300,6 @@ class QueryResolver:
     async def run_analysis(file: Upload) -> schemas.Task:
 
         try:
-            print(file[0])
 
             # # Access the file data
             # uploaded_file = await file[0].read()
