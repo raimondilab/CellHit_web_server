@@ -8271,6 +8271,10 @@ transition-property: border-color,box-shadow,color;
   margin-right: 0 !important;
 }
 
+.me-01 {
+  margin-right: 0.10rem !important;
+}
+
 .me-1 {
   margin-right: 0.25rem !important;
 }
@@ -19021,4 +19025,44 @@ box-shadow: none !important;
 .nopadding {
     padding: 0;
     margin: 0
+}
+
+ .p-selectbutton .p-button {
+    color: #ffffff !important;
+    background: #004059 !important;
+    padding: 10px 10px;
+    border-radius: 3px !important;
+    letter-spacing: 2px;
+    cursor: pointer;
+    box-shadow: 5px 15px 25px rgba(0,0,0,0.35);
+}
+
+.p-selectbutton .p-button > span {
+    font-weight: 400 !important;
+}
+
+.gdsc-border {
+   border-radius: 3px 0px 0px 3px !important;
+}
+
+.prism-border{
+   border-radius: 0px 3px 3px 0px !important;
+}
+
+input:checked {
+   color: #fff !important;
+   background-color: #359ccf !important;
+   border-color: #3293c3 !important;
+}
+
+.label-btn.hover {
+  text-decoration: none;
+  color: #fff;
+  background-color: #359ccf;
+  border-color: #3293c3;
+}
+
+.label-btn.disabled {
+  opacity: 0.5;
+  pointer-events: none;
 }

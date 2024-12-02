@@ -7,6 +7,7 @@ import { InputText } from 'primereact/inputtext';
 import axios from 'axios';
 import HeaderTitleRunCellHit from '../../components/HeaderTitleRunCellHit/HeaderTitleRunCellHit';
 import Swal from 'sweetalert2';
+import { SelectButton } from 'primereact/selectbutton';
 
 const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
 
@@ -16,6 +17,9 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
   const [formValues, setFormValues] = useState(initialValues);
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setIsLoading] = useState(false);
+
+  const [value, setValue] = useState("GDSC");
+
 
   const show = (position) => {
     setPosition(position);
@@ -52,7 +56,7 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
       const query = {
         query: `
           query runAnalysis {
-            runAnalysis(file: ${selectedFile}) {
+            runAnalysis(file:"") {
               taskId
               status
             }
@@ -61,7 +65,7 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
       };
 
     let taskData = null;
-    const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
+    const apiUrl = 'http://127.0.0.1:8003/graphql';
 
     taskData = await axios.post(apiUrl, query);
 
@@ -109,6 +113,21 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
                   <label htmlFor="databaseBtn" className="label-btn me-2">
                     Upload dataset
                   </label>
+                  <label
+                      htmlFor="gdsc"
+                      className={`label-btn gdsc-border me-01 ${value === "GDSC" ? "hover" : ""}`}
+                      onClick={() => setValue("GDSC")}
+                    >
+                      GDSC
+                    </label>
+                    <label
+                      htmlFor="prism"
+                      className={`label-btn gdsc-border me-2 disabled ${value === "PRISM" ? "hover" : ""}`}
+                      onClick={() => setValue("PRISM")} disabled
+                    >
+                      PRISM
+                    </label>
+
                   <label htmlFor="search" className="label-btn">Submit</label>
                   <button id="search" className="btn button shadow-none" type="submit"></button>
                 </div>
