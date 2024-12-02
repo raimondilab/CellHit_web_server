@@ -122,7 +122,7 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
                     </label>
                     <label
                       htmlFor="prism"
-                      className={`label-btn gdsc-border me-2 disabled ${value === "PRISM" ? "hover" : ""}`}
+                      className={`label-btn prism-border me-2 disabled ${value === "PRISM" ? "hover" : ""}`}
                       onClick={() => setValue("PRISM")} disabled
                     >
                       PRISM
