@@ -1,3 +1,7 @@
+import os
+from fastapi import HTTPException
+from io import StringIO
+
 from . import schemas
 from typing import List, Optional
 
@@ -6,9 +10,9 @@ from model import models
 from model.database import DBSession
 from sqlalchemy.exc import OperationalError
 from tasks import worker
-from starlette.datastructures import UploadFile
 from strawberry.file_uploads import Upload
-import typing
+import pandas as pd
+import mimetypes
 
 
 class QueryResolver:
@@ -297,32 +301,6 @@ class QueryResolver:
         return schemas.Task(task_id=task.id, status=task.status, result=task.result)
 
     @staticmethod
-    async def run_analysis(file: Upload) -> schemas.Task:
-
-        try:
-
-            # # Access the file data
-            # uploaded_file = await file[0].read()
-            #
-            # csv_content = uploaded_file.decode("utf-8")
-            # print("CSV Content:", csv_content)
-            #
-            # # Save the uploaded file temporarily
-            # temp_path = f"/tmp/{file.filename}"
-            # with open(temp_path, "wb") as f:
-            #     f.write(uploaded_file)
-
-            # Delay execution of the analysis task using Celery
-            task = worker.analysis.s().delay()
-
-            # Return task metadata with initial status
-            return schemas.Task(task_id=task.id, status='Data sending', result="")
-        except Exception as e:
-            # Handle potential errors during file saving or Celery invocation
-            print(f"Error during analysis initiation: {e}")
-            raise  # Re-raise the exception for further handling
-
-    @staticmethod
     def get_results(task_id: str, step: str) -> schemas.Task:
 
         task = worker.get_task(task_id)
@@ -335,3 +313,32 @@ class QueryResolver:
 
         return schemas.Task(task_id=task.id, status=task.status, result=result)
 
+
+class MutationResolver:
+    @staticmethod
+    async def run_analysis(file: Upload, value: str) -> schemas.Task:
+
+        try:
+
+            # Access the file data as a string (UTF-8 encoded)
+            contents = await file.read()
+
+            # Decoding the bytes to string and converting to a StringIO object
+            csv_data = contents.decode("utf-8")  # Decode bytes to string
+
+            # Use StringIO to simulate a file object for pandas
+            df = pd.read_csv(StringIO(csv_data))
+            print(df.head())
+
+            # Convert DataFrame to a JSON string or dictionary
+            df_json = df.to_dict(orient='records')  # Convert DataFrame to a list of dictionaries
+
+            # Delay execution of the analysis task using Celery
+            task = worker.analysis.s(df_json, value).delay()
+
+            # Return task metadata with initial status
+            return schemas.Task(task_id=task.id, status='Data sending', result="")
+        except Exception as e:
+            # Handle potential errors during file saving or Celery invocation
+            print(f"Error during analysis initiation: {e}")
+            raise  # Re-raise the exception for further handling

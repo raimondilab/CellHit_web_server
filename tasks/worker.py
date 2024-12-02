@@ -74,10 +74,7 @@ def divide_numbers(x, y):
 
 
 @celery.task(bind=True)
-def analysis(self):
-
-    # d = file.read().decode("utf-8")
-    # print(d)
+def analysis(self, file, value):
 
     # Step 1: Processing
     self.update_state(state='PROGRESS', meta='Processing')

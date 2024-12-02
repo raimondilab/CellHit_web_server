@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Card } from 'primereact/card';
-import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import axios from 'axios';
 import HeaderTitleRunCellHit from '../../components/HeaderTitleRunCellHit/HeaderTitleRunCellHit';
 import Swal from 'sweetalert2';
-import { SelectButton } from 'primereact/selectbutton';
+
 
 const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
 
@@ -26,9 +24,14 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
     setVisible(true);
   };
 
-  const handleFileChange = (e) => {
-    setSelectedFile(e.target.files[0]);
-  };
+ const handleFileChange = (e) => {
+  const file = e.target.files[0];
+
+  if (file) {
+    setSelectedFile(file);
+  }
+  setSelectedFile(file);
+};
 
   const onChangeHandler = (e) => {
     const { name, value } = e.target;
@@ -49,52 +52,54 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
 
 
 // Send file to back-end and get TaskId
-  async function sendFile() {
-    try {
-
-
-      const query = {
-        query: `
-          query runAnalysis {
-            runAnalysis(file:"") {
-              taskId
-              status
-            }
+async function sendFile() {
+  try {
+    const formData = new FormData();
+    formData.append("operations", JSON.stringify({
+      query: `
+        mutation runAnalysis($file: Upload!, $value: String!) {
+          runAnalysis(file: $file, value: $value) {
+            taskId
+            status
           }
-        `
-      };
-
-    let taskData = null;
-    const apiUrl = 'http://127.0.0.1:8003/graphql';
-
-    taskData = await axios.post(apiUrl, query);
-
-    if (!taskData) {
-                setIsSubmit(false);
-                Swal.fire({
-                    icon: "info",
-                    text: "No results found!"
-                });
-                return;
-    } else if (taskData.data.errors) {
-                setIsSubmit(false);
-                Swal.fire({
-                    icon: "error",
-                    text: "Oops... \n An error has occurred!"
-                });
-                return;
-            } else if (taskData) {
-                setTaskId(taskData.data.data.runAnalysis.taskId);
-                setTaskStatus(taskData.data.data.runAnalysis.status);
-            }
-    } catch (error) {
-            setIsSubmit(false);
-            Swal.fire({
-                icon: "error",
-                text: error.message
-            });
         }
-};
+      `,
+      variables: {
+        file: null,  // Will be filled by the file upload
+        value: value,
+      },
+    }));
+    formData.append("map", JSON.stringify({ 0: ["variables.file"] }));
+    formData.append("0", selectedFile);  // Add file to the request
+
+    const apiUrl = 'http://127.0.0.1:8003/graphql';
+    const response = await axios.post(apiUrl, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      }
+    });
+
+    if (response.data.errors) {
+      setIsSubmit(false);
+      Swal.fire({
+        icon: "error",
+        text: "Oops... \n An error has occurred!"
+      });
+    } else {
+      setTaskId(response.data.data.runAnalysis.taskId);
+      setTaskStatus(response.data.data.runAnalysis.status);
+    }
+  } catch (error) {
+    setIsSubmit(false);
+    Swal.fire({
+      icon: "error",
+      text: error.message,
+    });
+  }
+}
+
+
+
 
   return (
     <>
