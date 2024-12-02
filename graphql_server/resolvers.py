@@ -328,7 +328,6 @@ class MutationResolver:
 
             # Use StringIO to simulate a file object for pandas
             df = pd.read_csv(StringIO(csv_data))
-            print(df.head())
 
             # Convert DataFrame to a JSON string or dictionary
             df_json = df.to_dict(orient='records')  # Convert DataFrame to a list of dictionaries
