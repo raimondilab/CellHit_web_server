@@ -1,81 +1,78 @@
 import React, { useMemo } from 'react';
 import Plot from 'react-plotly.js';
 
-const ScatterPlot = ({ }) => {
+const ScatterPlot = ({ umapData }) => {
 
   const layout = {
-		showlegend: true,
-		legend: {"orientation": "v", y: 1.3, x: 0},
-		autosize: true,
-		yaxis: {
-		   automargin:true,
-		   showgrid: false,
-           showline: false,
-           showticklabels : false
-		},
-        xaxis: {
-            automargin:true,
-            showgrid: false,
-            showticklabels : false
-           },
-        displaylogo: false,
-         font: {
-            size: 9,
-            color: '#000000'
-          }
-	    };
+    showlegend: true,
 
-var trace1 = {
-  x: [1.5, 2.5, 3.5, 4.5, 5.5],
-  y: [4, 1, 7, 1, 4],
-  mode: 'markers',
-  type: 'scatter',
-  name: 'TCGA+Tumor',
-  showlegend : true,
-  marker: {
-   size: 12,
-   symbol: "diamond"
-  }
-};
+    autosize: true,
+    displaylogo: false,
+    yaxis: {
+      automargin: true,
+      showgrid: true,
+      showticklabels: true,
+      zeroline: false,
+      title: 'UMAP2',
+    },
+    xaxis: {
+      automargin: true,
+      showgrid: true,
+      showticklabels: true,
+      zeroline: false,
+      title: 'UMAP1',
+    },
+    font: {
+      size: 9,
+      color: '#000000',
+    },
+  };
 
-  var trace2 = {
-  x: [1, 2, 3, 4, 5],
-  y: [1, 6, 3, 6, 1],
-  mode: 'markers',
-  type: 'scatter',
-  name: 'Ovary',
-  text: ['B-a', 'B-b', 'B-c', 'B-d', 'B-e'],
-  marker: {
-   size: 8,
-   opacity: 0.5,
-   line: {
-      width: 1
-    }
-  }
-};
+  const symbol_map = {
+    TCGA: 'cross',
+    CCLE: 'diamond',
+  };
 
- var trace3 = {
-  x: [1, 6, 9, 4, 5],
-  y: [1, 6, 3, 6, 1],
-  mode: 'markers',
-  type: 'scatter',
-  name: 'Bone',
-  text: ['B-a', 'B-b', 'B-c', 'B-d', 'B-e'],
-  marker: {
-      size: 8,
-      opacity: 0.5,
-   line: {
-      width: 1
-    }
-  }
-};
+    const generateColorPalette = (size) => {
+    const plotlyPalette = [
+      '#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A',
+      '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52',
+    ];
 
-var data = [ trace1, trace2, trace3 ];
+    return Array.from({ length: size }, (_, i) => plotlyPalette[i % plotlyPalette.length]);
+  };
+
+  const traces = useMemo(() => {
+
+    const uniqueOncotree = [...new Set(umapData.map((item) => item.oncotree_code))];
+
+    const color_palette = generateColorPalette(uniqueOncotree.length);
+
+    const color_map = uniqueOncotree.reduce((acc, code, index) => {
+      acc[code] = color_palette[index];
+      return acc;
+    }, {});
+
+    return umapData.map((item) => ({
+      x: [item.UMAP1],
+      y: [item.UMAP2],
+      mode: 'markers',
+      type: 'scatter',
+      name: `${item.oncotree_code} (${item.Source})`,
+      text: `${item.tissue}, ${item.oncotree_code}, ${item.index}`,
+      marker: {
+        size: 6,
+        color: color_map[item.oncotree_code],
+        symbol: symbol_map[item.Source] || 'circle',
+      },
+    }));
+  }, [umapData]);
+
 
   return (
     <>
       <Plot
-        data={data}
+        data={traces}
         useResizeHandler={true}
         style={{ width: '100%', height: '100%' }}
         layout={layout}
