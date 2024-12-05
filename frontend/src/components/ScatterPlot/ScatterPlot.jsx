@@ -35,8 +35,13 @@ const ScatterPlot = ({ umapData }) => {
 
     const generateColorPalette = (size) => {
     const plotlyPalette = [
-      '#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A',
-      '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52',
+       "#E13978", "#F5899E", "#C091E3", "#E08571", "#9F55BB",
+        "#45A132", "#96568E", "#F5899E", "#5AB172", "#DFBC3A",
+        "#349077", "#D8AB6A", "#75DFBB", "#5DA134", "#1F8FFF",
+        "#9C5E2B", "#51D5E0", "#ABD23F", "#DA45BB", "#555555",
+        "#56E79D", "#B644DC", "#73E03D", "#F5899E", "#3870C9",
+        "#6C55E2", "#5FDB69", "#F5899E", "#659FD9", "#D74829",
+        "#bdbdbd", "#E491C1", "#E491C1"
     ];
 
     return Array.from({ length: size }, (_, i) => plotlyPalette[i % plotlyPalette.length]);

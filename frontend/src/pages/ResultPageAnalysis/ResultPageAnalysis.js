@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
@@ -22,6 +22,7 @@ const location = useLocation();
 const [loadFunctionalInfo, setLoadFunctionalInfo] = useState(false);
 
 const [task, setTask] = useState("");
+const [result, setResult] = useState("");
 
 useEffect(() => {
 
@@ -63,6 +64,7 @@ useEffect(() => {
             // Fallback to location.state if URL parameters are not present
             const state = location.state;
             setTask(state.taskID || "");
+            setResult(state.data || "")
             setLoadFunctionalInfo(false);
 
         } else {
@@ -71,8 +73,51 @@ useEffect(() => {
         }
     }, [location.search, location.state, navigate]);
 
-
   const [height, setHeight] = useState("819.26");
+
+
+  //const data = JSON.parse(result.umap);
+
+  const data =  {
+    "0": { "UMAP1": -85.51314, "UMAP2": 1135.882, "tissue": "CNS/Brain", "oncotree_code": "GBM", "Source": "TCGA", "index": "TCGA-19-1787-01" },
+    "1": { "UMAP1": -196.9247, "UMAP2": 1441.3835, "tissue": "Prostate", "oncotree_code": "ODG", "Source": "CCLE", "index": "ACH-000285" },
+    "2": { "UMAP1": 110.69679, "UMAP2": -849.85754, "tissue": "Bowel", "oncotree_code": "COAD", "Source": "FPS", "index": "FPS_GB101-1_S3" },
+    "3": { "UMAP1": 115.69679, "UMAP2": -869.85754, "tissue": "Bowel", "oncotree_code": "ODG", "Source": "FPS", "index": "FPS_GB101-2_S4" },
+    "4": { "UMAP1": -902.91925, "UMAP2": -430.4279, "tissue": "Liver", "oncotree_code": "HCC", "Source": "FPS", "index": "FPS_GB101-2_S5" }
+ };
+
+  const umapData = Object.values(data);
+
+  const [tissue, setTissue] = useState(null);
+  const [source, setSource] = useState(null);
+  const [oncotreeCode, setOncotreeCode]  = useState(null);
+
+  const uniqueTissue = [...new Set(umapData.map(item => item.tissue))];
+  const uniqueSource = [... new Set(umapData.map(item => item.Source))];
+  const uniqueOncotree = [...new Set(umapData.map(item => item.oncotree_code))];
+
+ const handleTissue = (e) => {
+      setTissue(e.target.value);
+  };
+
+  const handleSource = (e) => {
+      setSource(e.target.value);
+
+  };
+
+  const handleOncotreeCode = (e) => {
+      setOncotreeCode(e.target.value);
+  };
+
+ // Function to filter UMAP data base on tissue, source or oncoTree code
+const umapDataFiltered = useMemo(() => {
+    return umapData.filter((item) => {
+        const matchesTissue = !tissue || item.tissue === tissue;
+        const matchesSource = !source || item.Source === source;
+        const matchesOncotree = !oncotreeCode || item.oncotree_code === oncotreeCode;
+        return matchesTissue && matchesSource && matchesOncotree;
+    });
+}, [tissue, source, oncotreeCode, umapData]);
 
 
   // Dialog settings
@@ -84,31 +129,6 @@ useEffect(() => {
     setVisible(true);
   };
 
-  // Select lineage
-  const mapLineage = require('../../map_lineage.json');
-  const [lineage, setLineage ] = useState("");
-  const [subtype, setSubtype] = useState("");
-  const [subtypesByLineage, setSubtypesByLineage ] = useState([]);
-  const uniqueLineage = [...new Set(mapLineage.map(lineage => lineage.lineage))];
-
-  // Set lineage
-  const handleLineage = (e) => {
-
-  const selectedLineage = e.target.value;
-  setLineage(selectedLineage);
-
-  // Filter subtypes based on the selected lineage and remove duplicates
-  const filteredSubtypes = mapLineage
-    .filter(item => item.lineage === selectedLineage)
-    .map(item => item.subtype);
-
-  setSubtypesByLineage([...new Set(filteredSubtypes)]); // Update subtypes state
-};
-
- // Set subtype
- const handleSubtype = (e) => {
-  setSubtype(e.target.value);
- }
 
 const jsonData = "{}"
 
@@ -145,45 +165,49 @@ const jsonData = "{}"
                 <h4 className="display-6 fw-bold mb-5">UMAP<sup><Button icon="pi pi-info"
                 onClick={() => show('top-right')} text size="small" className="btn-dialog" /></sup></h4>
                  <div className="row">
-                <div className="col-md-2 mb-2">
+                 <div className="col-md-2 mb-2">
                   <div className="bg-light rounded-3">
                     <div className="p-3">
                       <div className="mb-2">
-                        <label htmlFor="lineage" className="form-label">Lineage&nbsp;</label>
-                        <select className="form-select mb-3" name="lineage"  value={lineage}
-                                    onChange={handleLineage}>
+                        <label htmlFor="tissue" className="form-label">Tissue&nbsp;</label>
+                        <select className="form-select mb-3" name="tissue"  value={tissue}
+                                    onChange={handleTissue}>
                           <option value=""></option>
-                          {uniqueLineage.sort((a, b) => a - b).map(lineage => (
-                            <option key={lineage} value={lineage}>
-                              {lineage.charAt(0).toUpperCase() + lineage.slice(1)}
+                          {uniqueTissue.sort((a, b) => a - b).map(tissue => (
+                            <option key={tissue} value={tissue}>
+                              {tissue.charAt(0).toUpperCase() + tissue.slice(1)}
                             </option>
                           ))}
                         </select>
-                        <label htmlFor="subtype" className="form-label">Subtype&nbsp;</label>
-                        <select className="form-select mb-3" name="subtype" value={subtype}
-                                    onChange={handleSubtype} >
-                        {subtypesByLineage.sort((a, b) => a - b).map(subtype => (
-                            <option key={subtype} value={subtype}>
-                              {subtype.charAt(0).toUpperCase() + subtype.slice(1)}
+                        <label htmlFor="source" className="form-label">Source&nbsp;</label>
+                        <select className="form-select mb-3" name="source"  value={source}
+                                    onChange={handleSource}>
+                          <option value=""></option>
+                          {uniqueSource.sort((a, b) => a - b).map(source => (
+                            <option key={source} value={source}>
+                              {source.charAt(0).toUpperCase() + source.slice(1)}
                             </option>
                           ))}
-
                         </select>
-                        <label htmlFor="color" className="form-label">Color by&nbsp;</label>
-                        <select className="form-select mb-3" name="color" >
-                            <option value="lineage" defaultValue>Lineage</option>
-                            <option value="subtypes">Subtypes</option>
-                            <option value="origin">Origin</option>
+                         <label htmlFor="oncotree_code" className="form-label">Oncotree Code&nbsp;</label>
+                        <select className="form-select mb-3" name="oncotree_code"  value={oncotreeCode}
+                                    onChange={handleOncotreeCode}>
+                          <option value=""></option>
+                          {uniqueOncotree.sort((a, b) => a - b).map(oncotreeCode => (
+                            <option key={oncotreeCode} value={oncotreeCode}>
+                              {oncotreeCode.charAt(0).toUpperCase() + oncotreeCode.slice(1)}
+                            </option>
+                          ))}
                         </select>
-                      </div>
+                       </div>
                     </div>
                   </div>
                   </div>
-                <div className="col-10 mb-1">
-                <div className="p-3 ">
-                    <ScatterPlot/>
-                </div>
-                  </div>
+                    <div className="col-10 mb-1">
+                    <div className="p-3 ">
+                        <ScatterPlot  umapData={umapDataFiltered}/>
+                    </div>
+                   </div>
                </div>
                 </TabPanel>
                 <TabPanel header="Inference">
