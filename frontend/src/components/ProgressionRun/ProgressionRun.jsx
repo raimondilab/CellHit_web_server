@@ -57,63 +57,65 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus }) => {
     };
 
     // Get task status
-    async function getTaskStatus() {
-        try {
-            const query = {
-                query: `
-                    query getTask {
-                        getTask (taskId: "${taskID}") {
-                            status
-                        }
+    // Get task status
+async function getTaskStatus() {
+    try {
+        const query = {
+            query: `
+                query getTask {
+                    getTask (taskId: "${taskID}") {
+                        status
+                        result
                     }
-                `
-            };
-
-            const apiUrl = 'http://127.0.0.1:8003/graphql';
-            const taskData = await axios.post(apiUrl, query);
-
-            if (!taskData) {
-                Swal.fire({
-                    icon: "info",
-                    text: "No results found!"
-                });
-                return;
-            } else if (taskData.data.errors) {
-                Swal.fire({
-                    icon: "error",
-                    text: "Oops... \n An error has occurred!"
-                });
-                return;
-            } else if (taskData) {
-                const newStatus = taskData.data.data.getTask.status;
-
-                if (newStatus !== "SUCCESS"){
-
-                    setTaskStatusState(newStatus);
-                    setTaskStatus(newStatus);
-
                 }
+            `
+        };
 
-                // If the status is "SUCCESS", clear the interval to stop checking
-                if (newStatus === "SUCCESS") {
-                    clearInterval(statusInterval.current);
+        const apiUrl = 'http://127.0.0.1:8003/graphql';
+        const taskData = await axios.post(apiUrl, query);
 
-                    // Append the form values as query parameters to the URL
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('taskId', taskID);
-
-                    // Navigate to result page
-                    navigate('/result/' + url.search, { state: { taskID: taskID } });
-                }
-
-            }
-        } catch (error) {
+        if (!taskData) {
+            Swal.fire({
+                icon: "info",
+                text: "No results found!"
+            });
+            return;
+        } else if (taskData.data.errors) {
             Swal.fire({
                 icon: "error",
-                text: error.message
+                text: "Oops... \n An error has occurred!"
             });
+            return;
+        } else if (taskData) {
+            const newStatus = taskData.data.data.getTask.status;
+            const result = taskData.data.data.getTask.result;
+
+            if (newStatus !== "SUCCESS" ) {
+                setTaskStatusState(newStatus);
+                setTaskStatus(newStatus);
+            }
+
+            // Stop polling if the status is "SUCCESS"
+            if (newStatus === "SUCCESS") {
+                clearInterval(statusInterval.current);
+
+                // Append the form values as query parameters to the URL
+                const url = new URL(window.location.href);
+                url.searchParams.set('taskId', taskID);
+
+                // Navigate to result page
+                navigate('/result/' + url.search, { state: { taskID: taskID, data: result } });
+            }
+
         }
+    } catch (error) {
+        clearInterval(statusInterval.current);
+        Swal.fire({
+            icon: "error",
+            text: error.message
+        });
     }
+}
 
     useEffect(() => {
         // Call getTaskStatus every 2 seconds until status is "Inference"
