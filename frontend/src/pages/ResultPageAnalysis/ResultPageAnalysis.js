@@ -63,8 +63,10 @@ useEffect(() => {
         } else if (location.state) {
             // Fallback to location.state if URL parameters are not present
             const state = location.state;
+            console.log(state.data)
             setTask(state.taskID || "");
-            setResult(state.data || "")
+            setResult( state.data ||  "" )
+            console.log(state.data)
             setLoadFunctionalInfo(false);
 
         } else {
@@ -76,40 +78,22 @@ useEffect(() => {
   const [height, setHeight] = useState("819.26");
 
 
-  //const data = JSON.parse(result.umap);
 
-  const data =  {
-    "0": { "UMAP1": -85.51314, "UMAP2": 1135.882, "tissue": "CNS/Brain", "oncotree_code": "GBM", "Source": "TCGA", "index": "TCGA-19-1787-01" },
-    "1": { "UMAP1": -196.9247, "UMAP2": 1441.3835, "tissue": "Prostate", "oncotree_code": "ODG", "Source": "CCLE", "index": "ACH-000285" },
-    "2": { "UMAP1": 110.69679, "UMAP2": -849.85754, "tissue": "Bowel", "oncotree_code": "COAD", "Source": "FPS", "index": "FPS_GB101-1_S3" },
-    "3": { "UMAP1": 115.69679, "UMAP2": -869.85754, "tissue": "Bowel", "oncotree_code": "ODG", "Source": "FPS", "index": "FPS_GB101-2_S4" },
-    "4": { "UMAP1": -902.91925, "UMAP2": -430.4279, "tissue": "Liver", "oncotree_code": "HCC", "Source": "FPS", "index": "FPS_GB101-2_S5" }
- };
+  const umapData = result.umap ? Object.values(result.umap) : []
 
-  const umapData = Object.values(data);
-
-  const [tissue, setTissue] = useState(null);
-  const [source, setSource] = useState(null);
-  const [oncotreeCode, setOncotreeCode]  = useState(null);
+  const [tissue, setTissue] = useState("");
+  const [source, setSource] = useState("");
+  const [oncotreeCode, setOncotreeCode]  = useState("");
 
   const uniqueTissue = [...new Set(umapData.map(item => item.tissue))];
-  const uniqueSource = [... new Set(umapData.map(item => item.Source))];
+  const uniqueSource = [...new Set(umapData.map(item => item.Source))]
   const uniqueOncotree = [...new Set(umapData.map(item => item.oncotree_code))];
 
- const handleTissue = (e) => {
-      setTissue(e.target.value);
-  };
+  const handleTissue = (e) => setTissue(e.target.value);
+  const handleSource = (e) => setSource(e.target.value);
+  const handleOncotreeCode = (e) => setOncotreeCode(e.target.value);
 
-  const handleSource = (e) => {
-      setSource(e.target.value);
-
-  };
-
-  const handleOncotreeCode = (e) => {
-      setOncotreeCode(e.target.value);
-  };
-
- // Function to filter UMAP data base on tissue, source or oncoTree code
+// Function to filter UMAP data base on tissue, source or oncoTree code
 const umapDataFiltered = useMemo(() => {
     return umapData.filter((item) => {
         const matchesTissue = !tissue || item.tissue === tissue;

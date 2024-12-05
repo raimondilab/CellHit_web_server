@@ -5,7 +5,6 @@ const ScatterPlot = ({ umapData }) => {
 
   const layout = {
     showlegend: true,
-
     autosize: true,
     displaylogo: false,
     yaxis: {
@@ -33,21 +32,22 @@ const ScatterPlot = ({ umapData }) => {
     CCLE: 'diamond',
   };
 
-    const generateColorPalette = (size) => {
+  const generateColorPalette = (size) => {
     const plotlyPalette = [
-       "#E13978", "#F5899E", "#C091E3", "#E08571", "#9F55BB",
-        "#45A132", "#96568E", "#F5899E", "#5AB172", "#DFBC3A",
-        "#349077", "#D8AB6A", "#75DFBB", "#5DA134", "#1F8FFF",
-        "#9C5E2B", "#51D5E0", "#ABD23F", "#DA45BB", "#555555",
-        "#56E79D", "#B644DC", "#73E03D", "#F5899E", "#3870C9",
-        "#6C55E2", "#5FDB69", "#F5899E", "#659FD9", "#D74829",
-        "#bdbdbd", "#E491C1", "#E491C1"
+      "#E13978", "#F5899E", "#C091E3", "#E08571", "#9F55BB",
+      "#45A132", "#96568E", "#F5899E", "#5AB172", "#DFBC3A",
+      "#349077", "#D8AB6A", "#75DFBB", "#5DA134", "#1F8FFF",
+      "#9C5E2B", "#51D5E0", "#ABD23F", "#DA45BB", "#555555",
+      "#56E79D", "#B644DC", "#73E03D", "#F5899E", "#3870C9",
+      "#6C55E2", "#5FDB69", "#F5899E", "#659FD9", "#D74829",
+      "#bdbdbd", "#E491C1", "#E491C1"
     ];
-
     return Array.from({ length: size }, (_, i) => plotlyPalette[i % plotlyPalette.length]);
   };
 
   const traces = useMemo(() => {
+    // Ensure umapData is a valid array
+    if (!Array.isArray(umapData) || umapData.length === 0) return []; // Return empty if not valid
 
     const uniqueOncotree = [...new Set(umapData.map((item) => item.oncotree_code))];
 
@@ -72,7 +72,6 @@ const ScatterPlot = ({ umapData }) => {
       },
     }));
   }, [umapData]);
-
 
   return (
     <>
