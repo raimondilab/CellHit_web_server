@@ -15,7 +15,7 @@ numpy~=1.26.4
 scipy~=1.14.1
 scikit-learn~=1.5.2
 xgboost~=2.1.1
-pycombat~=0.20
+
 setuptools~=68.2.2
 requests~=2.31.0
 tqdm~=4.66.5
