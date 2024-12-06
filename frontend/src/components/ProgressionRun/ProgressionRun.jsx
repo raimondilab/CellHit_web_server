@@ -6,7 +6,7 @@ import Swal from 'sweetalert2';
 import axios from 'axios';
 import {useNavigate} from "react-router-dom";
 
-const ProgressionRun = ({ taskID, statusTask, setTaskStatus }) => {
+const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit }) => {
     const navigate = useNavigate();
     const currentEventColor = "#FF9800";
 
@@ -81,11 +81,14 @@ async function getTaskStatus() {
             });
             return;
         } else if (taskData.data.errors) {
+            clearInterval(statusInterval.current);
+
             Swal.fire({
                 icon: "error",
-                text: "Oops... \n An error has occurred!"
+                 html: "Oops... An error has occurred! <br>" + taskData.data.errors[0].message.replace(/\n/g, "<br>")
             });
-            return;
+            setIsSubmit(false);
+
         } else if (taskData) {
             const newStatus = taskData.data.data.getTask.status;
             const result = taskData.data.data.getTask.result;
@@ -118,10 +121,10 @@ async function getTaskStatus() {
 }
 
     useEffect(() => {
-        // Call getTaskStatus every 2 seconds until status is "Inference"
+        // Call getTaskStatus every 3 seconds until status is "Inference"
         statusInterval.current = setInterval(() => {
             getTaskStatus();
-        }, 2000);
+        }, 3000);
 
         // Clear interval on component unmount
         return () => clearInterval(statusInterval.current);
