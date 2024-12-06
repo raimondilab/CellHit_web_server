@@ -5,7 +5,7 @@ import { InputText } from 'primereact/inputtext';
 import axios from 'axios';
 import HeaderTitleRunCellHit from '../../components/HeaderTitleRunCellHit/HeaderTitleRunCellHit';
 import Swal from 'sweetalert2';
-
+import { Link } from 'react-router-dom';
 
 const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
 
@@ -57,8 +57,8 @@ async function sendFile() {
     const formData = new FormData();
     formData.append("operations", JSON.stringify({
       query: `
-        mutation runAnalysis($file: Upload!, $value: String!) {
-          runAnalysis(file: $file, value: $value) {
+        mutation runAnalysis($file: Upload!, $dataset: String!) {
+          runAnalysis(file: $file, dataset: $dataset) {
             taskId
             status
           }
@@ -66,7 +66,7 @@ async function sendFile() {
       `,
       variables: {
         file: null,  // Will be filled by the file upload
-        value: value,
+        dataset: value,
       },
     }));
     formData.append("map", JSON.stringify({ 0: ["variables.file"] }));
@@ -98,8 +98,10 @@ async function sendFile() {
   }
 }
 
-
-
+const handleDownload = () => {
+        const downloadUrl = 'http://127.0.0.1:8003/api/download/GBM.csv';
+        window.open(downloadUrl, '_blank');
+};
 
   return (
     <>
@@ -121,14 +123,14 @@ async function sendFile() {
                   <label
                       htmlFor="gdsc"
                       className={`label-btn gdsc-border me-01 ${value === "GDSC" ? "hover" : ""}`}
-                      onClick={() => setValue("GDSC")}
+                      onClick={() => setValue("gdsc")}
                     >
                       GDSC
                     </label>
                     <label
                       htmlFor="prism"
                       className={`label-btn prism-border me-2 disabled ${value === "PRISM" ? "hover" : ""}`}
-                      onClick={() => setValue("PRISM")} disabled
+                      onClick={() => setValue("prism")} disabled
                     >
                       PRISM
                     </label>
@@ -138,7 +140,7 @@ async function sendFile() {
                 </div>
               </form>
               <span>
-                Please click <b><a href="/static/clrp/upload_example_LRRK2.csv" download>here</a></b> for an example input file
+                Please click <b><Link onClick={handleDownload}>here</Link></b> for an example input file
               </span>
             </div>
 
