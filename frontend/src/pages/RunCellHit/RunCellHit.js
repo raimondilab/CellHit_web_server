@@ -35,7 +35,7 @@ return (
             <div className="col-12">
              <h1 className="display-5 fw-bold line mb-4">CellHit</h1>
                    { (isSubmit && taskId) ? (
-                         <ProgressionRun taskID={taskId}  statusTask={taskStatus} setTaskStatus={setTaskStatus}/>
+                         <ProgressionRun taskID={taskId}  statusTask={taskStatus} setTaskStatus={setTaskStatus} setIsSubmit={setIsSubmit}/>
                       ) : (
                          <DataSubmission setIsSubmit={setIsSubmit} setTaskId={setTaskId} setTaskStatus={setTaskStatus} />
                       )}

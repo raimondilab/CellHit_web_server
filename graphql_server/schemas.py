@@ -90,11 +90,8 @@ class JSON:
 @strawberry.type
 class Task:
     task_id: str
-    status: str
+    status: Optional[str]
     result: JSON
 
 
-@strawberry.input
-class FolderInput:
-    files: typing.List[Upload]
 

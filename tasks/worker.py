@@ -1,4 +1,6 @@
+import json
 import os
+import sys
 import time
 import pandas as pd
 import numpy as np
@@ -6,6 +8,19 @@ import numpy as np
 from celery import Celery
 from celery.result import AsyncResult
 from subprocess import Popen
+
+from pathlib import Path
+
+from parametric_umap import ParametricUMAP
+
+from src.pipeline import PreprocessPaths, InferencePaths
+from src.pipeline.align import classify_samples, batch_correct, impute_missing, celligner_transform_data
+
+# Get the base directory of the script
+BASE_DIR = Path(__file__).resolve().parent
+
+# Get the parent folder of the base directory
+PARENT_DIR = BASE_DIR.parent
 
 celery = Celery(__name__)
 celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
@@ -63,81 +78,159 @@ def get_task(task_id):
     return res
 
 
-@celery.task
-def divide_numbers(x, y):
-    try:
-        if y == 0:
-            raise ValueError("Division by zero")
-        return x / y
-    except Exception as e:
-        return str(e)
+# Setup preprocess_paths
+preprocess_paths = PreprocessPaths(
+    classifier_path=PARENT_DIR / 'src/tumor_classifier_tcga_final_model_revised.json',
+    classifier_mapper_path=PARENT_DIR / 'src/tcga_classifier_code_mapper.json',
+    imputer_path=PARENT_DIR / 'src/tumor_regressor_final_model.json',
+    celligner_path=PARENT_DIR / 'src/base_alligner_CCLE_TCGA_optimized_revised.pkl',
+    tcga_data_path=PARENT_DIR / 'src/tcga_raw.feather',
+    tcga_metadata_path=PARENT_DIR / 'src/tcga_oncotree_data.csv',
+    tcga_code_map_path=PARENT_DIR / 'src/tcga_code_map.pkl',
+    tcga_project_ids_path=PARENT_DIR / 'src/tcga_project_ids.json',
+    umap_path=PARENT_DIR / 'src/umap.trc'
+)
+
+
+# read tcga_code_map
+def get_tcga_code():
+    global tcga_code_map
+    with open('C:/Users/Utente/PycharmProjects/CLRP/src/tcga_to_code_map.json') as f:
+        tcga_code_map = json.load(f)
+
+
+get_tcga_code()
+
+
+# inference_paths = InferencePaths(
+#     cellhit_data='/home/fcarli/WebCellHit/data',
+#     ccle_transcr_neighs='/home/fcarli/WebCellHit/webserver_data/local_data/ccle_transcr_neighs.pkl',
+#     tcga_transcr_neighs='/home/fcarli/WebCellHit/webserver_data/local_data/tcga_transcr_neighs.pkl',
+#     ccle_response_neighs='/home/fcarli/WebCellHit/webserver_data/local_data/ccle_response_neighs.pkl',
+#     tcga_response_neighs='/home/fcarli/WebCellHit/webserver_data/local_data/tcga_response_neighs.pkl',
+#     pretrained_models_path=f'/home/fcarli/WebCellHit/results/CellHit/inference_models/{dataset}',
+#     drug_stats=f'/home/fcarli/WebCellHit/webserver_data/local_data/{dataset}_drug_stats.csv',
+#     drug_metadata='/home/fcarli/WebCellHit/data/',
+#     quantile_computer=f'/home/fcarli/WebCellHit/webserver_data/local_data/{dataset}_quantile_computer.npy',
+#     ccle_metadata=f'/home/fcarli/WebCellHit/data/metadata/Model.csv',
+#     tcga_metadata=f'/home/fcarli/WebCellHit/data/metadata/tcga_oncotree_data.csv'
+# )
 
 
 @celery.task(bind=True)
-def analysis(self, file, value):
+def analysis(self, file, dataset, code):
+    try:
+        results_pipeline = {}
 
-    # Step 1: Processing
-    self.update_state(state='PROGRESS', meta='Processing')
-    #gbm = read_GBM(data_path)
-    #print(gbm)
+        print("cheguei")
 
-    # Step 2: Classification
-    self.update_state(state='PROGRESS', meta='Classification')
-    time.sleep(20)
+        # Step 1: Processing
+        self.update_state(state='PROGRESS', meta='Processing')
+        dataFile = pd.DataFrame(file)
+        print(dataFile)
 
-    # Step 3: Batch correction
-    self.update_state(state='PROGRESS', meta='Batch correction')
-    time.sleep(50)
+        # gbm code
+        gbm_code = tcga_code_map.get(code)
 
-    # Step 4: Imputation
-    self.update_state(state='PROGRESS', meta='Imputation')
-    time.sleep(20)
+        # Preprocess data
+        data = preprocess_data(dataFile, code)
 
-    # Step 5: Transform
-    self.update_state(state='PROGRESS', meta='Transform')
-    time.sleep(20)
+        # Define covariate labels (TCGA category to which the new sample belong to)
+        covariate_labels = [gbm_code] * len(data)
 
-    # Step 6: Inference
-    self.update_state(state='PROGRESS', meta='Inference')
-    time.sleep(2)
+        # Step 2: Classification
+        self.update_state(state='PROGRESS', meta='Classification')
+        results_pipeline['classification'] = classify_samples(data, preprocess_paths)
 
-    result = {
-        "heatmap": "completed",
-        "table": {
-            "data_loading": "success"
-        },
-        "celligner": {
-            "records_processed": 1000
-        },
-    }
-    return result
+        # Step 3: Batch correction
+        self.update_state(state='PROGRESS', meta='Batch correction')
+        # corrected = batch_correct(data, covariate_labels, preprocess_paths)
+
+        # Step 4: Imputation
+        self.update_state(state='PROGRESS', meta='Imputation')
+        # imputed = impute_missing(corrected, preprocess_paths, covariate_labels)
+
+        # Step 5: Transform
+        self.update_state(state='PROGRESS', meta='Transform')
+        # transformed = celligner_transform_data(data=imputed,
+        #                                       preprocess_paths=preprocess_paths,
+        #                                       device='cuda:0',
+        #                                       transform_source='target')
+        # print(transformed)
+
+        # umap_path = preprocess_paths.umap_path
+        #
+        # if umap_path:
+        #     umap = ParametricUMAP.load(umap_path)
+        #     embedding = umap.transform(transformed.values)
+        #
+        #     umap_results = pd.DataFrame(
+        #         embedding,
+        #         columns=['UMAP1', 'UMAP2'],
+        #         index=transformed.index
+        #     )
+        #     results_pipeline['umap'] = umap_results
+        #
+        # results_pipeline['transformed'] = transformed
+        #
+        # print(results_pipeline['transformed'])
+
+        # # Step 6: Inference
+        self.update_state(state='PROGRESS', meta='Inference')
+        time.sleep(2)
+
+        result = {
+            "heatmap": "completed",
+            "table": {
+                "data_loading": "success"
+            },
+            "umap": {
+                "0": {"UMAP1": -85.51314, "UMAP2": 1135.882, "tissue": "CNS/Brain", "oncotree_code": "GBM",
+                      "Source": "TCGA", "index": "TCGA-19-1787-01"},
+                "1": {"UMAP1": -196.9247, "UMAP2": 1441.3835, "tissue": "Prostate", "oncotree_code": "ODG",
+                      "Source": "CCLE", "index": "ACH-000285"},
+                "2": {"UMAP1": 110.69679, "UMAP2": -849.85754, "tissue": "Bowel", "oncotree_code": "COAD",
+                      "Source": "FPS",
+                      "index": "FPS_GB101-1_S3"},
+                "3": {"UMAP1": 115.69679, "UMAP2": -869.85754, "tissue": "Bowel", "oncotree_code": "ODG",
+                      "Source": "FPS",
+                      "index": "FPS_GB101-2_S4"},
+                "4": {"UMAP1": -902.91925, "UMAP2": -430.4279, "tissue": "Liver", "oncotree_code": "HCC",
+                      "Source": "FPS",
+                      "index": "FPS_GB101-2_S5"}
+            },
+        }
+        return result
+
+    except Exception as e:
+        print(f"Error during analysis: {e}")
+        raise  # Re-raise the exception for further handling
 
 
-# Load and preprocess GBM data
-def read_GBM(data_path):
+# Preprocess user data
+def preprocess_data(data, code):
+    # gbm_path = PARENT_DIR / 'src/GBM.txt'
+    # data = pd.read_csv(gbm_path, sep='\t').transpose()
 
-    gbm = pd.read_csv(data_path, sep='\t').transpose()
-    gbm.columns = [i.split('_')[1] for i in gbm.columns]
-    gbm = gbm.loc[:, gbm.std() != 0]
+    # data.columns = [i.split('_')[1] for i in data.columns]
+    data.columns = data.columns.str.replace("GENE", "", regex=True)  # Remover de nomes das colunas
+    data = data.replace("GENE", "", regex=True)
+    genes = data.columns  # data['GENE'].unique().to_list()
+    print(genes)
+    data = data.transpose()
+    data = data.loc[:, data.std() != 0]
 
-    # take the average of duplicate columns
-    gbm = gbm.groupby(gbm.columns, axis=1).mean()
+    print(data)
 
-    gbm = gbm.reset_index()
-    gbm['index'] = gbm['index'].apply(lambda x: 'FPS_' + x)
-    gbm = gbm.set_index('index')
+    # Take the average of duplicate columns
+    data = data.groupby(genes, axis=1).mean()
+    # data = data.groupby(data.columns, axis=1).mean()
 
-    # add one to all values and than take log2
-    gbm = gbm.apply(lambda x: np.log2(x + 1))
+    data = data.reset_index()
+    data['index'] = data['index'].apply(lambda x: code + x)
+    data = data.set_index('index')
 
-    return gbm
+    # Add one to all values and then take log2
+    data = data.apply(lambda x: np.log2(x + 1))
 
-
-def data_frame_completer(df, genes,return_genes=False,fill_value=np.nan):
-    missing_genes = list(set(genes) - set(df.columns))
-    common_genes = list(set(df.columns).intersection(genes))
-    df = df.reindex(columns=genes, fill_value=fill_value)
-    if return_genes:
-        return df, missing_genes,common_genes
-    else:
-        return df
+    return data

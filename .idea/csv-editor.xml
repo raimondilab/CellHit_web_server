@@ -10,6 +10,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\src\GBM.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\static\clrp\map_lineage.csv">
           <value>
             <Attribute>
@@ -18,13 +25,6 @@
           </value>
         </entry>
         <entry key="\static\clrp\small_molecule_drugbank.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\static\clrp\umap.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
