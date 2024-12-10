@@ -96,7 +96,7 @@ preprocess_paths = PreprocessPaths(
 # read tcga_code_map
 def get_tcga_code():
     global tcga_code_map
-    with open(PARENT_DIR / '/src/tcga_to_code_map.json') as f:
+    with open(Path(PARENT_DIR / '/src/tcga_to_code_map.json')) as f:
         tcga_code_map = json.load(f)
 
 
