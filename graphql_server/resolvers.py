@@ -327,34 +327,11 @@ class MutationResolver:
             # Decoding the bytes to string and converting to a StringIO object
             csv_data = contents.decode("utf-8")  # Decode bytes to string
 
-            # Use StringIO to simulate a file object for pandas
-            df = pd.read_csv(StringIO(csv_data), sep=",", header=0, index_col=0)
-
-            # Get TCGA_CODE code
-            code = str(df['TCGA_CODE'].unique()[0])
-
-            # Drop TCGA_CODE
-            df = df.drop(columns=['TCGA_CODE'])
-
-            df = df.transpose()
-
-            df.iloc[0:]
-
-            print(df.columns)
-
-            # Convert to dict
-            df_json = df.to_dict(orient='records')
-
-            #print(df_json)
-
-            dataFile = pd.DataFrame(df_json)
-            print(dataFile)
-
             # Delay execution of the analysis task using Celery
-            #task = worker.analysis.s(df_json, dataset, code).delay()
+            task = worker.analysis.s(csv_data, dataset).delay()
 
             # Return task metadata with initial status
-            return schemas.Task(task_id="task.id", status='Data sending', result="")
+            return schemas.Task(task_id=task.id, status='Data sending', result="")
         except Exception as e:
             # Handle potential errors during file saving or Celery invocation
             print(f"Error during analysis initiation: {e}")
