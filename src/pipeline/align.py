@@ -8,10 +8,7 @@ from typing import Union, Optional, Tuple, List
 from parametric_umap import ParametricUMAP
 from typing import Dict
 from ..pipeline.dataclasses import PreprocessPaths
-import sys
-
-# sys.path.append("C:/Users/Utente/PycharmProjects/CLRP/src/celligner/")
-from ..celligner import Celligner
+from src.celligner.run_celligner import Celligner
 
 # Get the base directory of the script
 BASE_DIR = Path(__file__).resolve().parent
