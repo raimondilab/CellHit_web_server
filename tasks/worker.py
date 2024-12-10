@@ -8,6 +8,7 @@ import numpy as np
 from celery import Celery
 from celery.result import AsyncResult
 from subprocess import Popen
+from io import StringIO
 
 from pathlib import Path
 
@@ -118,22 +119,27 @@ get_tcga_code()
 
 
 @celery.task(bind=True)
-def analysis(self, file, dataset, code):
+def analysis(self, file, dataset):
     try:
         results_pipeline = {}
 
-        print("cheguei")
-
         # Step 1: Processing
         self.update_state(state='PROGRESS', meta='Processing')
-        dataFile = pd.DataFrame(file)
-        print(dataFile)
+
+        # Use StringIO to simulate a file object for pandas
+        df = pd.read_csv(StringIO(file), sep=",", header=0, index_col=0)
+
+        # Get TCGA_CODE code
+        code = str(df['TCGA_CODE'].unique()[0])
+
+        # Drop TCGA_CODE
+        df = df.drop(columns=['TCGA_CODE'])
 
         # gbm code
         gbm_code = tcga_code_map.get(code)
 
         # Preprocess data
-        data = preprocess_data(dataFile, code)
+        data = preprocess_data(df, code)
 
         # Define covariate labels (TCGA category to which the new sample belong to)
         covariate_labels = [gbm_code] * len(data)
@@ -144,38 +150,38 @@ def analysis(self, file, dataset, code):
 
         # Step 3: Batch correction
         self.update_state(state='PROGRESS', meta='Batch correction')
-        # corrected = batch_correct(data, covariate_labels, preprocess_paths)
+        corrected = batch_correct(data, covariate_labels, preprocess_paths)
 
         # Step 4: Imputation
         self.update_state(state='PROGRESS', meta='Imputation')
-        # imputed = impute_missing(corrected, preprocess_paths, covariate_labels)
+        imputed = impute_missing(corrected, preprocess_paths, covariate_labels)
 
         # Step 5: Transform
         self.update_state(state='PROGRESS', meta='Transform')
-        # transformed = celligner_transform_data(data=imputed,
-        #                                       preprocess_paths=preprocess_paths,
-        #                                       device='cuda:0',
-        #                                       transform_source='target')
-        # print(transformed)
+        transformed = celligner_transform_data(data=imputed,
+                                               preprocess_paths=preprocess_paths,
+                                               device='cuda:0',
+                                               transform_source='target')
+        print(transformed)
 
-        # umap_path = preprocess_paths.umap_path
-        #
-        # if umap_path:
-        #     umap = ParametricUMAP.load(umap_path)
-        #     embedding = umap.transform(transformed.values)
-        #
-        #     umap_results = pd.DataFrame(
-        #         embedding,
-        #         columns=['UMAP1', 'UMAP2'],
-        #         index=transformed.index
-        #     )
-        #     results_pipeline['umap'] = umap_results
-        #
-        # results_pipeline['transformed'] = transformed
-        #
-        # print(results_pipeline['transformed'])
+        umap_path = preprocess_paths.umap_path
 
-        # # Step 6: Inference
+        if umap_path:
+            umap = ParametricUMAP.load(umap_path)
+            embedding = umap.transform(transformed.values)
+
+            umap_results = pd.DataFrame(
+                embedding,
+                columns=['UMAP1', 'UMAP2'],
+                index=transformed.index
+            )
+            results_pipeline['umap'] = umap_results
+
+        results_pipeline['transformed'] = transformed
+
+        print(results_pipeline['umap'])
+
+        # Step 6: Inference
         self.update_state(state='PROGRESS', meta='Inference')
         time.sleep(2)
 
@@ -209,28 +215,31 @@ def analysis(self, file, dataset, code):
 
 # Preprocess user data
 def preprocess_data(data, code):
-    # gbm_path = PARENT_DIR / 'src/GBM.txt'
-    # data = pd.read_csv(gbm_path, sep='\t').transpose()
 
-    # data.columns = [i.split('_')[1] for i in data.columns]
-    data.columns = data.columns.str.replace("GENE", "", regex=True)  # Remover de nomes das colunas
-    data = data.replace("GENE", "", regex=True)
-    genes = data.columns  # data['GENE'].unique().to_list()
-    print(genes)
+    # Transpose data
     data = data.transpose()
+
+    # Remove "GENE" from column names
+    data.columns = data.columns.str.replace("GENE", " ", regex=True)
+
+    # Replace "GENE" in values, if necessary
+    data = data.replace("GENE", "", regex=True)
+
+    # Remove columns with zero standard deviation
     data = data.loc[:, data.std() != 0]
 
-    print(data)
+    # Update column names after filtering
+    genes = data.columns
 
-    # Take the average of duplicate columns
+    # Group and calculate the mean for duplicate columns
     data = data.groupby(genes, axis=1).mean()
-    # data = data.groupby(data.columns, axis=1).mean()
 
+    # Reset the index and modify it
     data = data.reset_index()
     data['index'] = data['index'].apply(lambda x: code + x)
     data = data.set_index('index')
 
-    # Add one to all values and then take log2
+    # Add 1 to all values and take the log2
     data = data.apply(lambda x: np.log2(x + 1))
 
     return data
