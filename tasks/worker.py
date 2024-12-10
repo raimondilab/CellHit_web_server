@@ -16,6 +16,7 @@ from parametric_umap import ParametricUMAP
 
 from src.pipeline import PreprocessPaths, InferencePaths
 from src.pipeline.align import classify_samples, batch_correct, impute_missing, celligner_transform_data
+from src.pipeline import InferencePaths, run_full_inference
 
 # Get the base directory of the script
 BASE_DIR = Path(__file__).resolve().parent
@@ -96,19 +97,21 @@ preprocess_paths = PreprocessPaths(
 with open(PARENT_DIR / 'src/tcga_to_code_map.json') as f:
     tcga_code_map = json.load(f)
 
+# read overall umap
+umap_df = pd.read_csv( PARENT_DIR / 'src/overall_umap_df.csv',index_col=0)
 
-# inference_paths = InferencePaths(
-#     cellhit_data='/home/fcarli/WebCellHit/data',
-#     ccle_transcr_neighs='/home/fcarli/WebCellHit/webserver_data/local_data/ccle_transcr_neighs.pkl',
-#     tcga_transcr_neighs='/home/fcarli/WebCellHit/webserver_data/local_data/tcga_transcr_neighs.pkl',
-#     ccle_response_neighs='/home/fcarli/WebCellHit/webserver_data/local_data/ccle_response_neighs.pkl',
-#     tcga_response_neighs='/home/fcarli/WebCellHit/webserver_data/local_data/tcga_response_neighs.pkl',
-#     pretrained_models_path=f'/home/fcarli/WebCellHit/results/CellHit/inference_models/{dataset}',
-#     drug_stats=f'/home/fcarli/WebCellHit/webserver_data/local_data/{dataset}_drug_stats.csv',
-#     drug_metadata='/home/fcarli/WebCellHit/data/',
-#     quantile_computer=f'/home/fcarli/WebCellHit/webserver_data/local_data/{dataset}_quantile_computer.npy',
-#     ccle_metadata=f'/home/fcarli/WebCellHit/data/metadata/Model.csv',
-#     tcga_metadata=f'/home/fcarli/WebCellHit/data/metadata/tcga_oncotree_data.csv'
+# inference_paths_gdsc = InferencePaths(
+#     cellhit_data=PARENT_DIR / '/src/data',
+#     ccle_transcr_neighs=PARENT_DIR / '/src/ccle_transcr_neighs.pkl',
+#     tcga_transcr_neighs=PARENT_DIR / 'src/tcga_transcr_neighs.pkl',
+#     ccle_response_neighs=PARENT_DIR /'src/ccle_response_neighs.pkl',
+#     tcga_response_neighs=PARENT_DIR /'src/tcga_response_neighs.pkl',
+#     pretrained_models_path=PARENT_DIR / f'src/gdsc',
+#     drug_stats=PARENT_DIR /'src/gdsc_drug_stats.csv',
+#     drug_metadata=PARENT_DIR /'src/data/',
+#     quantile_computer=PARENT_DIR /'src/gdcs_quantile_computer.npy',
+#     ccle_metadata=PARENT_DIR / 'src/Model.csv',
+#     tcga_metadata=PARENT_DIR / 'src/tcga_oncotree_data.csv'
 # )
 
 
@@ -156,7 +159,6 @@ def analysis(self, file, dataset):
                                                preprocess_paths=preprocess_paths,
                                                device='cuda:0',
                                                transform_source='target')
-        print(transformed)
 
         umap_path = preprocess_paths.umap_path
 
@@ -169,15 +171,27 @@ def analysis(self, file, dataset):
                 columns=['UMAP1', 'UMAP2'],
                 index=transformed.index
             )
-            results_pipeline['umap'] = umap_results
+            #results_pipeline['umap'] = umap_results
 
-        results_pipeline['transformed'] = transformed
+        umap = pd.concat([umap_df, umap_results])
 
-        print(results_pipeline['umap'])
+        print(umap)
+
+        #umap = umap_results.to_dict(orient='records')
+
+        #results_pipeline['transformed'] = transformed
+
 
         # Step 6: Inference
         self.update_state(state='PROGRESS', meta='Inference')
-        time.sleep(2)
+
+        # if dataset == "gdsc":
+        #     result_df, heatmap_df = run_full_inference(transformed,
+        #                                                dataset=dataset,
+        #                                                inference_paths=inference_paths_gdsc,
+        #                                                return_heatmap=True)
+        #
+        # print(result_df, heatmap_df)
 
         result = {
             "heatmap": "completed",
@@ -209,7 +223,6 @@ def analysis(self, file, dataset):
 
 # Preprocess user data
 def preprocess_data(data, code):
-
     # Transpose data
     data = data.transpose()
 

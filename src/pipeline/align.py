@@ -8,13 +8,19 @@ from typing import Union, Optional, Tuple, List
 from parametric_umap import ParametricUMAP
 from typing import Dict
 from ..pipeline.dataclasses import PreprocessPaths
-from src.celligner.run_celligner import Celligner
+import sys
+
 
 # Get the base directory of the script
 BASE_DIR = Path(__file__).resolve().parent
 
 # Get the parent folder of the base directory
 PARENT_DIR = BASE_DIR.parent
+
+sys.path.append('C:/Users/Utente/PycharmProjects/CLRP/src/celligner')
+
+from celligner import Celligner
+
 
 # read tcga_code_map
 with open(PARENT_DIR / 'tcga_to_code_map.json') as f:
@@ -107,7 +113,7 @@ def batch_correct(
     """
     # Load TCGA reference data
     tcga = pd.read_feather(tcga_data_path or preprocess_paths.tcga_data_path).set_index('index')
-    tcga = tcga.sample(frac=0.1)
+    #tcga = tcga.sample(frac=0.1)
     tcga_metadata = pd.read_csv(tcga_metadata_path or preprocess_paths.tcga_metadata_path)
     tcga_metadata_mapper = dict(zip(
         tcga_metadata['sample_id'],
