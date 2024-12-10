@@ -92,15 +92,9 @@ preprocess_paths = PreprocessPaths(
     umap_path=PARENT_DIR / 'src/umap.trc'
 )
 
-
 # read tcga_code_map
-def get_tcga_code():
-    global tcga_code_map
-    with open(Path(PARENT_DIR / '/src/tcga_to_code_map.json')) as f:
-        tcga_code_map = json.load(f)
-
-
-get_tcga_code()
+with open(PARENT_DIR / 'src/tcga_to_code_map.json') as f:
+    tcga_code_map = json.load(f)
 
 
 # inference_paths = InferencePaths(
