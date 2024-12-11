@@ -181,7 +181,7 @@ def impute_missing(
     # tcga_code_map = tcgaCodeMap.load(tcga_code_map_path or preprocess_paths.tcga_code_map_path)
     data_completed['tumor_y'] = data_completed['tumor_y'].astype(str)
     data_completed['tumor_y'] = data_completed['tumor_y'].map(code_tcga_map)
-    print(data_completed['tumor_y'])
+    #print(data_completed['tumor_y'])
     # make tumor_y a categorical variable
     data_completed['tumor_y'] = pd.Categorical(data_completed['tumor_y'],
                                                categories=project_ids,
