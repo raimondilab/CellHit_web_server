@@ -190,12 +190,12 @@ const handleDownload = () => {
               title="Click to zoom-in"
               alt="Learning Workflow"
             />
-            <h5 className="display-6 fw-bold mb-3">Instructions</h5>
-            <p className="fs-1 mb-5 text-justify mb-2">
+             <p className="fs-1 mb-3 text-justify mb-2">
               We trained explainable machine learning algorithms by employing cell line transcriptomics to predict the growth inhibitory
               potential of drugs. We used large language models (LLMs) to expand descriptions of the mechanisms of action (MOA) for
                each drug starting from available annotations, which were matched to the semantically closest pathways from reference knowledge bases.
             </p>
+
           </div>
         </div>
       </div>

@@ -17,7 +17,7 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit }) => {
     const baseEvents = [
         { status: 'Data sending', date: '15/10/2020 10:30', icon: 'pi pi-send', color: '#607D8B' },
         { status: 'Processing', date: '15/10/2020 14:00', icon: 'pi pi-cog', color: '#607D8B' },
-        { status: 'Classification', date: '15/10/2020 16:15', icon: 'pi pi-check-circle', color: '#607D8B' },
+       // { status: 'Classification', date: '15/10/2020 16:15', icon: 'pi pi-check-circle', color: '#607D8B' },
         { status: 'Batch correction', date: '16/10/2020 10:00', icon: 'pi pi-wrench', color: '#607D8B' },
         { status: 'Imputation', date: '16/10/2020 10:00', icon: 'pi pi-microchip-ai', color: '#607D8B' },
         { status: 'Transform', date: '16/10/2020 10:00', icon: 'pi pi-objects-column', color: '#607D8B' },

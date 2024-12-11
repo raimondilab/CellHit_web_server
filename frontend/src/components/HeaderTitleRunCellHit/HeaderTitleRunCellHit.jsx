@@ -24,13 +24,17 @@ const HeaderTitleRunCellHit = () => {
           {/* Help message */}
           <Dialog header="CellHit" visible={visible} position={position} style={{ width: '50vw' }} onHide={() => setVisible(false)}
             draggable={false} resizable={false} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
-            <p className="m-0 mb-1 text-justify">
-              We trained explainable machine learning algorithms by employing cell
-              line transcriptomics to predict the growth inhibitory potential of drugs. We used large
-              language models (LLMs) to expand descriptions of the mechanisms of action (MOA) for
-              each drug starting from available annotations, which were matched to the semantically
-              closest pathways from reference knowledge bases.
+            <p className="text-justify mb-3">To run CellHit on your data, you must upload a transcriptomic dataset of your choice.
+            Begin by clicking the "Upload Dataset" button to be directed to the upload window. Then,
+            select the drugs dataset by choosing either GDSC or PRISM. Finally, click the submit button to complete the process.
             </p>
+             <p className=" text-justify ">To properly process the input file, it must adhere to the following specific structure:</p>
+             <ol>
+              <li className="text-justify">The file must include a column labelled "GENE," which contains gene names.</li>
+              <li className="text-justify">Each sample should have its corresponding column with numeric values representing the transcriptomic data for each gene. Sample names should be unique and clearly labelled (e.g., GB101-1_S3, GB101-2_S4).</li>
+              <li className="text-justify">Include a column titled "TCGA_CODE" to specify the cancer type associated with each sample in that row (for example, "GBM" for Glioblastoma Multiforme).</li>
+              <li className="text-justify">Add a column labelled "TISSUE" to indicate the tissue type for each sample in that row (for example, "CNS/Brain").</li>
+            </ol>
             <p className="m-0 mb-1 text-justify">For more information, please refer to the
               <Link className="" to="/about/" target="_blank"><b> about</b></Link> page.
             </p>
