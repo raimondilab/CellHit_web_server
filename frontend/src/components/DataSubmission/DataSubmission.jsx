@@ -183,7 +183,7 @@ const handleDownload = () => {
           <div className="col-md-12">
             <img
               tabIndex="1"
-              src="/assets/images/learning_workflow.png"
+              src="/assets/images/celligner_diagram.png"
               className="img-fluid center-help mb-5"
               data-toggle="tooltip"
               data-placement="top"
