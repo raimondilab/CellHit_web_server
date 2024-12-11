@@ -85,9 +85,9 @@ useEffect(() => {
   const [source, setSource] = useState("");
   const [oncotreeCode, setOncotreeCode]  = useState("");
 
-  const uniqueTissue = [...new Set(umapData.map(item => item.tissue))];
-  const uniqueSource = [...new Set(umapData.map(item => item.Source))]
-  const uniqueOncotree = [...new Set(umapData.map(item => item.oncotree_code))];
+  const uniqueTissue = [...new Set(umapData.map(item => item.tissue))].sort();
+  const uniqueSource = [...new Set(umapData.map(item => item.Source))].sort();
+  const uniqueOncotree = [...new Set(umapData.map(item => item.oncotree_code))].sort();
 
   const handleTissue = (e) => setTissue(e.target.value);
   const handleSource = (e) => setSource(e.target.value);
