@@ -98,7 +98,8 @@ with open(PARENT_DIR / 'src/tcga_to_code_map.json') as f:
     tcga_code_map = json.load(f)
 
 # read overall umap
-umap_df = pd.read_csv( PARENT_DIR / 'src/overall_umap_df.csv',index_col=0)
+umap_df = pd.read_csv(PARENT_DIR / 'src/overall_umap_df.csv', index_col=0)
+
 
 # inference_paths_gdsc = InferencePaths(
 #     cellhit_data=PARENT_DIR / '/src/data',
@@ -129,8 +130,11 @@ def analysis(self, file, dataset):
         # Get TCGA_CODE code
         code = str(df['TCGA_CODE'].unique()[0])
 
+        # Get Tissue
+        tissue = ''.join(df['TISSUE'].unique())
+
         # Drop TCGA_CODE
-        df = df.drop(columns=['TCGA_CODE'])
+        df = df.drop(columns=['TCGA_CODE', 'TISSUE'])
 
         # gbm code
         gbm_code = tcga_code_map.get(code)
@@ -142,8 +146,8 @@ def analysis(self, file, dataset):
         covariate_labels = [gbm_code] * len(data)
 
         # Step 2: Classification
-        self.update_state(state='PROGRESS', meta='Classification')
-        results_pipeline['classification'] = classify_samples(data, preprocess_paths)
+        # self.update_state(state='PROGRESS', meta='Classification')
+        # results_pipeline['classification'] = classify_samples(data, preprocess_paths)
 
         # Step 3: Batch correction
         self.update_state(state='PROGRESS', meta='Batch correction')
@@ -171,22 +175,30 @@ def analysis(self, file, dataset):
                 columns=['UMAP1', 'UMAP2'],
                 index=transformed.index
             )
-            #results_pipeline['umap'] = umap_results
 
-        umap = pd.concat([umap_df, umap_results])
+            umap_results['Source'] = code
+            umap_results['oncotree_code'] = code
+            umap_results['tissue'] = tissue
+            umap_results = umap_results.reset_index()
 
-        print(umap)
+            results_pipeline['umap'] = umap_results
 
-        #umap = umap_results.to_dict(orient='records')
+        # Mapping new sample into umap space
+        umap_concat = pd.concat([umap_df, results_pipeline['umap']])
 
-        #results_pipeline['transformed'] = transformed
+        # Reset index
+        umap_concat = umap_concat.reset_index(drop=True)
 
+        # Convert umap data in json format
+        umap_json = umap_concat.to_dict(orient='index')
+
+        results_pipeline['transformed'] = transformed
 
         # Step 6: Inference
         self.update_state(state='PROGRESS', meta='Inference')
 
         # if dataset == "gdsc":
-        #     result_df, heatmap_df = run_full_inference(transformed,
+        #     result_df, heatmap_df = run_full_inference(results_pipeline['transformed'],
         #                                                dataset=dataset,
         #                                                inference_paths=inference_paths_gdsc,
         #                                                return_heatmap=True)
@@ -198,22 +210,9 @@ def analysis(self, file, dataset):
             "table": {
                 "data_loading": "success"
             },
-            "umap": {
-                "0": {"UMAP1": -85.51314, "UMAP2": 1135.882, "tissue": "CNS/Brain", "oncotree_code": "GBM",
-                      "Source": "TCGA", "index": "TCGA-19-1787-01"},
-                "1": {"UMAP1": -196.9247, "UMAP2": 1441.3835, "tissue": "Prostate", "oncotree_code": "ODG",
-                      "Source": "CCLE", "index": "ACH-000285"},
-                "2": {"UMAP1": 110.69679, "UMAP2": -849.85754, "tissue": "Bowel", "oncotree_code": "COAD",
-                      "Source": "FPS",
-                      "index": "FPS_GB101-1_S3"},
-                "3": {"UMAP1": 115.69679, "UMAP2": -869.85754, "tissue": "Bowel", "oncotree_code": "ODG",
-                      "Source": "FPS",
-                      "index": "FPS_GB101-2_S4"},
-                "4": {"UMAP1": -902.91925, "UMAP2": -430.4279, "tissue": "Liver", "oncotree_code": "HCC",
-                      "Source": "FPS",
-                      "index": "FPS_GB101-2_S5"}
-            },
+            "umap": umap_json,
         }
+
         return result
 
     except Exception as e:
@@ -243,7 +242,7 @@ def preprocess_data(data, code):
 
     # Reset the index and modify it
     data = data.reset_index()
-    data['index'] = data['index'].apply(lambda x: code + x)
+    data['index'] = data['index'].apply(lambda x: code + '_' + x)
     data = data.set_index('index')
 
     # Add 1 to all values and take the log2
