@@ -3,7 +3,6 @@ import Plot from 'react-plotly.js';
 
 const HeatMap = ({ jsonData }) => {
 
-
   const parsedData = useMemo(() => JSON.parse(jsonData), [jsonData]);
   const { data, layout } = parsedData;
 

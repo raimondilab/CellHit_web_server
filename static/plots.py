@@ -1,24 +1,15 @@
-import clustergram as clu
+import static.clustergram as clu
 
 
 # Draw clustergram
-def clustergram(data, annotation, index_column="PATHWAY_NAME", color_bar_title="ES",
+def clustergram(data, index_column="index", color_bar_title="IC50",
                 tick_vals=None, height=500, width=500, auto_size=False, xpad=100, zmin=-3, zmax=3):
 
     # Drop rows with all NaN values and fill NaN with 0
     data = data.dropna(subset=data.columns[1:], how="all").fillna(0)
-    annotation = annotation.dropna(subset=annotation.columns[1:], how="all").fillna(0)
 
     # Sort the DataFrame
     data = data.sort_values(by=index_column, ignore_index=True).reset_index(drop=True)
-    annotation = annotation.sort_values(by=index_column, ignore_index=True).reset_index(drop=True)
-
-    # Replace values less than 0.01 with "*"
-    for column in annotation.columns[1:]:
-        annotation[column.strip()] = annotation[column].apply(lambda x: '*' if float(x) < 0.01 and x != 0 else "")
-
-    # Set the first column as the index
-    annotation = annotation.set_index(index_column)
 
     # Create the clustergram figure
     fig = clu.Clustergram(
@@ -31,7 +22,6 @@ def clustergram(data, annotation, index_column="PATHWAY_NAME", color_bar_title="
         display_ratio=0.15,
         zmin=zmin,
         zmax=zmax,
-        text=annotation,
         center_values=False,
         colorbar=dict(
             xpad=xpad,
