@@ -34,14 +34,14 @@ const ScatterPlot = ({ umapData }) => {
     CCLE: 'diamond',
   };
 
-  const plotlyPalette = [
-  "#E13978", "#F5899E", "#C091E3", "#E08571", "#9F55BB", "#45A132", "#96568E",
-  "#5AB172", "#DFBC3A", "#349077", "#D8AB6A", "#75DFBB", "#5DA134", "#1F8FFF",
-  "#9C5E2B", "#51D5E0", "#ABD23F", "#DA45BB", "#555555", "#56E79D", "#B644DC",
-  "#73E03D", "#3870C9", "#6C55E2", "#5FDB69", "#659FD9", "#D74829", "#bdbdbd",
-  "#E491C1", "#348ABD", "#A60628", "#7A68A6", "#467821", "#CF4457", "#188487",
-  "#E24A33", "#FBC15E", "#8EBA42", "#988ED5", "#FFB5B8", "#FFC0CB", "#CD5C5C"
-  ];
+      const plotlyPalette = [
+      "#E13978", "#F5899E", "#C091E3", "#E08571", "#9F55BB", "#45A132", "#96568E",
+      "#5AB172", "#DFBC3A", "#349077", "#D8AB6A", "#75DFBB", "#5DA134", "#1F8FFF",
+      "#9C5E2B", "#51D5E0", "#ABD23F", "#DA45BB", "#555555", "#56E79D", "#B644DC",
+      "#73E03D", "#3870C9", "#6C55E2", "#5FDB69", "#659FD9", "#D74829", "#bdbdbd",
+      "#E491C1", "#348ABD", "#A60628", "#7A68A6", "#467821", "#CF4457", "#188487",
+      "#E24A33", "#FBC15E", "#8EBA42", "#988ED5", "#FFB5B8", "#FFC0CB", "#CD5C5C"
+      ];
 
     // Static color palette for tissue types
     const tissueTypes = [
@@ -80,7 +80,7 @@ const ScatterPlot = ({ umapData }) => {
         type: 'scatter',
         name: name,
         text: `${item.tissue}, ${item.oncotree_code}, ${item.index}`,
-        showlegend: showLegend,
+        showlegend: false,
         marker: {
           size: 6,
           color: getColorForTissue(item.tissue),

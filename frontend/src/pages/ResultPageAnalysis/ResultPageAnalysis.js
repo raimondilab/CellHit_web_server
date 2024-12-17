@@ -10,7 +10,9 @@ import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 import { Link } from 'react-router-dom';
 import { Dialog } from 'primereact/dialog';
-
+import Swal from 'sweetalert2';
+import axios from 'axios';
+import { ProgressSpinner } from 'primereact/progressspinner';
 
 import { TabView, TabPanel } from 'primereact/tabview';
 
@@ -19,67 +21,90 @@ const ResultPageAnalysis = () => {
 
 const navigate = useNavigate();
 const location = useLocation();
-const [loadFunctionalInfo, setLoadFunctionalInfo] = useState(false);
+const [load, setLoad] = useState(false);
 
 const [task, setTask] = useState("");
 const [result, setResult] = useState("");
 
+// Get task results
+async function getTaskResults(taskID) {
+    try {
+        const query = {
+            query: `
+                query getTask {
+                    getTask (taskId: "${taskID}") {
+                        taskId
+                        result
+                    }
+                }
+            `
+        };
+
+        const apiUrl = 'http://127.0.0.1:8003/graphql';
+        const taskData = await axios.post(apiUrl, query);
+
+        if (!taskData.data.data || taskData.data.errors) {
+            Swal.fire({
+                icon: "error",
+                text: "Oops... An error has occurred!"
+            });
+
+        } else if (taskData) {
+
+            const taskId = taskData.data.data.getTask.taskId;
+            const result = taskData.data.data.getTask.result;
+
+            setTask(taskId || "");
+            setResult(result ||  "" );
+
+        }
+    } catch (error) {
+        Swal.fire({
+            icon: "error",
+            text: error.message
+        });
+    }
+}
+
+
 useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    const urlTask = query.get('taskId');
 
-        const query = new URLSearchParams(location.search);
-        const urlTask = query.get('taskId');
+    if (urlTask) {
+        // If URL parameter exists, fetch results
+        setLoad(true);
+        setTask(urlTask);
+        getTaskResults(urlTask).then(() => setLoad(false));
+    } else if (location.state) {
+        // If state exists, use it directly
+        const { taskID, data } = location.state;
+        setTask(taskID || "");
+        setResult(data || "");
+        setLoad(false);
+    } else {
+        // Redirect if no valid data
+        navigate('/');
+    }
 
-        if (!location.state) {
-
-            // Set state from URL parameters
-            setTask(urlTask);
-            setLoadFunctionalInfo(true);
-
-            if(urlTask){
-
-//               sendExploreData(urlTarget, urlType)
-//              .then(data => {
-//                if (data) {
-//                  setInfo(data.data || []);
-//                  setLoadFunctionalInfo(false);
-//                } else {
-//                  console.log('No data received!');
-//                  setInfo([]); // Handle empty or undefined data
-//                  setLoadFunctionalInfo(false);
-//                }
-//              })
-//              .catch(error => {
-//                console.log('Error fetching data:', error);
-//                setInfo([]); // Handle the error scenario
-//                setLoadFunctionalInfo(false);
-//              });
+}, [location.search, navigate]);
 
 
-            } else {
-            // If neither URL parameters nor location.state are present, navigate to home
-            navigate('/');
-        }
+  const [height, setHeight] = useState("500");
 
-        } else if (location.state) {
-            // Fallback to location.state if URL parameters are not present
-            const state = location.state;
-            console.log(state.data)
-            setTask(state.taskID || "");
-            setResult( state.data ||  "" )
-            console.log(state.data)
-            setLoadFunctionalInfo(false);
-
-        } else {
-            // If neither URL parameters nor location.state are present, navigate to home
-            navigate('/');
-        }
-    }, [location.search, location.state, navigate]);
-
-  const [height, setHeight] = useState("819.26");
-
-
+  useEffect(() => {
+      if (result.height) {
+        setHeight(Object.values(result.height));
+      } else {
+        setHeight("500");
+      }
+    }, [result.height]);
 
   const umapData = result.umap ? Object.values(result.umap) : []
+  const inferenceData = result.table ? Object.values(result.table) : []
+  const heatmapData = result.heatmap ? result.heatmap : "{}"
+
+  console.log(inferenceData)
 
   const [tissue, setTissue] = useState("");
   const [source, setSource] = useState("");
@@ -114,14 +139,23 @@ const umapDataFiltered = useMemo(() => {
   };
 
 
-const jsonData = "{}"
-
     return (
     <>
     <Helmet>
         <title>CellHit | Result</title>
       </Helmet>
       <Header/>
+        { load &&  (
+         <section className="py-9">
+             <div className="container">
+                 <div className="row mb-4">
+                    <ProgressSpinner style={{width: '50px', height: '50px'}}
+                    strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s" />
+                 </div>
+              </div>
+           </section>
+        )}
+        {(!load) && (
         <section className="py-9">
         <div className="container">
         <div className="row">
@@ -199,7 +233,7 @@ const jsonData = "{}"
                    onClick={() => show('top-right')} text size="small" className="btn-dialog" /></sup></h4>
                     <div className="row">
                       <div className="col-12 nopadding">
-                          <InferenceTable inferenceData={[]}/>
+                          <InferenceTable inferenceData={inferenceData}/>
                     </div>
                     </div>
                 </TabPanel>
@@ -209,7 +243,7 @@ const jsonData = "{}"
                     <div className="row">
                       <div className="col-12 nopadding">
                         <div className="rounded-3 shadow img-fluid" style={{ height: height}}>
-                         <HeatMap jsonData={jsonData}/>
+                         <HeatMap jsonData={heatmapData}/>
                     </div>
                     </div>
                     </div>
@@ -219,6 +253,7 @@ const jsonData = "{}"
           </div>
         </div>
       </section>
+       )}
     <Footer/>
     </>
   );

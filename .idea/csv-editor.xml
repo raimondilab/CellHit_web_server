@@ -52,7 +52,14 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\test.csv">
+        <entry key="\tasks\heatmap.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\tasks\predictions.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

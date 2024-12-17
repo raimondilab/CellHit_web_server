@@ -56,8 +56,7 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit }) => {
         );
     };
 
-    // Get task status
-    // Get task status
+// Get task status
 async function getTaskStatus() {
     try {
         const query = {
@@ -74,22 +73,16 @@ async function getTaskStatus() {
         const apiUrl = 'http://127.0.0.1:8003/graphql';
         const taskData = await axios.post(apiUrl, query);
 
-        if (!taskData) {
-            Swal.fire({
-                icon: "info",
-                text: "No results found!"
-            });
-            return;
-        } else if (taskData.data.errors) {
-            clearInterval(statusInterval.current);
-
+        if (!taskData.data.data || taskData.data.errors) {
+           clearInterval(statusInterval.current);
             Swal.fire({
                 icon: "error",
-                 html: "Oops... An error has occurred! <br>" + taskData.data.errors[0].message.replace(/\n/g, "<br>")
+                text: "Oops... An error has occurred!"
             });
             setIsSubmit(false);
 
         } else if (taskData) {
+
             const newStatus = taskData.data.data.getTask.status;
             const result = taskData.data.data.getTask.result;
 
@@ -113,6 +106,7 @@ async function getTaskStatus() {
         }
     } catch (error) {
         clearInterval(statusInterval.current);
+        setIsSubmit(false);
         Swal.fire({
             icon: "error",
             text: error.message

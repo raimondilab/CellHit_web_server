@@ -40,19 +40,17 @@ const InferenceTable = ({ inferenceData }) => {
  const [selectedDrugs, setSelectedDrugs] = useState([]);
  const [selectedColumns, setSelectedColumns] = useState(columnsDefault);
 
- const [dataset, setDataset] = useState();
  const datasets = [
         { label: 'GDSC', value: 'GDSC' },
-        { label: 'Prism', value: 'Prism' }
+        { label: 'PRISM ', value: 'PRISM' }
         ];
-
-     const [drugName, setDrugName] = useState();
 
     // Extract unique drugs
     const uniqueDrugs = [
     ...new Set(inferenceData.map(inference => inference.DrugName?.trim()))
     ].filter(drug => drug) // Remove any undefined/null values
     .map(drug => ({ label: drug, value: drug }));
+
 
    const onColumnToggle = (event) => {
     const selectedFieldNames = event.value;
@@ -143,19 +141,12 @@ const exportCSV = (tableRef, selectionOnly) => {
 
   const header = (
   <div className="row align-items-center">
-      <div className="col mb-2">
+      <div className="col">
           <div className="flex justify-content-end">
-                <IconField iconPosition="left">
-                    <InputIcon className="pi pi-search" />
-                    <InputText value={value || ''} onChange={onGlobalFilterChange} placeholder="Global Search" />
-                </IconField>
-            </div>
-      </div>
-      <div className="col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-          <MultiSelect
+                 <MultiSelect
                 value={selectedDatasets} // Correctly tied to state
                 options={datasets} // Options remain the same
-                onChange={onColumnToggle} // Update state
+                onChange={(e) => setSelectedDatasets(e.value)} // Update state
                 optionLabel="label"
                 optionValue="value"
                 display="chip"
@@ -172,6 +163,19 @@ const exportCSV = (tableRef, selectionOnly) => {
                 placeholder="Filter by drug"
                 style={{ width: '200px', marginRight: '10px' }}
             />
+{/*              <MultiSelect */}
+{/*                 value={selectedTissues} // Correctly tied to state */}
+{/*                 options={uniqueTissue} // Ensure uniqueDrugs has correct structure */}
+{/*                 onChange={(e) => setSelectedTissues(e.value)} // Update state */}
+{/*                 optionLabel="label" */}
+{/*                 optionValue="value" */}
+{/*                 display="chip" */}
+{/*                 placeholder="Filter by tissue" */}
+{/*                 style={{ width: '200px', marginRight: '10px' }} */}
+{/*             /> */}
+            </div>
+      </div>
+      <div className="col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
           <MultiSelect
                 value={visibleColumns.map(col => col.field)}
                 options={multiSelectOptions}
