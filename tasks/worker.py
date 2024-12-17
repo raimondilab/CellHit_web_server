@@ -217,6 +217,7 @@ def analysis(self, file, dataset):
             predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].fillna("No putative target")
             predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].astype(str)
             predictions_df['TopGenes'] = predictions_df['TopGenes'].astype(str)
+            predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].fillna("No tissue")
             predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].astype(str)
 
             predictions_df['dataset'] = "GDSC"
