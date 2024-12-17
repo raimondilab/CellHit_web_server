@@ -1,9 +1,9 @@
 import json
 import os
-import sys
-import time
+
 import pandas as pd
 import numpy as np
+import ast
 
 from celery import Celery
 from celery.result import AsyncResult
@@ -11,6 +11,7 @@ from subprocess import Popen
 from io import StringIO
 
 from pathlib import Path
+from static import plots as pt
 
 from parametric_umap import ParametricUMAP
 
@@ -101,19 +102,19 @@ with open(PARENT_DIR / 'src/tcga_to_code_map.json') as f:
 umap_df = pd.read_csv(PARENT_DIR / 'src/overall_umap_df.csv', index_col=0)
 
 
-# inference_paths_gdsc = InferencePaths(
-#     cellhit_data=PARENT_DIR / '/src/data',
-#     ccle_transcr_neighs=PARENT_DIR / '/src/ccle_transcr_neighs.pkl',
-#     tcga_transcr_neighs=PARENT_DIR / 'src/tcga_transcr_neighs.pkl',
-#     ccle_response_neighs=PARENT_DIR /'src/ccle_response_neighs.pkl',
-#     tcga_response_neighs=PARENT_DIR /'src/tcga_response_neighs.pkl',
-#     pretrained_models_path=PARENT_DIR / f'src/gdsc',
-#     drug_stats=PARENT_DIR /'src/gdsc_drug_stats.csv',
-#     drug_metadata=PARENT_DIR /'src/data/',
-#     quantile_computer=PARENT_DIR /'src/gdcs_quantile_computer.npy',
-#     ccle_metadata=PARENT_DIR / 'src/Model.csv',
-#     tcga_metadata=PARENT_DIR / 'src/tcga_oncotree_data.csv'
-# )
+inference_paths_gdsc = InferencePaths(
+    cellhit_data=PARENT_DIR / '/src/data',
+    ccle_transcr_neighs=PARENT_DIR / '/src/ccle_transcr_neighs.pkl',
+    tcga_transcr_neighs=PARENT_DIR / 'src/tcga_transcr_neighs.pkl',
+    ccle_response_neighs=PARENT_DIR /'src/ccle_response_neighs.pkl',
+    tcga_response_neighs=PARENT_DIR /'src/tcga_response_neighs.pkl',
+    pretrained_models_path=PARENT_DIR / 'src/gdsc',
+    drug_stats=PARENT_DIR /'src/gdsc_drug_stats.csv',
+    drug_metadata=PARENT_DIR /'src/data/',
+    quantile_computer=PARENT_DIR /'src/gdcs_quantile_computer.npy',
+    ccle_metadata=PARENT_DIR / 'src/Model.csv',
+    tcga_metadata=PARENT_DIR / 'src/tcga_oncotree_data.csv'
+)
 
 
 @celery.task(bind=True)
@@ -197,19 +198,39 @@ def analysis(self, file, dataset):
         # Step 6: Inference
         self.update_state(state='PROGRESS', meta='Inference')
 
-        # if dataset == "gdsc":
-        #     result_df, heatmap_df = run_full_inference(results_pipeline['transformed'],
-        #                                                dataset=dataset,
-        #                                                inference_paths=inference_paths_gdsc,
-        #                                                return_heatmap=True)
-        #
-        # print(result_df, heatmap_df)
+        if dataset == "gdsc":
+            result_df = run_full_inference(results_pipeline['transformed'],
+                                                   dataset=dataset,
+                                                   inference_paths=inference_paths_gdsc,
+                                                   return_heatmap=True)
+
+            heatmap_df = result_df['heatmap_data']
+
+            # Draw heatmap
+            heatmap_json = draw_heatmap(heatmap_df)
+
+            # Set up predictions dataframe
+            predictions_df = result_df['predictions']
+            predictions_df = predictions_df.drop(columns=['Unnamed: 0'])
+
+            predictions_df['RecoveredTargets'] = predictions_df['RecoveredTargets'].fillna("No recovered targets")
+            predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].fillna("No putative target")
+            predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].astype(str)
+            predictions_df['TopGenes'] = predictions_df['TopGenes'].astype(str)
+            predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].astype(str)
+
+            predictions_df['dataset'] = "GDSC"
+
+            predictions_df = predictions_df.reset_index(drop=True)
+
+            predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].apply(preprocess_shap_dict)
+
+            predictions_json = predictions_df.to_dict(orient='records')
 
         result = {
-            "heatmap": "completed",
-            "table": {
-                "data_loading": "success"
-            },
+            "heatmap": heatmap_json[0],
+            "height": heatmap_json[1],
+            "table": predictions_json,
             "umap": umap_json,
         }
 
@@ -249,3 +270,31 @@ def preprocess_data(data, code):
     data = data.apply(lambda x: np.log2(x + 1))
 
     return data
+
+
+def draw_heatmap(heatmap_df):
+    # Exclude non-numeric columns
+    numeric_data = heatmap_df.select_dtypes(include='number')
+
+    # Identify columns with all positive or all negative values
+    columns_to_remove = numeric_data.columns[(numeric_data.gt(0).all() | numeric_data.lt(0).all())]
+
+    # Drop these columns from the original dataframe
+    processed_data = heatmap_df.drop(columns=columns_to_remove)
+
+    height = len(heatmap_df) * 20
+    width = len(processed_data) * 100
+
+    return pt.clustergram(processed_data, height=height, width=width, xpad=70), height
+
+
+# Preprocess 'ShapDictionary' to replace `np.float32(...)` with plain float values
+def preprocess_shap_dict(shap_str):
+    try:
+        # Replace `np.float32(value)` with `value`
+        shap_str = shap_str.replace("np.float32(", "").replace(")", "")
+        # Convert the string into a dictionary
+        return ast.literal_eval(shap_str)
+    except Exception as e:
+        print(f"Error parsing ShapDictionary: {shap_str}")
+        raise e
