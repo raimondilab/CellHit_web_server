@@ -6,12 +6,14 @@ import axios from 'axios';
 import HeaderTitleRunCellHit from '../../components/HeaderTitleRunCellHit/HeaderTitleRunCellHit';
 import Swal from 'sweetalert2';
 import { Link } from 'react-router-dom';
+import {useNavigate} from "react-router-dom";
 
 const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
 
+  const navigate = useNavigate();
   const [position, setPosition] = useState('center');
   const [visible, setVisible] = useState(false);
-  const initialValues = { target: "" };
+  const initialValues = { taskId: "" };
   const [formValues, setFormValues] = useState(initialValues);
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setIsLoading] = useState(false);
@@ -48,6 +50,8 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
   // Get results by taskId
   const handleFormSubmitTask = (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    getTaskResults();
   };
 
 
@@ -102,6 +106,60 @@ const handleDownload = () => {
         const downloadUrl = 'http://127.0.0.1:8003/api/download/GBM.csv';
         window.open(downloadUrl, '_blank');
 };
+
+// Get task results
+async function getTaskResults() {
+    try {
+        const query = {
+            query: `
+                query getTask {
+                    getTask (taskId: "${formValues.target}") {
+                        taskId
+                        result
+                    }
+                }
+            `
+        };
+
+        const apiUrl = 'http://127.0.0.1:8003/graphql';
+        const taskData = await axios.post(apiUrl, query);
+
+        if (!taskData.data.data || taskData.data.errors) {
+            Swal.fire({
+                icon: "error",
+                text: "Oops... An error has occurred!"
+            });
+
+        } else if (taskData) {
+
+            const taskID = taskData.data.data.getTask.taskId;
+            const result = taskData.data.data.getTask.result;
+
+            if (taskID !== "PENDING"){
+
+                   // Append the form values as query parameters to the URL
+                   const url = new URL(window.location.href);
+                   url.searchParams.set('taskId', taskID);
+
+                   // Navigate to result page
+                   navigate('/result/' + url.search, { state: { taskID: taskID, data: result } });
+          } else {
+              Swal.fire({
+                icon: "info",
+                text: "No result found!"
+            });
+             setIsLoading(false);
+          }
+
+        }
+    } catch (error) {
+        Swal.fire({
+            icon: "error",
+            text: error.message
+        });
+    }
+}
+
 
   return (
     <>

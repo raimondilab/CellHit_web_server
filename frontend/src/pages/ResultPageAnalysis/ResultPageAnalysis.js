@@ -71,7 +71,7 @@ useEffect(() => {
     const query = new URLSearchParams(location.search);
     const urlTask = query.get('taskId');
 
-    if (urlTask) {
+    if (!location.state && urlTask) {
         // If URL parameter exists, fetch results
         setLoad(true);
         setTask(urlTask);
@@ -87,7 +87,7 @@ useEffect(() => {
         navigate('/');
     }
 
-}, [location.search, navigate]);
+}, [location.state, navigate]);
 
 
   const [height, setHeight] = useState("500");
