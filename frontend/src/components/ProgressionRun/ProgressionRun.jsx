@@ -70,7 +70,7 @@ async function getTaskStatus() {
             `
         };
 
-        const apiUrl = 'http://127.0.0.1:8003/graphql';
+        const apiUrl = 'https://test.bioinfolab.sns.it/graphql';
         const taskData = await axios.post(apiUrl, query);
 
         if (!taskData.data.data || taskData.data.errors) {

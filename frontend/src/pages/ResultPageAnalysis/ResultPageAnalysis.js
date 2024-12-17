@@ -40,7 +40,7 @@ async function getTaskResults(taskID) {
             `
         };
 
-        const apiUrl = 'http://127.0.0.1:8003/graphql';
+        const apiUrl = 'https://test.bioinfolab.sns.it/graphql';
         const taskData = await axios.post(apiUrl, query);
 
         if (!taskData.data.data || taskData.data.errors) {
@@ -72,11 +72,13 @@ useEffect(() => {
     const urlTask = query.get('taskId');
 
     if (!location.state && urlTask) {
+
         // If URL parameter exists, fetch results
         setLoad(true);
         setTask(urlTask);
         getTaskResults(urlTask).then(() => setLoad(false));
-    } else if (location.state) {
+
+    } else if (location.state && urlTask) {
         // If state exists, use it directly
         const { taskID, data } = location.state;
         setTask(taskID || "");
@@ -87,7 +89,7 @@ useEffect(() => {
         navigate('/');
     }
 
-}, [location.state, navigate]);
+}, [location.search, location.state, navigate]);
 
 
   const [height, setHeight] = useState("500");

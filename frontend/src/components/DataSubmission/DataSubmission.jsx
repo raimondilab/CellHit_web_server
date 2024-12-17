@@ -76,7 +76,7 @@ async function sendFile() {
     formData.append("map", JSON.stringify({ 0: ["variables.file"] }));
     formData.append("0", selectedFile);  // Add file to the request
 
-    const apiUrl = 'http://127.0.0.1:8003/graphql';
+    const apiUrl = 'https://test.bioinfolab.sns.it/graphql';
     const response = await axios.post(apiUrl, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -121,7 +121,7 @@ async function getTaskResults() {
             `
         };
 
-        const apiUrl = 'http://127.0.0.1:8003/graphql';
+        const apiUrl = 'https://test.bioinfolab.sns.it/graphql';
         const taskData = await axios.post(apiUrl, query);
 
         if (!taskData.data.data || taskData.data.errors) {
