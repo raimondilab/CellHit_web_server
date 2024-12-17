@@ -1,4 +1,4 @@
-import React, {  useState, useRef } from 'react';
+import React, {  useState, useRef, useEffect } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';
@@ -18,22 +18,28 @@ const InferenceTable = ({ inferenceData }) => {
   const dt = useRef(null);
 
   const columnsDefault = [
-      { field: 'drugName', header: 'Drug Name' },
-      { field: 'source', header: 'Source' },
-      { field: 'sampleIndex', header: 'Sample' },
-      { field: 'predictions', header: 'Predictions' },
-      { field: 'predictionsStd', header: 'Predictions Std' },
-      { field: 'quantileScore', header: 'Quantile Score' },
-      { field: 'putativeTarget', header: 'Putative Target' },
-      { field: 'topLocalShapGenes', header: 'Top Genes' }
+      { field: 'DrugName', header: 'DrugName' },
+      { field: 'index', header: 'index' },
+      { field: 'prediction', header: 'prediction' },
+      { field: 'std', header: 'std' },
+      { field: 'QuantileScore', header: 'QuantileScore' },
+      { field: 'PutativeTarget', header: 'PutativeTarget' },
+      { field: 'TopGenes', header: 'TopGenes' }
     ];
 
  inferenceData.forEach(obj => delete obj["__typename"]);
 
- const columns = Object.keys(inferenceData[0] || ['']);
+ const columns = Object.keys(inferenceData[0] || [''])
+     .filter(col => col) // Remove any undefined/null values
+    .map(col => ({ field: col, header: col }));
 
  const multiSelectOptions = columns.map(col => ({ label: col.header, value: col.field }));
  const [visibleColumns, setVisibleColumns] = useState(columnsDefault);
+
+ const [selectedDatasets, setSelectedDatasets] = useState([]);
+ const [selectedDrugs, setSelectedDrugs] = useState([]);
+ const [selectedColumns, setSelectedColumns] = useState(columnsDefault);
+
  const [dataset, setDataset] = useState();
  const datasets = [
         { label: 'GDSC', value: 'GDSC' },
@@ -41,21 +47,40 @@ const InferenceTable = ({ inferenceData }) => {
         ];
 
      const [drugName, setDrugName] = useState();
-     const drugNames = inferenceData .map(inference => ({
-                        drugName: inference.drugName.trim()
-                    }));
 
     // Extract unique drugs
-    const uniqueDrugs = [...new Set(drugNames.map(r => r.drugName))];
+    const uniqueDrugs = [
+    ...new Set(inferenceData.map(inference => inference.DrugName?.trim()))
+    ].filter(drug => drug) // Remove any undefined/null values
+    .map(drug => ({ label: drug, value: drug }));
 
    const onColumnToggle = (event) => {
     const selectedFieldNames = event.value;
     const updatedVisibleColumns = columns.filter(col => selectedFieldNames.includes(col.field));
-    setVisibleColumns(updatedVisibleColumns);
+     setVisibleColumns(updatedVisibleColumns);
+     setSelectedColumns(event.value);
    };
 
+  const [filteredData, setFilteredData] = useState(inferenceData);
+
+  // Function to filter inferenceData based on selectedDrugs and selectedDatasets
+  useEffect(() => {
+    let data = [...inferenceData];
+
+    if (selectedDatasets.length > 0) {
+      data = data.filter((item) => selectedDatasets.includes(item.dataset));
+    }
+
+    if (selectedDrugs.length > 0) {
+      data = data.filter((item) => selectedDrugs.includes(item.DrugName));
+    }
+
+    setFilteredData(data);
+  }, [selectedDrugs, selectedDatasets, inferenceData]);
+
+
   const dynamicColumns = visibleColumns.map((col) => {
-    return <Column key={col.field} field={col.field} header={col.header} />;
+    return <Column key={col.field} field={col.field} header={col.header} sortable />;
  });
 
 const exportCSV = (tableRef, selectionOnly) => {
@@ -127,38 +152,36 @@ const exportCSV = (tableRef, selectionOnly) => {
             </div>
       </div>
       <div className="col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-      <MultiSelect
-              value={dataset}
-              options={multiSelectOptions}
-              onChange={(e) => setDataset(e.value)}
-              options={datasets}
-              optionLabel="label"
-              optionValue="value"
-              display="chip"
-              placeholder="Select datasets"
-              style={{ width: '200px', marginRight: '10px' }}
-          />
           <MultiSelect
-              value={drugName}
-              options={multiSelectOptions}
-              onChange={(e) => setDrugName(e.value)}
-              options={drugNames}
-              optionLabel="label"
-              optionValue="value"
-              display="chip"
-              placeholder="Select drugs"
-              style={{ width: '200px', marginRight: '10px' }}
-          />
+                value={selectedDatasets} // Correctly tied to state
+                options={datasets} // Options remain the same
+                onChange={onColumnToggle} // Update state
+                optionLabel="label"
+                optionValue="value"
+                display="chip"
+                placeholder="Filter by dataset"
+                style={{ width: '200px', marginRight: '10px' }}
+            />
           <MultiSelect
-              value={visibleColumns.map(col => col.field)}
-              options={multiSelectOptions}
-              onChange={onColumnToggle}
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Select columns"
-              display="chip"
-              style={{ width: '200px', marginRight: '10px' }}
-          />
+                value={selectedDrugs} // Correctly tied to state
+                options={uniqueDrugs} // Ensure uniqueDrugs has correct structure
+                onChange={(e) => setSelectedDrugs(e.value)} // Update state
+                optionLabel="label"
+                optionValue="value"
+                display="chip"
+                placeholder="Filter by drug"
+                style={{ width: '200px', marginRight: '10px' }}
+            />
+          <MultiSelect
+                value={visibleColumns.map(col => col.field)}
+                options={multiSelectOptions}
+                onChange={onColumnToggle}
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Select columns"
+                display="chip"
+                style={{ width: '200px', marginRight: '10px' }}
+            />
           <Button type="button" icon="pi pi-file" className="p-button-rounded p-mr-2" onClick={() => exportCSV(dt, false)} data-pr-tooltip="CSV" />
           <Button type="button" icon="pi pi-file-excel" className="p-button-success p-button-rounded p-mr-2" onClick={() => exportExcel(inferenceData)} data-pr-tooltip="XLS" />
           <Button type="button" icon="pi pi-file-pdf" className="p-button-warning p-button-rounded" onClick={() => exportPdf(inferenceData, columns)} data-pr-tooltip="PDF" />
@@ -169,8 +192,8 @@ const exportCSV = (tableRef, selectionOnly) => {
 
 return (
 <>
- <DataTable ref={dt} value={inferenceData} paginator rows={5}  emptyMessage="No inference found."
- removableSort header={header} filters={filters}
+ <DataTable ref={dt} value={filteredData} paginator rows={5}  emptyMessage="No inference found."
+ removableSort header={header} filters={filters}   removableSort
  onFilter={(e) => setFilters(e.filters)} tableStyle={{ minWidth: '50rem' }}>
           {dynamicColumns}
   </DataTable>
