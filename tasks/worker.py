@@ -198,6 +198,7 @@ def analysis(self, file, dataset):
         # Step 6: Inference
         self.update_state(state='PROGRESS', meta='Inference')
 
+        dataset = dataset.lower()
         if dataset == "gdsc":
             result_df = run_full_inference(results_pipeline['transformed'],
                                                    dataset=dataset,

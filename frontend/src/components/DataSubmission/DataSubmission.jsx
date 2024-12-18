@@ -103,7 +103,7 @@ async function sendFile() {
 }
 
 const handleDownload = () => {
-        const downloadUrl = 'http://127.0.0.1:8003/api/download/GBM.csv';
+        const downloadUrl = 'https://test.bioinfolab.sns.it/api/download/GBM.csv';
         window.open(downloadUrl, '_blank');
 };
 
@@ -115,6 +115,7 @@ async function getTaskResults() {
                 query getTask {
                     getTask (taskId: "${formValues.target}") {
                         taskId
+                        status
                         result
                     }
                 }
@@ -125,6 +126,7 @@ async function getTaskResults() {
         const taskData = await axios.post(apiUrl, query);
 
         if (!taskData.data.data || taskData.data.errors) {
+           setIsLoading(false);
             Swal.fire({
                 icon: "error",
                 text: "Oops... An error has occurred!"
@@ -133,9 +135,18 @@ async function getTaskResults() {
         } else if (taskData) {
 
             const taskID = taskData.data.data.getTask.taskId;
+            const newStatus = taskData.data.data.getTask.status;
             const result = taskData.data.data.getTask.result;
 
-            if (taskID !== "PENDING"){
+            if (taskID === "PROGRESS" ) {
+                Swal.fire({
+                    icon: "info",
+                     html: "The task is still in progress! <br> Currently, it is at this step: " + newStatus.replace(/\n/g, "<br>")
+                });
+               setIsLoading(false);
+            }
+
+            if (newStatus === "SUCCESS"){
 
                    // Append the form values as query parameters to the URL
                    const url = new URL(window.location.href);
@@ -143,7 +154,8 @@ async function getTaskResults() {
 
                    // Navigate to result page
                    navigate('/result/' + url.search, { state: { taskID: taskID, data: result } });
-          } else {
+
+          } else if (taskID === "PENDING" ) {
               Swal.fire({
                 icon: "info",
                 text: "No result found!"
@@ -153,6 +165,7 @@ async function getTaskResults() {
 
         }
     } catch (error) {
+        setIsLoading(false);
         Swal.fire({
             icon: "error",
             text: error.message

@@ -31,7 +31,21 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\src\metadata\tcga_oncotree_data.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\src\overall_umap_df.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\src\tcga_oncotree_data.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
