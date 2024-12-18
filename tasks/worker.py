@@ -103,8 +103,8 @@ umap_df = pd.read_csv(PARENT_DIR / 'src/overall_umap_df.csv', index_col=0)
 
 
 inference_paths_gdsc = InferencePaths(
-    cellhit_data=PARENT_DIR / '/src/data',
-    ccle_transcr_neighs=PARENT_DIR / '/src/ccle_transcr_neighs.pkl',
+    cellhit_data=PARENT_DIR / 'src/data',
+    ccle_transcr_neighs=PARENT_DIR / 'src/ccle_transcr_neighs.pkl',
     tcga_transcr_neighs=PARENT_DIR / 'src/tcga_transcr_neighs.pkl',
     ccle_response_neighs=PARENT_DIR /'src/ccle_response_neighs.pkl',
     tcga_response_neighs=PARENT_DIR /'src/tcga_response_neighs.pkl',
