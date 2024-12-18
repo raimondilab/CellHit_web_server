@@ -17,7 +17,7 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
   const [formValues, setFormValues] = useState(initialValues);
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setIsLoading] = useState(false);
-
+  const [submitted, setSubmitted] = useState(false);
   const [value, setValue] = useState("GDSC");
 
 
@@ -44,6 +44,7 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
   const handleFormSubmit = (e) => {
     e.preventDefault();
     setIsSubmit(true);
+    setSubmitted(true);
     sendFile();
   };
 
@@ -76,7 +77,7 @@ async function sendFile() {
     formData.append("map", JSON.stringify({ 0: ["variables.file"] }));
     formData.append("0", selectedFile);  // Add file to the request
 
-    const apiUrl = 'https://test.bioinfolab.sns.it/graphql';
+    const apiUrl = 'http://127.0.0.1:8003/graphql';
     const response = await axios.post(apiUrl, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -85,6 +86,7 @@ async function sendFile() {
 
     if (response.data.errors) {
       setIsSubmit(false);
+      setSubmitted(false);
       Swal.fire({
         icon: "error",
         text: "Oops... \n An error has occurred!"
@@ -95,6 +97,7 @@ async function sendFile() {
     }
   } catch (error) {
     setIsSubmit(false);
+    setSubmitted(false);
     Swal.fire({
       icon: "error",
       text: error.message,
@@ -112,8 +115,8 @@ async function getTaskResults() {
     try {
         const query = {
             query: `
-                query getTask {
-                    getTask (taskId: "${formValues.target}") {
+                query getResults {
+                    getResults (taskId: "${formValues.target}", step: "umap") {
                         taskId
                         status
                         result
@@ -134,9 +137,9 @@ async function getTaskResults() {
 
         } else if (taskData) {
 
-            const taskID = taskData.data.data.getTask.taskId;
-            const newStatus = taskData.data.data.getTask.status;
-            const result = taskData.data.data.getTask.result;
+            const taskID = taskData.data.data.getResults.taskId;
+            const newStatus = taskData.data.data.getResults.status;
+            const result = taskData.data.data.getResults.result;
 
             if (taskID === "PROGRESS" ) {
                 Swal.fire({
@@ -206,8 +209,14 @@ async function getTaskResults() {
                       PRISM
                     </label>
 
-                  <label htmlFor="search" className="label-btn">Submit</label>
-                  <button id="search" className="btn button shadow-none" type="submit"></button>
+                  <label htmlFor="search" className="label-btn" disabled={submitted}>{submitted ?  <i className="pi pi-spin pi-spinner"></i> : 'Submit'}</label>
+                  <button
+                          id="search"
+                          className="btn button shadow-none"
+                          type="submit"
+                          disabled={submitted}
+                        >
+                        </button>
                 </div>
               </form>
               <span>

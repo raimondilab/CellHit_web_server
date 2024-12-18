@@ -102,34 +102,9 @@ useEffect(() => {
       }
     }, [result.height]);
 
-  const umapData = result.umap ? Object.values(result.umap) : []
+  const umapData = result ? result : "{}"
   const inferenceData = result.table ? Object.values(result.table) : []
   const heatmapData = result.heatmap ? result.heatmap : "{}"
-
-  console.log(inferenceData)
-
-  const [tissue, setTissue] = useState("");
-  const [source, setSource] = useState("");
-  const [oncotreeCode, setOncotreeCode]  = useState("");
-
-  const uniqueTissue = [...new Set(umapData.map(item => item.tissue))].sort();
-  const uniqueSource = [...new Set(umapData.map(item => item.Source))].sort();
-  const uniqueOncotree = [...new Set(umapData.map(item => item.oncotree_code))].sort();
-
-  const handleTissue = (e) => setTissue(e.target.value);
-  const handleSource = (e) => setSource(e.target.value);
-  const handleOncotreeCode = (e) => setOncotreeCode(e.target.value);
-
-// Function to filter UMAP data base on tissue, source or oncoTree code
-const umapDataFiltered = useMemo(() => {
-    return umapData.filter((item) => {
-        const matchesTissue = !tissue || item.tissue === tissue;
-        const matchesSource = !source || item.Source === source;
-        const matchesOncotree = !oncotreeCode || item.oncotree_code === oncotreeCode;
-        return matchesTissue && matchesSource && matchesOncotree;
-    });
-}, [tissue, source, oncotreeCode, umapData]);
-
 
   // Dialog settings
   const [position, setPosition] = useState('center');
@@ -185,47 +160,9 @@ const umapDataFiltered = useMemo(() => {
                 <h4 className="display-6 fw-bold mb-5">UMAP<sup><Button icon="pi pi-info"
                 onClick={() => show('top-right')} text size="small" className="btn-dialog" /></sup></h4>
                  <div className="row">
-                 <div className="col-md-2 mb-2">
-                  <div className="bg-light rounded-3">
-                    <div className="p-3">
-                      <div className="mb-2">
-                        <label htmlFor="tissue" className="form-label">Tissue&nbsp;</label>
-                        <select className="form-select mb-3" name="tissue"  value={tissue}
-                                    onChange={handleTissue}>
-                          <option value=""></option>
-                          {uniqueTissue.sort((a, b) => a - b).map(tissue => (
-                            <option key={tissue} value={tissue}>
-                              {tissue.charAt(0).toUpperCase() + tissue.slice(1)}
-                            </option>
-                          ))}
-                        </select>
-                        <label htmlFor="source" className="form-label">Source&nbsp;</label>
-                        <select className="form-select mb-3" name="source"  value={source}
-                                    onChange={handleSource}>
-                          <option value=""></option>
-                          {uniqueSource.sort((a, b) => a - b).map(source => (
-                            <option key={source} value={source}>
-                              {source.charAt(0).toUpperCase() + source.slice(1)}
-                            </option>
-                          ))}
-                        </select>
-                         <label htmlFor="oncotree_code" className="form-label">Oncotree Code&nbsp;</label>
-                        <select className="form-select mb-3" name="oncotree_code"  value={oncotreeCode}
-                                    onChange={handleOncotreeCode}>
-                          <option value=""></option>
-                          {uniqueOncotree.sort((a, b) => a - b).map(oncotreeCode => (
-                            <option key={oncotreeCode} value={oncotreeCode}>
-                              {oncotreeCode.charAt(0).toUpperCase() + oncotreeCode.slice(1)}
-                            </option>
-                          ))}
-                        </select>
-                       </div>
-                    </div>
-                  </div>
-                  </div>
-                    <div className="col-10 mb-1">
+                    <div className="col-12 mb-1">
                     <div className="p-3 ">
-                        <ScatterPlot  umapData={umapDataFiltered}/>
+                        <ScatterPlot  jsonData={umapData}/>
                     </div>
                    </div>
                </div>

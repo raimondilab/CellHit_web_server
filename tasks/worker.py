@@ -1,5 +1,6 @@
 import json
 import os
+import time
 
 import pandas as pd
 import numpy as np
@@ -18,6 +19,7 @@ from parametric_umap import ParametricUMAP
 from src.pipeline import PreprocessPaths, InferencePaths
 from src.pipeline.align import classify_samples, batch_correct, impute_missing, celligner_transform_data
 from src.pipeline import InferencePaths, run_full_inference
+import plotly.express as px
 
 # Get the base directory of the script
 BASE_DIR = Path(__file__).resolve().parent
@@ -101,17 +103,16 @@ with open(PARENT_DIR / 'src/tcga_to_code_map.json') as f:
 # read overall umap
 umap_df = pd.read_csv(PARENT_DIR / 'src/overall_umap_df.csv', index_col=0)
 
-
 inference_paths_gdsc = InferencePaths(
     cellhit_data=PARENT_DIR / 'src/data',
     ccle_transcr_neighs=PARENT_DIR / 'src/ccle_transcr_neighs.pkl',
     tcga_transcr_neighs=PARENT_DIR / 'src/tcga_transcr_neighs.pkl',
-    ccle_response_neighs=PARENT_DIR /'src/ccle_response_neighs.pkl',
-    tcga_response_neighs=PARENT_DIR /'src/tcga_response_neighs.pkl',
+    ccle_response_neighs=PARENT_DIR / 'src/ccle_response_neighs.pkl',
+    tcga_response_neighs=PARENT_DIR / 'src/tcga_response_neighs.pkl',
     pretrained_models_path=PARENT_DIR / 'src/gdsc',
-    drug_stats=PARENT_DIR /'src/gdsc_drug_stats.csv',
-    drug_metadata=PARENT_DIR /'src/data/',
-    quantile_computer=PARENT_DIR /'src/gdcs_quantile_computer.npy',
+    drug_stats=PARENT_DIR / 'src/gdsc_drug_stats.csv',
+    drug_metadata=PARENT_DIR / 'src/data/',
+    quantile_computer=PARENT_DIR / 'src/gdsc_quantile_computer.npy',
     ccle_metadata=PARENT_DIR / 'src/Model.csv',
     tcga_metadata=PARENT_DIR / 'src/tcga_oncotree_data.csv'
 )
@@ -146,19 +147,15 @@ def analysis(self, file, dataset):
         # Define covariate labels (TCGA category to which the new sample belong to)
         covariate_labels = [gbm_code] * len(data)
 
-        # Step 2: Classification
-        # self.update_state(state='PROGRESS', meta='Classification')
-        # results_pipeline['classification'] = classify_samples(data, preprocess_paths)
-
-        # Step 3: Batch correction
+        # Step 2: Batch correction
         self.update_state(state='PROGRESS', meta='Batch correction')
         corrected = batch_correct(data, covariate_labels, preprocess_paths)
 
-        # Step 4: Imputation
+        # Step 3: Imputation
         self.update_state(state='PROGRESS', meta='Imputation')
         imputed = impute_missing(corrected, preprocess_paths, covariate_labels)
 
-        # Step 5: Transform
+        # Step 4: Transform
         self.update_state(state='PROGRESS', meta='Transform')
         transformed = celligner_transform_data(data=imputed,
                                                preprocess_paths=preprocess_paths,
@@ -191,43 +188,48 @@ def analysis(self, file, dataset):
         umap_concat = umap_concat.reset_index(drop=True)
 
         # Convert umap data in json format
-        umap_json = umap_concat.to_dict(orient='index')
+        umap_json = draw_scatter_plot(umap_concat, code)
 
         results_pipeline['transformed'] = transformed
 
-        # Step 6: Inference
+        # Step 5: Inference
         self.update_state(state='PROGRESS', meta='Inference')
 
         dataset = dataset.lower()
         if dataset == "gdsc":
             result_df = run_full_inference(results_pipeline['transformed'],
-                                                   dataset=dataset,
-                                                   inference_paths=inference_paths_gdsc,
-                                                   return_heatmap=True)
+                                           dataset=dataset,
+                                           inference_paths=inference_paths_gdsc,
+                                           return_heatmap=True)
 
-            heatmap_df = result_df['heatmap_data']
+        # Step 6: Result elaboration
+        self.update_state(state='PROGRESS', meta='Elaboration')
+        time.sleep(10)
 
-            # Draw heatmap
-            heatmap_json = draw_heatmap(heatmap_df)
+        heatmap_df = result_df['heatmap_data']
+        heatmap_df = heatmap_df.reset_index()
 
-            # Set up predictions dataframe
-            predictions_df = result_df['predictions']
-            predictions_df = predictions_df.drop(columns=['Unnamed: 0'])
+        # Draw heatmap
+        heatmap_json = draw_heatmap(heatmap_df)
 
-            predictions_df['RecoveredTargets'] = predictions_df['RecoveredTargets'].fillna("No recovered targets")
-            predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].fillna("No putative target")
-            predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].astype(str)
-            predictions_df['TopGenes'] = predictions_df['TopGenes'].astype(str)
-            predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].fillna("No tissue")
-            predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].astype(str)
+        # Set up predictions dataframe
+        predictions_df = result_df['predictions']
 
-            predictions_df['dataset'] = "GDSC"
+        predictions_df['RecoveredTargets'] = predictions_df['RecoveredTargets'].fillna("No recovered targets")
+        predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].fillna("No putative target")
+        predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].astype(str)
+        predictions_df['TopGenes'] = predictions_df['TopGenes'].astype(str)
+        predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].fillna("No tissue")
+        predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].astype(str)
 
-            predictions_df = predictions_df.reset_index(drop=True)
+        predictions_df['dataset'] = "GDSC"
 
-            predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].apply(preprocess_shap_dict)
+        predictions_df = predictions_df.reset_index(drop=True)
 
-            predictions_json = predictions_df.to_dict(orient='records')
+        predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].astype(str)
+        predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].apply(preprocess_shap_dict)
+
+        predictions_json = predictions_df.to_dict(orient='records')
 
         result = {
             "heatmap": heatmap_json[0],
@@ -274,7 +276,9 @@ def preprocess_data(data, code):
     return data
 
 
+# Draw IC50 heatmap
 def draw_heatmap(heatmap_df):
+
     # Exclude non-numeric columns
     numeric_data = heatmap_df.select_dtypes(include='number')
 
@@ -300,3 +304,42 @@ def preprocess_shap_dict(shap_str):
     except Exception as e:
         print(f"Error parsing ShapDictionary: {shap_str}")
         raise e
+
+
+# Draw scatter plot for UMAP
+def draw_scatter_plot(umap, code):
+
+    symbol_map = {
+        'TCGA': 'cross',
+        'CCLE': 'circle',
+        code: 'diamond',
+    }
+
+    # Create scatter plot with Plotly, adding symbols based on 'Source'
+    fig = px.scatter(
+        umap,
+        x='UMAP1',
+        y='UMAP2',
+        color='oncotree_code',
+        symbol='Source',  # Assign different markers based on 'Source'
+        symbol_map=symbol_map,
+        #title='UMAP of Combined TCGA and CCLE Gene Expression Data',
+        hover_data=['oncotree_code', 'Source', 'oncotree_code', 'index']  # Optionally include in hover
+    )
+
+    # Customize the layout
+    fig.update_layout(
+        legend_title_text='Oncotree Code and Source',  # Adjusted for multiple legends
+        legend=dict(
+            # You can customize legend layout here if needed
+        ),
+        width=1000,
+        height=800,
+    )
+
+    # Optionally, customize the marker symbols and sizes further
+    fig.update_traces(marker=dict(size=6, line=dict(width=0.2, color='DarkSlateGrey')))
+
+    # Convert the figure to JSON
+    fig_json = fig.to_json(remove_uids=False)
+    return fig_json
