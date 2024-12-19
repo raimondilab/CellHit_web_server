@@ -195,46 +195,46 @@ def analysis(self, file, dataset):
         # Step 5: Inference
         self.update_state(state='PROGRESS', meta='Inference')
 
-        # dataset = dataset.lower()
-        # if dataset == "gdsc":
-        #     result_df = run_full_inference(results_pipeline['transformed'],
-        #                                    dataset=dataset,
-        #                                    inference_paths=inference_paths_gdsc,
-        #                                    return_heatmap=True)
+        dataset = dataset.lower()
+        if dataset == "gdsc":
+            result_df = run_full_inference(results_pipeline['transformed'],
+                                           dataset=dataset,
+                                           inference_paths=inference_paths_gdsc,
+                                           return_heatmap=True)
 
         # Step 6: Result elaboration
         self.update_state(state='PROGRESS', meta='Results elaboration')
         time.sleep(10)
 
-        # heatmap_df = result_df['heatmap_data']
-        # heatmap_df = heatmap_df.reset_index()
-        #
-        # # Draw heatmap
-        # heatmap_json = draw_heatmap(heatmap_df)
-        #
-        # # Set up predictions dataframe
-        # predictions_df = result_df['predictions']
-        #
-        # predictions_df['RecoveredTargets'] = predictions_df['RecoveredTargets'].fillna("No recovered targets")
-        # predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].fillna("No putative target")
-        # predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].astype(str)
-        # predictions_df['TopGenes'] = predictions_df['TopGenes'].astype(str)
-        # predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].fillna("No tissue")
-        # predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].astype(str)
-        #
-        # predictions_df['dataset'] = "GDSC"
-        #
-        # predictions_df = predictions_df.reset_index(drop=True)
-        #
-        # predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].astype(str)
-        # predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].apply(preprocess_shap_dict)
-        #
-        # predictions_json = predictions_df.to_dict(orient='records')
+        heatmap_df = result_df['heatmap_data']
+        heatmap_df = heatmap_df.reset_index()
+
+        # Draw heatmap
+        heatmap_json = draw_heatmap(heatmap_df)
+
+        # Set up predictions dataframe
+        predictions_df = result_df['predictions']
+
+        predictions_df['RecoveredTargets'] = predictions_df['RecoveredTargets'].fillna("No recovered targets")
+        predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].fillna("No putative target")
+        predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].astype(str)
+        predictions_df['TopGenes'] = predictions_df['TopGenes'].astype(str)
+        predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].fillna("No tissue")
+        predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].astype(str)
+
+        predictions_df['dataset'] = "GDSC"
+
+        predictions_df = predictions_df.reset_index(drop=True)
+
+        predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].astype(str)
+        predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].apply(preprocess_shap_dict)
+
+        predictions_json = predictions_df.to_dict(orient='records')
 
         result = {
-            "heatmap":   {},
-            "height": {},
-            "table": {},
+            "heatmap": heatmap_json[0],
+            "height": heatmap_json[1],
+            "table": predictions_json,
             "umap": umap_json,
         }
 
