@@ -324,7 +324,10 @@ def draw_scatter_plot(umap, code):
         "#E24A33", "#FBC15E", "#8EBA42", "#988ED5", "#FFB5B8", "#FFC0CB", "#CD5C5C",
         "#1B998B", "#FF9B71", "#6A0572", "#0A2342", "#EC9F05", "#9E0031", "#8D4F8D",
         "#4E4A59", "#BC4B51", "#9AD1D4", "#5C80BC", "#68B684", "#A23B72", "#D5DFE5",
-        "#FF7F50", "#3BCEAC", "#60656F", "#1A535C", "#F7FFF7", "#FFE066", "#FFF79B"
+        "#FF7F50", "#3BCEAC", "#60656F", "#1A535C", "#F7FFF7", "#FFE066", "#FFF79B",
+        "#FF6F61", "#D4A5A5", "#6B4226", "#F4C095", "#E2A3D3", "#F0B7A3", "#D9BF77",
+        "#3F8E7C", "#F2D7D5", "#3B6A7A", "#CF9C73", "#B5A4A3", "#6F6D59", "#88A9A6",
+        "#D3C4A1", "#8C5B7B", "#F1C4B1", "#A4C3B2", "#E2B7A4", "#E1D7D4", "#C9A99D"
     ]
 
     # Create scatter plot with Plotly, adding symbols based on 'Source'
