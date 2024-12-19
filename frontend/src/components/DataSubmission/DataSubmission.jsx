@@ -271,9 +271,12 @@ async function getTaskResults() {
               className="center-help shrink img-fluid mb-3"
             />
              <p className="fs-1 mb-3 text-justify mb-2">
-              We trained explainable machine learning algorithms by employing cell line transcriptomics to predict the growth inhibitory
-              potential of drugs. We used large language models (LLMs) to expand descriptions of the mechanisms of action (MOA) for
-               each drug starting from available annotations, which were matched to the semantically closest pathways from reference knowledge bases.
+              CellHit web server is a powerful tool that provides practical insights into cancer cell sensitivities to drugs using patient transcriptomic data (bulk RNA-seq). By utilizing data from the GDSC and PRISM assays,
+              CellHit predicts drug sensitivities, thereby facilitating the development of targeted therapies and precision oncology.
+              The web server also offers a wide range of tools for aligning, visualizing, and modelling patient transcriptomics
+              alongside well-characterized commercial cell lines. Furthermore, it allows users to explore pre-computed
+              predictions and outputs for the entire TCGA dataset, making it a valuable resource for cancer research. For more information, please refer to the
+              <Link className="" to="/about/" target="_blank"><b> about</b></Link> page.
             </p>
 
           </div>
