@@ -20,7 +20,6 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
   const [submitted, setSubmitted] = useState(false);
   const [value, setValue] = useState("GDSC");
 
-
   const show = (position) => {
     setPosition(position);
     setVisible(true);
@@ -263,12 +262,13 @@ async function getTaskResults() {
           <div className="col-md-12">
             <img
               tabIndex="1"
-              src="/assets/images/celligner_diagram.png"
+              src="/assets/images/web.png"
               className="img-fluid center-help mb-5"
               data-toggle="tooltip"
               data-placement="top"
               title="Click to zoom-in"
               alt="Learning Workflow"
+              className="center-help shrink img-fluid mb-3"
             />
              <p className="fs-1 mb-3 text-justify mb-2">
               We trained explainable machine learning algorithms by employing cell line transcriptomics to predict the growth inhibitory

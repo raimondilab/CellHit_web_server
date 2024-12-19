@@ -195,46 +195,46 @@ def analysis(self, file, dataset):
         # Step 5: Inference
         self.update_state(state='PROGRESS', meta='Inference')
 
-        dataset = dataset.lower()
-        if dataset == "gdsc":
-            result_df = run_full_inference(results_pipeline['transformed'],
-                                           dataset=dataset,
-                                           inference_paths=inference_paths_gdsc,
-                                           return_heatmap=True)
+        # dataset = dataset.lower()
+        # if dataset == "gdsc":
+        #     result_df = run_full_inference(results_pipeline['transformed'],
+        #                                    dataset=dataset,
+        #                                    inference_paths=inference_paths_gdsc,
+        #                                    return_heatmap=True)
 
         # Step 6: Result elaboration
-        self.update_state(state='PROGRESS', meta='Elaboration')
+        self.update_state(state='PROGRESS', meta='Results elaboration')
         time.sleep(10)
 
-        heatmap_df = result_df['heatmap_data']
-        heatmap_df = heatmap_df.reset_index()
-
-        # Draw heatmap
-        heatmap_json = draw_heatmap(heatmap_df)
-
-        # Set up predictions dataframe
-        predictions_df = result_df['predictions']
-
-        predictions_df['RecoveredTargets'] = predictions_df['RecoveredTargets'].fillna("No recovered targets")
-        predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].fillna("No putative target")
-        predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].astype(str)
-        predictions_df['TopGenes'] = predictions_df['TopGenes'].astype(str)
-        predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].fillna("No tissue")
-        predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].astype(str)
-
-        predictions_df['dataset'] = "GDSC"
-
-        predictions_df = predictions_df.reset_index(drop=True)
-
-        predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].astype(str)
-        predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].apply(preprocess_shap_dict)
-
-        predictions_json = predictions_df.to_dict(orient='records')
+        # heatmap_df = result_df['heatmap_data']
+        # heatmap_df = heatmap_df.reset_index()
+        #
+        # # Draw heatmap
+        # heatmap_json = draw_heatmap(heatmap_df)
+        #
+        # # Set up predictions dataframe
+        # predictions_df = result_df['predictions']
+        #
+        # predictions_df['RecoveredTargets'] = predictions_df['RecoveredTargets'].fillna("No recovered targets")
+        # predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].fillna("No putative target")
+        # predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].astype(str)
+        # predictions_df['TopGenes'] = predictions_df['TopGenes'].astype(str)
+        # predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].fillna("No tissue")
+        # predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].astype(str)
+        #
+        # predictions_df['dataset'] = "GDSC"
+        #
+        # predictions_df = predictions_df.reset_index(drop=True)
+        #
+        # predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].astype(str)
+        # predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].apply(preprocess_shap_dict)
+        #
+        # predictions_json = predictions_df.to_dict(orient='records')
 
         result = {
-            "heatmap": heatmap_json[0],
-            "height": heatmap_json[1],
-            "table": predictions_json,
+            "heatmap":   {},
+            "height": {},
+            "table": {},
             "umap": umap_json,
         }
 
@@ -315,6 +315,18 @@ def draw_scatter_plot(umap, code):
         code: 'diamond',
     }
 
+    plotlyPalette = [
+        "#E13978", "#F5899E", "#C091E3", "#E08571", "#9F55BB", "#45A132", "#96568E",
+        "#5AB172", "#DFBC3A", "#349077", "#D8AB6A", "#75DFBB", "#5DA134", "#1F8FFF",
+        "#9C5E2B", "#51D5E0", "#ABD23F", "#DA45BB", "#555555", "#56E79D", "#B644DC",
+        "#73E03D", "#3870C9", "#6C55E2", "#5FDB69", "#659FD9", "#D74829", "#bdbdbd",
+        "#E491C1", "#348ABD", "#A60628", "#7A68A6", "#467821", "#CF4457", "#188487",
+        "#E24A33", "#FBC15E", "#8EBA42", "#988ED5", "#FFB5B8", "#FFC0CB", "#CD5C5C",
+        "#1B998B", "#FF9B71", "#6A0572", "#0A2342", "#EC9F05", "#9E0031", "#8D4F8D",
+        "#4E4A59", "#BC4B51", "#9AD1D4", "#5C80BC", "#68B684", "#A23B72", "#D5DFE5",
+        "#FF7F50", "#3BCEAC", "#60656F", "#1A535C", "#F7FFF7", "#FFE066", "#FFF79B"
+    ]
+
     # Create scatter plot with Plotly, adding symbols based on 'Source'
     fig = px.scatter(
         umap,
@@ -323,8 +335,8 @@ def draw_scatter_plot(umap, code):
         color='oncotree_code',
         symbol='Source',  # Assign different markers based on 'Source'
         symbol_map=symbol_map,
-        #title='UMAP of Combined TCGA and CCLE Gene Expression Data',
-        hover_data=['oncotree_code', 'Source', 'oncotree_code', 'index']  # Optionally include in hover
+        hover_data=['oncotree_code', 'Source', 'oncotree_code', 'index'],  # Optionally include in hover
+        color_discrete_sequence=plotlyPalette
     )
 
     # Customize the layout

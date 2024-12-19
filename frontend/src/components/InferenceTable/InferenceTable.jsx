@@ -30,7 +30,7 @@ const InferenceTable = ({ inferenceData }) => {
  inferenceData.forEach(obj => delete obj["__typename"]);
 
  const columns = Object.keys(inferenceData[0] || [''])
-     .filter(col => col) // Remove any undefined/null values
+    .filter(col => col && col !== 'ShapDictionary') // Remove any undefined/null values
     .map(col => ({ field: col, header: col }));
 
  const multiSelectOptions = columns.map(col => ({ label: col.header, value: col.field }));

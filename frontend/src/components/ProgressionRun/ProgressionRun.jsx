@@ -17,7 +17,7 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit }) => {
     const [highlightedEvents, setHighlightedEvents] = useState([]);
     const [taskStatus, setTaskStatusState] = useState(statusTask);
     const [completionMessage, setCompletionMessage] = useState("");
-    const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+    const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
    const baseEvents = [
     { status: 'Data sending', date: '15/10/2020 10:30', icon: 'pi pi-send', color: '#607D8B' },
@@ -31,6 +31,16 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit }) => {
 ];
 
     const statusInterval = useRef(null);
+
+     const expirationDate = new Date();
+                    expirationDate.setMonth(expirationDate.getMonth() + 1);
+
+     const formattedDate = expirationDate.toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                    });
+
 
     useEffect(() => {
         setText(`We are conducting intensive tasks that may take up to a few minutes to process. If you want to avoid waiting for the results, please copy the task ID below and return later. \n TaskID: ${taskID}`);
@@ -61,32 +71,35 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit }) => {
     };
 
     const customizedContent = (item) => {
-        return (
-            <div>
-                <p className="mt-2">{item.status}</p>
-                {item.status === 'Results elaboration' && completionMessage && (
-                    <p style={{ fontStyle: 'italic', color: '#757575', marginTop: '10px' }}>{completionMessage}</p>
-                )}
-            </div>
-        );
-    };
+    return (
+        <div>
+            <p className="mt-2 mb-1">{item.status}</p> {/* Removida margem inferior */}
+            {item.status === 'Results elaboration' && completionMessage && (
+                <sub style={{ fontStyle: 'italic', color: '#757575', display: 'block' }}>
+                    {completionMessage}
+                </sub>
+            )}
+        </div>
+    );
+   };
 
     const handleEnableNotifications = () => {
-        if ("Notification" in window) {
-            Notification.requestPermission().then(permission => {
-                if (permission === "granted") {
-                    setNotificationsEnabled(true);
-                    Swal.fire({
-                        icon: "success",
-                        text: "Notifications enabled successfully!"
-                    });
-                } else {
-                    Swal.fire({
-                        icon: "warning",
-                        text: "Notifications are blocked. Please enable them in your browser settings."
-                    });
-                }
-            });
+    if ("Notification" in window) {
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+                setNotificationsEnabled(true);
+                Swal.fire({
+                    icon: "success",
+                    text: "Notifications enabled successfully!"
+                });
+                setNotificationsEnabled(true);
+            } else {
+                Swal.fire({
+                    icon: "warning",
+                    text: "Notifications are blocked. Please enable them in your browser settings."
+                });
+            }
+        });
         } else {
             Swal.fire({
                 icon: "error",
@@ -95,7 +108,9 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit }) => {
         }
     };
 
+
     const showNotification = (formattedDate) => {
+         console.log("Notifications Enabled:", notificationsEnabled);
         if (notificationsEnabled && "Notification" in window) {
             new Notification("Task Complete", {
                 body: `Your task has been completed successfully! Results will be stored until ${formattedDate}.`
@@ -144,29 +159,13 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit }) => {
                     setTaskStatus('Queueing');
                 }
 
-                 if (newStatus === "Elaboration") {
-
-                   const updatedEvents = baseEvents.map(event => ({
-                        ...event,
-                        color: event.status === 'Results elaboration' ? successEventColor : event.color,
-                    }));
-
-                    setHighlightedEvents(updatedEvents);
-
-                    const expirationDate = new Date();
-                    expirationDate.setMonth(expirationDate.getMonth() + 1);
-                    const formattedDate = expirationDate.toLocaleDateString("en-GB", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                    });
-                    setCompletionMessage(`Results will be stored until ${formattedDate}.`);
-
-                    showNotification(formattedDate);
-
+                 if (newStatus === 'Processing') {
+                   setCompletionMessage(`Results will be stored until ${formattedDate}.`);
                  }
 
                 if (newStatus === "SUCCESS") {
+
+                     showNotification(formattedDate);
                     clearInterval(statusInterval.current);
 
                     const url = new URL(window.location.href);

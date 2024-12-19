@@ -31,9 +31,10 @@ async function getTaskResults(taskID) {
     try {
         const query = {
             query: `
-                query getTask {
-                    getTask (taskId: "${taskID}") {
+                query getResults {
+                     getResults (taskId: "${taskID}", step: "umap") {
                         taskId
+                        status
                         result
                     }
                 }
@@ -51,18 +52,38 @@ async function getTaskResults(taskID) {
 
         } else if (taskData) {
 
-            const taskId = taskData.data.data.getTask.taskId;
-            const result = taskData.data.data.getTask.result;
+            const taskID = taskData.data.data.getResults.taskId;
+            const newStatus = taskData.data.data.getResults.status;
+            const result = taskData.data.data.getResults.result;
 
-            setTask(taskId || "");
+            setTask(taskID || "");
             setResult(result ||  "" );
 
+           if (taskID === "PROGRESS" ) {
+
+                Swal.fire({
+                    icon: "info",
+                     html: "The task is still in progress! <br> Currently, it is at this step: " + newStatus.replace(/\n/g, "<br>")
+                });
+
+               setLoad(false);
+
+           } else if (taskID === "PENDING" ) {
+              Swal.fire({
+                icon: "info",
+                text: "No result found!"
+            });
+
+             setLoad(false);
+             navigate("/analysis/")
+           }
         }
     } catch (error) {
         Swal.fire({
             icon: "error",
             text: error.message
         });
+        setLoad(false);
     }
 }
 
