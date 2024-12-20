@@ -84,6 +84,53 @@ const AboutPage = () => {
                     A central innovation was the introduction of a new heuristic procedure to measure alignment quality, grounded in neighborhood consistency. This approach relies on tissue-type annotations and nearest neighbor analyses, allowing us to quantify how well each cell line aligns with its corresponding tumor counterparts after the Celligner procedure.
                     By selecting hyperparameters that minimize this heuristic, we achieved a more reliable and biologically meaningful alignment.
                     </p>
+                    <p className="fs-1 text-justify mb-2">
+                    Heuristic Procedure (Neighborhood Consistency) Steps:
+                    </p>
+                    <ol class="mb-3 ml-10">
+                        <li class="fs-1 text-justify">Pre-Alignment Selection:
+                          <ul>
+                          <li class="fs-1 text-justify">Identify “well-behaved” cell lines before alignment by examining their local neighborhoods within CCLE.</li>
+                          <li class="fs-1 text-justify">Perform a 10-nearest-neighbor (10-NN) search for each cell line. Only retain cell lines whose neighborhoods contain at least 50% of neighbors sharing the same tissue label. This step filters out inherently “noisy” or non-representative cell lines.</li>
+                          </ul>
+                        </li>
+                        <li class="fs-1 text-justify">Post-Alignment Evaluation:
+                          <ul>
+                             <li class="fs-1 text-justify">After applying Celligner alignment, stratify the analysis by tissue type.</li>
+                             <li class="fs-1 text-justify">For each of the previously identified “well-behaved” cell lines, identify their 10 nearest neighbors in the TCGA-aligned space.</li>
+                             <li class="fs-1 text-justify">Pool and average these neighbors across all selected cell lines within the same tissue, producing a tissue-level alignment quality metric.</li>
+                          </ul>
+                        </li>
+                        <li class="fs-1 text-justify">Metric Derivation:
+                          <ul>
+                             <li class="fs-1 text-justify">Using OncoTree annotations (available directly for cell lines and recoverable for TCGA samples), ensure consistent tissue definitions across datasets.</li>
+                             <li class="fs-1 text-justify">The resulting metric, which reflects the average neighborhood consistency between CCLE cell lines and corresponding TCGA samples post-alignment, serves as a target for hyperparameter optimization.</li>
+                             <li class="fs-1 text-justify">Minimizing this metric leads to improved alignment outcomes and ensures that the resulting model more accurately represents the biological reality of tissue-specific tumor profiles.</li>
+                          </ul>
+                        </li>
+                    </ol>
+                    <p className="fs-1 text-justify mb-3">
+                    With these improvements, the refactored pipeline now achieves more coherent and insightful alignments.
+                    Removing external dependencies and adopting a robust evaluation heuristic not only rectifies previous procedural issues, but also provides a stable framework to fine-tune and validate the alignment.
+                    The new implementation of the celligner package is released from a fork of the original Celligner implementation at <Link to="https://github.com/mr-fcharles/celligner " target="_blank" rel="noopener noreferrer"><b><i>/mr-fcharles/celligner. </i></b></Link>
+                    The optimization for this problem is instead released at <Link to="https://github.com/mr-fcharles/WebCellHit" target="_blank" rel="noopener noreferrer"><b><i>WebCellHit.</i></b></Link>
+                    </p>
+                    <h5 className="display-6 fw-bold mb-3">Parametric UMAP projection</h5>
+                    <p className="fs-1 text-justify mb-3">
+                    We developed a custom implementation of the Parametric UMAP method in PyTorch to facilitate the visualization of user-provided data in the context of a fixed reference space aligned to CCLE and TCGA datasets. Traditional UMAP methods require recalculating embeddings from scratch each time new data is introduced, making them unsuitable for maintaining a consistent reference framework.
+                    Our implementation addresses this limitation by providing a light, fast, GPU-accelerated, and efficient solution.
+                    </p>
+                    <p className="fs-1 text-justify mb-3">
+                    The Parametric UMAP model is structured as a 3-layer feedforward neural network that learns a mapping from the original high-dimensional transcriptomic space to a two-dimensional embedding. This design enables the creation of a fixed reference space, derived from CCLE and TCGA, into which new data can be integrated seamlessly without requiring recomputation. This not only ensures efficiency but also supports consistency and interpretability in visualizations. Our method,
+                    inspired by <Link to="https://doi.org/10.1162/neco_a_01434 " target="_blank" rel="noopener noreferrer"><b><i>https://doi.org/10.1162/neco_a_01434</i></b></Link>,
+                    is released as an open-source tool at <Link to="https://github.com/mr-fcharles/parametric_umap" target="_blank" rel="noopener noreferrer"><b><i>https://github.com/mr-fcharles/parametric_umap</i></b></Link>
+                    </p>
+                    <h5 className="display-6 fw-bold mb-3">CellHit</h5>
+                     <p className="fs-1 text-justify mb-3">
+                     The aligned patients data is sent to inference in the models thourghly described in the <Link to="https://doi.org/10.1101/2024.03.28.586783" target="_blank" rel="noopener noreferrer"><b><i> Learning and actioning general principles of cancer cell drug sensitivity</i></b></Link>.
+                     Code for these model is already available at <Link to="https://github.com/raimondilab/CellHit" target="_blank" rel="noopener noreferrer"><b><i>CellHit.</i></b></Link>
+                     </p>
+
                     <h5 className="display-6 fw-bold mb-3">Libraries</h5>
                     <ul class="mb-1 ml-10">
                         <li class="fs-1 text-justify">ReactJS (v18.2.0)</li>

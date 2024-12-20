@@ -17,7 +17,7 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit }) => {
     const [highlightedEvents, setHighlightedEvents] = useState([]);
     const [taskStatus, setTaskStatusState] = useState(statusTask);
     const [completionMessage, setCompletionMessage] = useState("");
-    const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+    const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
    const baseEvents = [
     { status: 'Data sending', date: '15/10/2020 10:30', icon: 'pi pi-send', color: '#607D8B' },
