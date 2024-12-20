@@ -7,6 +7,7 @@ import HeaderTitleRunCellHit from '../../components/HeaderTitleRunCellHit/Header
 import Swal from 'sweetalert2';
 import { Link } from 'react-router-dom';
 import {useNavigate} from "react-router-dom";
+import Papa from 'papaparse';
 
 const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
 
@@ -40,11 +41,31 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
   };
 
   // Send file to analysis
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
+
+    try {
+    // Read file as text
+    const fileContent = await selectedFile.text();
+
+    // Validate file content
+    await validateFile(fileContent);
+
+    // If validation passes, send the file
     setIsSubmit(true);
     setSubmitted(true);
-    sendFile();
+    await sendFile();
+
+  } catch (error) {
+    // Handle validation or upload error
+    setIsSubmit(false);
+    setSubmitted(false);
+
+    Swal.fire({
+      icon: "error",
+      text: `Error: ${error.message}`,
+    });
+  }
   };
 
   // Get results by taskId
@@ -76,7 +97,7 @@ async function sendFile() {
     formData.append("map", JSON.stringify({ 0: ["variables.file"] }));
     formData.append("0", selectedFile);  // Add file to the request
 
-    const apiUrl = 'https://test.bioinfolab.sns.it/graphql';
+    const apiUrl = 'http://127.0.0.1:8003/graphql';
     const response = await axios.post(apiUrl, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -175,6 +196,48 @@ async function getTaskResults() {
     }
 }
 
+// Validation function (unchanged from previous example)
+function validateFile(fileContent) {
+  return new Promise((resolve, reject) => {
+    const requiredColumns = ['TCGA_CODE', 'TISSUE', 'GENE'];
+
+    Papa.parse(fileContent, {
+      header: true,
+      skipEmptyLines: true,
+      complete: function (result) {
+        const { data, errors, meta } = result;
+
+        if (errors.length > 0) {
+          reject(new Error(`Error parsing the file: ${errors.map(err => err.message).join(', ')}`));
+          return;
+        }
+
+        const columns = meta.fields;
+        const missingColumns = requiredColumns.filter(col => !columns.includes(col));
+        if (missingColumns.length > 0) {
+          reject(new Error(`Missing required columns: ${missingColumns.join(', ')}`));
+          return;
+        }
+
+        const sampleColumns = columns.filter(col => !requiredColumns.includes(col));
+        for (let row of data) {
+          for (let col of sampleColumns) {
+            const value = row[col];
+            if (value && isNaN(parseFloat(value)) && value !== 'NaN') {
+              reject(new Error(`All SAMPLE columns must have numeric values or NaN. Invalid value: ${value}`));
+              return;
+            }
+          }
+        }
+
+        resolve(data);
+      },
+      error: function (error) {
+        reject(new Error(`Error reading the file: ${error.message}`));
+      }
+    });
+  });
+}
 
   return (
     <>

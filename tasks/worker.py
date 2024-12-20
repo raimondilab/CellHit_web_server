@@ -253,12 +253,12 @@ def analysis(self, file, dataset):
 # Preprocess user data
 def preprocess_data(data, code):
 
-    # Mapping genes if any value in 'GENE' starts with 'ENSG'
-    if data['GENE'].str.startswith("ENSG").any():
-        data['GENE'] = ensg_to_hgnc(data['GENE'])
-
     # Transpose data
     data = data.transpose()
+
+    # Mapping genes if any value in the first column starts with 'ENSG'
+    if data.columns.str.startswith("ENSG").any():
+        data.columns = ensg_to_hgnc(data.columns)
 
     # Remove "GENE" from column names
     data.columns = data.columns.str.replace("GENE", " ", regex=True)
@@ -371,62 +371,33 @@ def draw_scatter_plot(umap, code):
     return fig_json
 
 
-def validate_file(self, file):
-
-    df = pd.DataFrame()
-
-    # Check if the file has a valid extension
-    if not file.endswith('.csv'):
-        error_msg = 'Invalid file type. Only .csv files are accepted.'
-        self.update_state(state='FAILURE', meta=error_msg)
-        return None
-
-    # Try reading the file
-    try:
-        # Simulate a file object for pandas
-        df = pd.read_csv(StringIO(file), sep=",", header=0, index_col=0)
-    except Exception as e:
-        error_msg = f'Error reading the file: {str(e)}'
-        self.update_state(state='FAILURE', meta=error_msg)
-        return None
-
-    # Check for required columns
-    required_columns = {'TCGA_CODE', 'TISSUE', 'GENE'}
-    missing_columns = required_columns - set(df.columns)
-    if missing_columns:
-        error_msg = f'Missing required columns: {", ".join(missing_columns)}'
-        self.update_state(state='FAILURE', meta=error_msg)
-        return None
-
-    # Check for sample columns before transpose
-    sample_columns = [col for col in df.columns if col not in {'TCGA_CODE', 'TISSUE', 'GENE'}]
-    if not all(df[sample_columns].applymap(lambda x: isinstance(x, (float, int)) or pd.isna(x)).all()):
-        error_msg = 'All SAMPLE columns must have numeric values or NaN.'
-        self.update_state(state='FAILURE', meta=error_msg)
-        return None
-
-    # If everything is fine, return the dataframe
-    return df
-
-
-def ensg_to_hgnc(df_column):
+def ensg_to_hgnc(df_columns):
     """
-    Transforms a pandas Series of Ensembl Gene IDs (ENSG format) to HGNC symbols.
+    Transforms a list or pandas Index of Ensembl Gene IDs (ENSG format) to HGNC symbols.
 
     Parameters:
-    df_column (pd.Series): A pandas Series containing Ensembl Gene IDs.
+    df_columns (pd.Index or list): A pandas Index or list containing Ensembl Gene IDs.
 
     Returns:
-    pd.Series: A pandas Series with corresponding HGNC symbols. Returns the original ENSG ID for unmapped IDs.
+    pd.Index: A pandas Index with corresponding HGNC symbols. Returns the original ENSG ID for unmapped IDs.
     """
+    import mygene
+    import pandas as pd
+
     # Initialize MyGeneInfo client
     mg = mygene.MyGeneInfo()
 
+    # Convert columns to a list if necessary
+    if isinstance(df_columns, pd.Index):
+        columns = df_columns.tolist()
+    else:
+        columns = df_columns
+
     # Extract unique ENSG IDs to minimize redundant queries
-    unique_ensg = df_column.dropna().unique().tolist()
+    unique_ensg = [col for col in columns if col.startswith("ENSG")]
 
     if not unique_ensg:
-        return df_column  # Return original column if no valid ENSG IDs are present
+        return pd.Index(columns)  # Return original columns if no valid ENSG IDs are present
 
     # Query MyGeneInfo in batch
     print('Querying MyGeneInfo...')
@@ -442,7 +413,7 @@ def ensg_to_hgnc(df_column):
         print('MyGeneInfo query completed.')
     except Exception as e:
         print(f"Error during MyGeneInfo query: {e}")
-        return df_column
+        return pd.Index(columns)
 
     # Create a mapping dictionary from Ensembl IDs to HGNC symbols
     ensg_to_symbol = {
@@ -450,7 +421,7 @@ def ensg_to_hgnc(df_column):
         for entry in results if 'query' in entry
     }
 
-    # Map the original column using the dictionary
-    mapped_symbols = df_column.map(ensg_to_symbol)
+    # Map the original columns using the dictionary
+    mapped_columns = [ensg_to_symbol.get(col, col) for col in columns]
 
-    return mapped_symbols
+    return pd.Index(mapped_columns)

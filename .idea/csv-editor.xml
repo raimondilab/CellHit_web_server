@@ -17,13 +17,6 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\src\GBM_TEST.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
         <entry key="\src\gdsc_drug_stats.csv">
           <value>
             <Attribute>
@@ -60,20 +53,6 @@
           </value>
         </entry>
         <entry key="\static\clrp\small_molecule_drugbank.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\tasks\heatmap.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\tasks\predictions.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
