@@ -17,7 +17,7 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit }) => {
     const [highlightedEvents, setHighlightedEvents] = useState([]);
     const [taskStatus, setTaskStatusState] = useState(statusTask);
     const [completionMessage, setCompletionMessage] = useState("");
-    const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+    const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
    const baseEvents = [
     { status: 'Data sending', date: '15/10/2020 10:30', icon: 'pi pi-send', color: '#607D8B' },
@@ -84,30 +84,39 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit }) => {
    };
 
     const handleEnableNotifications = () => {
-    if ("Notification" in window) {
-        Notification.requestPermission().then(permission => {
-            if (permission === "granted") {
-                setNotificationsEnabled(true);
-                Swal.fire({
-                    icon: "success",
-                    text: "Notifications enabled successfully!"
-                });
-                setNotificationsEnabled(true);
-            } else {
-                Swal.fire({
-                    icon: "warning",
-                    text: "Notifications are blocked. Please enable them in your browser settings."
-                });
-            }
+    if (notificationsEnabled) {
+        // Disable notifications
+        setNotificationsEnabled(false);
+        Swal.fire({
+            icon: "info",
+            text: "Notifications disabled!"
         });
+    } else {
+        // Enable notifications
+        if ("Notification" in window) {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    setNotificationsEnabled(true);
+                    Swal.fire({
+                        icon: "success",
+                        text: "Notifications enabled successfully!"
+                    });
+                } else {
+                    setNotificationsEnabled(false);
+                    Swal.fire({
+                        icon: "warning",
+                        text: "Notifications are blocked. Please enable them in your browser settings."
+                    });
+                }
+            });
         } else {
             Swal.fire({
                 icon: "error",
                 text: "Browser does not support notifications."
             });
         }
-    };
-
+    }
+};
 
     const showNotification = (formattedDate) => {
          console.log("Notifications Enabled:", notificationsEnabled);
@@ -132,21 +141,35 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit }) => {
                 `
             };
 
-            const apiUrl = 'http://127.0.0.1:8003/graphql';
+            const apiUrl = 'https://test.bioinfolab.sns.it/graphql';
             const taskData = await axios.post(apiUrl, query);
 
             if (!taskData.data.data || taskData.data.errors) {
-                clearInterval(statusInterval.current);
-                Swal.fire({
-                    icon: "error",
-                    text: "Oops... An error has occurred!"
-                });
+                    clearInterval(statusInterval.current);
+
+                    Swal.fire({
+                        icon: "error",
+                        text: "Oops... An error has occurred!"
+                    });
+
                 setIsSubmit(false);
 
             } else if (taskData) {
                 const taskID = taskData.data.data.getResults.taskId;
                 const newStatus = taskData.data.data.getResults.status;
                 const result = taskData.data.data.getResults.result;
+
+                if (newStatus === "FAILURE") {
+
+                     clearInterval(statusInterval.current);
+                      setIsSubmit(false);
+
+                        Swal.fire({
+                            icon: "error",
+                            text: taskID
+                        });
+
+                }
 
                 if (newStatus !== "SUCCESS") {
                     setTaskStatusState(newStatus);
@@ -165,7 +188,7 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit }) => {
 
                 if (newStatus === "SUCCESS") {
 
-                     showNotification(formattedDate);
+                    showNotification(formattedDate);
                     clearInterval(statusInterval.current);
 
                     const url = new URL(window.location.href);
@@ -196,7 +219,9 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit }) => {
             <HeaderTitleRunCellHit />
             <div className="row mb-3">
               <div className="col-md-3">
-                <Button label="Turn notification on" icon="pi pi-bell"  onClick={handleEnableNotifications} />
+                <Button label={notificationsEnabled ? "Turn notification off" : "Turn notification on"}
+                        icon= {notificationsEnabled ? "pi pi-bell-slash" : "pi pi-bell"}
+                        onClick={handleEnableNotifications} />
                </div>
             </div>
             <div className="row">

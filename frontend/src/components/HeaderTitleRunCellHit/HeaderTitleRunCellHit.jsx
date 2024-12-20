@@ -36,7 +36,7 @@ const HeaderTitleRunCellHit = () => {
               <li className="text-justify">Add a column labelled "TISSUE" to indicate the tissue type for each sample in that row (for example, "CNS/Brain").</li>
             </ol>
             <p className="m-0 mb-1 text-justify">For more information, please refer to the
-              <Link className="" to="/about/" target="_blank"><b> about</b></Link> page.
+              <Link className="" to="/about/" target="_blank" rel="noopener noreferrer"><b> about</b></Link> page.
             </p>
           </Dialog>
 

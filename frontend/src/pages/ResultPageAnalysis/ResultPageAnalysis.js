@@ -13,9 +13,8 @@ import { Dialog } from 'primereact/dialog';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 import { ProgressSpinner } from 'primereact/progressspinner';
-
 import { TabView, TabPanel } from 'primereact/tabview';
-
+import { getTaskResultsStep } from '../../ApiFunctions.js';
 
 const ResultPageAnalysis = () => {
 
@@ -114,18 +113,9 @@ useEffect(() => {
 
 
   const [height, setHeight] = useState("500");
-
-  useEffect(() => {
-      if (result.height) {
-        setHeight(Object.values(result.height));
-      } else {
-        setHeight("500");
-      }
-    }, [result.height]);
-
   const umapData = result ? result : "{}"
-  const inferenceData = result.table ? Object.values(result.table) : []
-  const heatmapData = result.heatmap ? result.heatmap : "{}"
+  const [inferenceData, setInferenceData] = useState([]);
+  const [heatmapData, setHeatmapData] = useState("{}");
 
   // Dialog settings
   const [position, setPosition] = useState('center');
@@ -136,6 +126,78 @@ useEffect(() => {
     setVisible(true);
   };
 
+// Control Calls
+const [callNumberTable, setCallNumberTable] = useState(1);
+const [callNumberHeatmap, setCallNumberHeatmap] = useState(1);
+const [activeTabIndex, setActiveTabIndex] = useState(0);
+const [tableLoadData, setTableLoadData] = useState(false);
+const [heatmapLoadData, setHeatmapLoadData] = useState(false);
+
+const handleTable = async () => {
+
+    if (activeTabIndex === 1 && inferenceData.length === 0) {
+        setTableLoadData(true);
+        try {
+
+          const tableData = await getTaskResultsStep(task, "table");
+
+            if (tableData){
+                 setInferenceData(tableData);
+            } else {
+                // No table data available
+                setInferenceData([]);
+            }
+        } catch (error) {
+            console.error("Error fetching table data:", error);
+        } finally {
+            setTableLoadData(false);
+        }
+
+        setCallNumberTable(callNumberTable + 1);
+    }
+}
+
+const handleHeatmap = async () => {
+
+    if (activeTabIndex === 2 && heatmapData === "{}") {
+
+        setHeatmapLoadData(true);
+
+        try {
+
+            const heatmapDataJson = await getTaskResultsStep(task, "heatmap");
+
+            if (heatmapDataJson){
+                 setHeatmapData(heatmapDataJson.data? heatmapDataJson.data : "{}");
+                 setHeight(heatmapDataJson.height? heatmapDataJson.height : "500");
+            } else {
+                // No heatmap data available
+                setHeatmapData("{}");
+            }
+        } catch (error) {
+            console.error("Error fetching table data:", error);
+        } finally {
+            setHeatmapLoadData(false);
+        }
+
+        setCallNumberHeatmap(callNumberHeatmap + 1);
+
+    }
+}
+
+// Get tab data
+useEffect(() => {
+
+    if (activeTabIndex === 1 && callNumberTable === 1) {
+         handleTable();
+    }
+
+    console.log(activeTabIndex, callNumberHeatmap)
+    if (activeTabIndex === 2 && callNumberHeatmap === 1) {
+        handleHeatmap();
+    }
+
+}, [activeTabIndex, callNumberTable, callNumberHeatmap]);
 
     return (
     <>
@@ -176,7 +238,7 @@ useEffect(() => {
           </Dialog>
         </div>
         <div className="row">
-            <TabView>
+            <TabView scrollable activeIndex={activeTabIndex} onTabChange={(e) => setActiveTabIndex(e.index)}>
                 <TabPanel header="UMAP">
                 <h4 className="display-6 fw-bold mb-5">UMAP<sup><Button icon="pi pi-info"
                 onClick={() => show('top-right')} text size="small" className="btn-dialog" /></sup></h4>
@@ -191,22 +253,38 @@ useEffect(() => {
                 <TabPanel header="Inference">
                    <h4 className="display-6 fw-bold mb-5">Inference<sup><Button icon="pi pi-info"
                    onClick={() => show('top-right')} text size="small" className="btn-dialog" /></sup></h4>
-                    <div className="row">
-                      <div className="col-12 nopadding">
+                    { tableLoadData &&  (
+                         <div className="row mb-4">
+                            <ProgressSpinner style={{width: '50px', height: '50px'}}
+                            strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s" />
+                         </div>
+                    )}
+                    { !tableLoadData &&  (
+                       <div className="row">
+                        <div className="col-12 nopadding">
                           <InferenceTable inferenceData={inferenceData}/>
-                    </div>
-                    </div>
+                         </div>
+                       </div>
+                     )}
                 </TabPanel>
                 <TabPanel header="Heatmap">
-                    <h4 className="display-6 fw-bold mb-5">Heatmap<sup><Button icon="pi pi-info"
+                   <h4 className="display-6 fw-bold mb-5">Heatmap<sup><Button icon="pi pi-info"
                    onClick={() => show('top-right')} text size="small" className="btn-dialog" /></sup></h4>
+                    { heatmapLoadData &&  (
+                         <div className="row mb-4">
+                            <ProgressSpinner style={{width: '50px', height: '50px'}}
+                            strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s" />
+                         </div>
+                    )}
+                    { !heatmapLoadData &&  (
                     <div className="row">
                       <div className="col-12 nopadding">
                         <div className="rounded-3 shadow img-fluid" style={{ height: height}}>
                          <HeatMap jsonData={heatmapData}/>
+                        </div>
+                      </div>
                     </div>
-                    </div>
-                    </div>
+                    )}
                 </TabPanel>
             </TabView>
             </div>

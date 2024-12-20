@@ -76,7 +76,7 @@ async function sendFile() {
     formData.append("map", JSON.stringify({ 0: ["variables.file"] }));
     formData.append("0", selectedFile);  // Add file to the request
 
-    const apiUrl = 'http://127.0.0.1:8003/graphql';
+    const apiUrl = 'https://test.bioinfolab.sns.it/graphql';
     const response = await axios.post(apiUrl, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -258,7 +258,7 @@ async function getTaskResults() {
         </Card>
         </div>
 
-        <div className="row mt-4">
+        <div className="row mt-5">
           <div className="col-md-12">
             <img
               tabIndex="1"
@@ -276,7 +276,7 @@ async function getTaskResults() {
               The web server also offers a wide range of tools for aligning, visualizing, and modelling patient transcriptomics
               alongside well-characterized commercial cell lines. Furthermore, it allows users to explore pre-computed
               predictions and outputs for the entire TCGA dataset, making it a valuable resource for cancer research. For more information, please refer to the
-              <Link className="" to="/about/" target="_blank"><b> about</b></Link> page.
+              <Link className="" to="/about/" target="_blank" rel="noopener noreferrer"><b><i> about</i></b></Link> page.
             </p>
 
           </div>

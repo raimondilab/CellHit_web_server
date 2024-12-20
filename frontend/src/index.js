@@ -18,7 +18,7 @@ import ErrorPage from './pages/ErrorPage/ErrorPage'
 import ResultPage from './pages/ResultPage/ResultPage'
 import ResultPageAnalysis from './pages/ResultPageAnalysis/ResultPageAnalysis'
 import RunCellHit from './pages/RunCellHit/RunCellHit'
-
+import AboutPage from './pages/AboutPage/AboutPage'
 
 const router = createBrowserRouter([ {
       path: "/",
@@ -30,6 +30,10 @@ const router = createBrowserRouter([ {
     {
       path: "/under/",
       element: <Under/>,
+    },
+    {
+      path: "/about/",
+      element: <AboutPage/>,
     },
     {
       path: "/explore/",
