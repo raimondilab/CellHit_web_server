@@ -5,6 +5,7 @@ import time
 import pandas as pd
 import numpy as np
 import ast
+import mygene
 
 from celery import Celery
 from celery.result import AsyncResult
@@ -251,6 +252,11 @@ def analysis(self, file, dataset):
 
 # Preprocess user data
 def preprocess_data(data, code):
+
+    # Mapping genes if any value in 'GENE' starts with 'ENSG'
+    if data['GENE'].str.startswith("ENSG").any():
+        data['GENE'] = ensg_to_hgnc(data['GENE'])
+
     # Transpose data
     data = data.transpose()
 
@@ -288,17 +294,16 @@ def draw_heatmap(heatmap_df):
 
     # Identify columns to remove based on conditions
     columns_to_remove = numeric_data.columns[
-        (numeric_data.gt(0).all() |  # All values > 0
-         numeric_data.ge(-1).all() & numeric_data.le(1).all())  # All values within [-1, 1]
+        numeric_data.ge(-1).all()  # All values ≥  -1
     ]
 
     # Drop these columns from the original dataframe
     processed_data = heatmap_df.drop(columns=columns_to_remove)
 
     height = len(heatmap_df) * 20
-    width = len(processed_data) * 20
+    width = len(processed_data) * 10
 
-    return pt.clustergram(processed_data, height=height, width=width, xpad=70), height
+    return pt.clustergram(processed_data, height=height, width=width, xpad=100), height
 
 
 # Preprocess 'ShapDictionary' to replace `np.float32(...)` with plain float values
@@ -403,3 +408,49 @@ def validate_file(self, file):
     # If everything is fine, return the dataframe
     return df
 
+
+def ensg_to_hgnc(df_column):
+    """
+    Transforms a pandas Series of Ensembl Gene IDs (ENSG format) to HGNC symbols.
+
+    Parameters:
+    df_column (pd.Series): A pandas Series containing Ensembl Gene IDs.
+
+    Returns:
+    pd.Series: A pandas Series with corresponding HGNC symbols. Returns the original ENSG ID for unmapped IDs.
+    """
+    # Initialize MyGeneInfo client
+    mg = mygene.MyGeneInfo()
+
+    # Extract unique ENSG IDs to minimize redundant queries
+    unique_ensg = df_column.dropna().unique().tolist()
+
+    if not unique_ensg:
+        return df_column  # Return original column if no valid ENSG IDs are present
+
+    # Query MyGeneInfo in batch
+    print('Querying MyGeneInfo...')
+    try:
+        # Query in batches for efficiency
+        batch_size = 1000
+        results = []
+        for i in range(0, len(unique_ensg), batch_size):
+            batch = unique_ensg[i:i + batch_size]
+            results.extend(
+                mg.querymany(batch, scopes='ensembl.gene', fields='symbol', species='human', as_dataframe=False)
+            )
+        print('MyGeneInfo query completed.')
+    except Exception as e:
+        print(f"Error during MyGeneInfo query: {e}")
+        return df_column
+
+    # Create a mapping dictionary from Ensembl IDs to HGNC symbols
+    ensg_to_symbol = {
+        entry['query']: entry.get('symbol', entry['query'])  # Fallback to ENSG ID if no symbol is found
+        for entry in results if 'query' in entry
+    }
+
+    # Map the original column using the dictionary
+    mapped_symbols = df_column.map(ensg_to_symbol)
+
+    return mapped_symbols

@@ -2,7 +2,7 @@ import static.clustergram as clu
 
 
 # Draw clustergram
-def clustergram(data, index_column="index", color_bar_title="IC50",
+def clustergram(data, index_column="index", color_bar_title="lnIC50",
                 tick_vals=None, height=500, width=500, auto_size=False, xpad=100, zmin=-3, zmax=3):
 
     # Drop rows with all NaN values and fill NaN with 0
@@ -49,6 +49,7 @@ def clustergram(data, index_column="index", color_bar_title="IC50",
         # Remove default image size
         fig["layout"].pop("height")
         fig["layout"].pop("width")
+
 
     # Convert the figure to JSON
     fig_json = fig.to_json(remove_uids=False)
