@@ -17,7 +17,7 @@ from static import plots as pt
 from parametric_umap import ParametricUMAP
 
 from src.pipeline import PreprocessPaths, InferencePaths
-from src.pipeline.align import classify_samples, batch_correct, impute_missing, celligner_transform_data
+from src.pipeline.align import batch_correct, impute_missing, celligner_transform_data
 from src.pipeline import InferencePaths, run_full_inference
 import plotly.express as px
 
@@ -282,17 +282,21 @@ def preprocess_data(data, code):
 
 # Draw IC50 heatmap
 def draw_heatmap(heatmap_df):
+
     # Exclude non-numeric columns
     numeric_data = heatmap_df.select_dtypes(include='number')
 
-    # Identify columns with all positive or all negative values
-    columns_to_remove = numeric_data.columns[(numeric_data.gt(0).all() | numeric_data.lt(0).all())]
+    # Identify columns to remove based on conditions
+    columns_to_remove = numeric_data.columns[
+        (numeric_data.gt(0).all() |  # All values > 0
+         numeric_data.ge(-1).all() & numeric_data.le(1).all())  # All values within [-1, 1]
+    ]
 
     # Drop these columns from the original dataframe
     processed_data = heatmap_df.drop(columns=columns_to_remove)
 
     height = len(heatmap_df) * 20
-    width = len(processed_data) * 100
+    width = len(processed_data) * 20
 
     return pt.clustergram(processed_data, height=height, width=width, xpad=70), height
 
