@@ -126,8 +126,14 @@ def analysis(self, file, dataset):
         # Step 1: Processing
         self.update_state(state='PROGRESS', meta='Processing')
 
-        # Use StringIO to simulate a file object for pandas
         df = pd.read_csv(StringIO(file), sep=",", header=0, index_col=0)
+
+        # # Validate file
+        # df = validate_file(self, file)
+        #
+        # print(df)
+        # if df is None:
+        #     return {}
 
         # Get TCGA_CODE code
         code = str(df['TCGA_CODE'].unique()[0])
@@ -204,12 +210,11 @@ def analysis(self, file, dataset):
 
         # Step 6: Result elaboration
         self.update_state(state='PROGRESS', meta='Results elaboration')
-        time.sleep(10)
 
         heatmap_df = result_df['heatmap_data']
         heatmap_df = heatmap_df.reset_index()
 
-        # Draw heatmap
+        # Draw heatmap and get heatmap's height
         heatmap_json = draw_heatmap(heatmap_df)
 
         # Set up predictions dataframe
@@ -232,8 +237,7 @@ def analysis(self, file, dataset):
         predictions_json = predictions_df.to_dict(orient='records')
 
         result = {
-            "heatmap": heatmap_json[0],
-            "height": heatmap_json[1],
+            "heatmap": {'data': heatmap_json[0], "height": heatmap_json[1]},
             "table": predictions_json,
             "umap": umap_json,
         }
@@ -278,7 +282,6 @@ def preprocess_data(data, code):
 
 # Draw IC50 heatmap
 def draw_heatmap(heatmap_df):
-
     # Exclude non-numeric columns
     numeric_data = heatmap_df.select_dtypes(include='number')
 
@@ -308,7 +311,6 @@ def preprocess_shap_dict(shap_str):
 
 # Draw scatter plot for UMAP
 def draw_scatter_plot(umap, code):
-
     symbol_map = {
         'TCGA': 'cross',
         'CCLE': 'circle',
@@ -338,7 +340,7 @@ def draw_scatter_plot(umap, code):
         color='oncotree_code',
         symbol='Source',  # Assign different markers based on 'Source'
         symbol_map=symbol_map,
-        hover_data=['oncotree_code', 'Source', 'oncotree_code', 'index'],  # Optionally include in hover
+        hover_data=['oncotree_code', 'Source', 'oncotree_code', 'index', 'tissue'],  # Optionally include in hover
         color_discrete_sequence=plotlyPalette
     )
 
@@ -358,3 +360,42 @@ def draw_scatter_plot(umap, code):
     # Convert the figure to JSON
     fig_json = fig.to_json(remove_uids=False)
     return fig_json
+
+
+def validate_file(self, file):
+
+    df = pd.DataFrame()
+
+    # Check if the file has a valid extension
+    if not file.endswith('.csv'):
+        error_msg = 'Invalid file type. Only .csv files are accepted.'
+        self.update_state(state='FAILURE', meta=error_msg)
+        return None
+
+    # Try reading the file
+    try:
+        # Simulate a file object for pandas
+        df = pd.read_csv(StringIO(file), sep=",", header=0, index_col=0)
+    except Exception as e:
+        error_msg = f'Error reading the file: {str(e)}'
+        self.update_state(state='FAILURE', meta=error_msg)
+        return None
+
+    # Check for required columns
+    required_columns = {'TCGA_CODE', 'TISSUE', 'GENE'}
+    missing_columns = required_columns - set(df.columns)
+    if missing_columns:
+        error_msg = f'Missing required columns: {", ".join(missing_columns)}'
+        self.update_state(state='FAILURE', meta=error_msg)
+        return None
+
+    # Check for sample columns before transpose
+    sample_columns = [col for col in df.columns if col not in {'TCGA_CODE', 'TISSUE', 'GENE'}]
+    if not all(df[sample_columns].applymap(lambda x: isinstance(x, (float, int)) or pd.isna(x)).all()):
+        error_msg = 'All SAMPLE columns must have numeric values or NaN.'
+        self.update_state(state='FAILURE', meta=error_msg)
+        return None
+
+    # If everything is fine, return the dataframe
+    return df
+
