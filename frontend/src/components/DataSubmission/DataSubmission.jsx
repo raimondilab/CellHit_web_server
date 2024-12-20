@@ -97,7 +97,7 @@ async function sendFile() {
     formData.append("map", JSON.stringify({ 0: ["variables.file"] }));
     formData.append("0", selectedFile);  // Add file to the request
 
-    const apiUrl = 'http://127.0.0.1:8003/graphql';
+    const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
     const response = await axios.post(apiUrl, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -126,7 +126,7 @@ async function sendFile() {
 }
 
 const handleDownload = () => {
-        const downloadUrl = 'https://test.bioinfolab.sns.it/api/download/GBM.csv';
+        const downloadUrl = 'https://api.cellhit.bioinfolab.sns.it/api/download/GBM.csv';
         window.open(downloadUrl, '_blank');
 };
 
@@ -145,7 +145,7 @@ async function getTaskResults() {
             `
         };
 
-        const apiUrl = 'https://test.bioinfolab.sns.it/graphql';
+        const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
         const taskData = await axios.post(apiUrl, query);
 
         if (!taskData.data.data || taskData.data.errors) {
@@ -337,8 +337,7 @@ function validateFile(fileContent) {
               CellHit web server is a powerful tool that provides practical insights into cancer cell sensitivities to drugs using patient transcriptomic data (bulk RNA-seq). By utilizing data from the GDSC and PRISM assays,
               CellHit predicts drug sensitivities, thereby facilitating the development of targeted therapies and precision oncology.
               The web server also offers a wide range of tools for aligning, visualizing, and modelling patient transcriptomics
-              alongside well-characterized commercial cell lines. Furthermore, it allows users to explore pre-computed
-              predictions and outputs for the entire TCGA dataset, making it a valuable resource for cancer research. For more information, please refer to the
+              alongside well-characterized commercial cell lines. For more information, please refer to the
               <Link className="" to="/about/" target="_blank" rel="noopener noreferrer"><b><i> about</i></b></Link> page.
             </p>
 

@@ -47,7 +47,7 @@ const AboutPage = () => {
                     <h4 className="fw-bold mb-3">ComBat</h4>
                     <p className="fs-1 text-justify mb-4">
                     Combat correction is performed using the <Link to="https://epigenelabs.github.io/pyComBat/" target="_blank" rel="noopener noreferrer"><b><i>pyComBat package</i></b></Link>.
-                    Notably, if the user assigns a TCGA tumor label (e.g., BRCA, LAML, LUAD; see [placeholder for the link]) to the samples in a
+                    Notably, if the user assigns a TCGA tumor label (e.g., BRCA, LAML, LUAD;) to the samples in a
                     dedicated column along with transcriptomics data, this metadata is utilized to achieve improved harmonization with
                     TCGA (through the “mod” argument of pyComBat). It is important to note that the input data is expected to originate
                     from bulk transcriptomics of patient tissue (in log2(TPM+1) format) rather than from commercial cell lines.
