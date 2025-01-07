@@ -40,7 +40,7 @@ async function getTaskResults(taskID) {
             `
         };
 
-        const apiUrl = 'https://test.bioinfolab.sns.it/graphql';
+        const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
         const taskData = await axios.post(apiUrl, query);
 
         if (!taskData.data.data || taskData.data.errors) {
@@ -113,9 +113,11 @@ useEffect(() => {
 
 
   const [height, setHeight] = useState("500");
-  const umapData = result ? result : "{}"
+  const umapData = result.oncotree ? result : "{}"
   const [inferenceData, setInferenceData] = useState([]);
   const [heatmapData, setHeatmapData] = useState("{}");
+  const [umapPlotData, setUmapPlotData] = useState(umapData);
+  const [umapType, setUmapType] = useState('oncotree');
 
   // Dialog settings
   const [position, setPosition] = useState('center');
@@ -243,9 +245,22 @@ useEffect(() => {
                 <h4 className="display-6 fw-bold mb-5">UMAP<sup><Button icon="pi pi-info"
                 onClick={() => show('top-right')} text size="small" className="btn-dialog" /></sup></h4>
                  <div className="row">
-                    <div className="col-12 mb-1">
+                 <div className="col-2 mb-1">
+                  <div className="bg-light rounded-3">
+                    <div className="p-3">
+                      <div className="mb-2">
+                        <label htmlFor="color" className="form-label">Color by&nbsp;</label>
+                        <select className="form-select mb-3" name="color" onChange={handleColorBy} value={umapType}>
+                            <option value="oncotree" defaultValue>Oncotree</option>
+                            <option value="tissue">Tissue</option>
+                        </select>
+                        </div>
+                      </div>
+                     </div>
+                    </div>
+                    <div className="col-10 mb-1">
                     <div className="p-3 ">
-                        <ScatterPlot  jsonData={umapData}/>
+                        <ScatterPlot  jsonData={umapPlotData}/>
                     </div>
                    </div>
                </div>
