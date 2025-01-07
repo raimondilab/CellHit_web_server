@@ -68,7 +68,7 @@ const HelpPage = () => {
                     />
                <h5 className="display-6 fw-bold mb-4">Heatmap</h5>
               <p className="fs-1 text-justify mb-4">
-                Clustering of CellHit predictions of GDSC/PRISM drugs (columns) for each sample (rows). Cells contain the predicted lnIC50 values normalized by median subtraction.
+                Heatmap of CellHit predictions of GDSC/PRISM drugs (columns) for each sample (rows). Cells contain the predicted lnIC50 values normalized by median subtraction.
               </p>
               <img
                       tabIndex="1"
