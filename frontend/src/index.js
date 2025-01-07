@@ -19,6 +19,8 @@ import ResultPage from './pages/ResultPage/ResultPage'
 import ResultPageAnalysis from './pages/ResultPageAnalysis/ResultPageAnalysis'
 import RunCellHit from './pages/RunCellHit/RunCellHit'
 import AboutPage from './pages/AboutPage/AboutPage'
+import HelpPage from './pages/HelpPage/HelpPage'
+import FaqPage from './pages/FaqPage/FaqPage'
 
 const router = createBrowserRouter([ {
       path: "/",
@@ -34,6 +36,14 @@ const router = createBrowserRouter([ {
     {
       path: "/about/",
       element: <AboutPage/>,
+    },
+    {
+      path: "/help/",
+      element: <HelpPage/>,
+    },
+    {
+      path: "/faq/",
+      element: <FaqPage/>,
     },
     {
       path: "/explore/",
