@@ -116,8 +116,9 @@ useEffect(() => {
   const umapData = result ? result : "{}"
   const [inferenceData, setInferenceData] = useState([]);
   const [heatmapData, setHeatmapData] = useState("{}");
-  const [umapPlotData, setUmapPlotData] = useState(umapData.oncotree);
+  const [umapPlotData, setUmapPlotData] = useState("{}");
   const [umapType, setUmapType] = useState('oncotree');
+
 
   // Dialog settings
   const [position, setPosition] = useState('center');
@@ -201,11 +202,13 @@ const handleHeatmap = async () => {
 // Get tab data
 useEffect(() => {
 
+   setUmapPlotData(umapData.oncotree);
+   setUmapType("oncotree")
+
     if (activeTabIndex === 1 && callNumberTable === 1) {
          handleTable();
     }
 
-    console.log(activeTabIndex, callNumberHeatmap)
     if (activeTabIndex === 2 && callNumberHeatmap === 1) {
         handleHeatmap();
     }
