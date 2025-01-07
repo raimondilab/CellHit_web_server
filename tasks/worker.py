@@ -17,7 +17,7 @@ from static import plots as pt
 
 from parametric_umap import ParametricUMAP
 
-from src.pipeline import PreprocessPaths, InferencePaths
+from src.pipeline import PreprocessPaths
 from src.pipeline.align import batch_correct, impute_missing, celligner_transform_data
 from src.pipeline import InferencePaths, run_full_inference
 import plotly.express as px
