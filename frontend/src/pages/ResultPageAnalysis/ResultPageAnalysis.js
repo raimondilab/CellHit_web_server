@@ -135,6 +135,17 @@ const [activeTabIndex, setActiveTabIndex] = useState(0);
 const [tableLoadData, setTableLoadData] = useState(false);
 const [heatmapLoadData, setHeatmapLoadData] = useState(false);
 
+const handleColorBy = (e) => {
+    let value = e.target.value;
+    setUmapType(value);
+
+    if (value === 'oncotree') {
+        setUmapPlotData(umapData.oncotree || "{}");
+    } else if (value === 'tissue') {
+        setUmapPlotData(umapData.tissue || "{}");
+    }
+};
+
 const handleTable = async () => {
 
     if (activeTabIndex === 1 && inferenceData.length === 0) {
