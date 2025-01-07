@@ -120,6 +120,15 @@ useEffect(() => {
   const [umapType, setUmapType] = useState('oncotree');
 
 
+useEffect(() => {
+    if (umapType === 'oncotree') {
+        setUmapPlotData(umapData.oncotree || "{}");
+    } else if (umapType === 'tissue') {
+        setUmapPlotData(umapData.tissue || "{}");
+    }
+}, [umapData, umapType]);
+
+
   // Dialog settings
   const [position, setPosition] = useState('center');
   const [visible, setVisible] = useState(false);
@@ -201,9 +210,6 @@ const handleHeatmap = async () => {
 
 // Get tab data
 useEffect(() => {
-
-   setUmapPlotData(umapData.oncotree);
-   setUmapType("oncotree")
 
     if (activeTabIndex === 1 && callNumberTable === 1) {
          handleTable();
