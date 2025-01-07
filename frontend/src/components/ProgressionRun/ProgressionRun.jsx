@@ -141,7 +141,7 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit }) => {
                 `
             };
 
-            const apiUrl = 'https://test.bioinfolab.sns.it/graphql';
+            const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
             const taskData = await axios.post(apiUrl, query);
 
             if (!taskData.data.data || taskData.data.errors) {
