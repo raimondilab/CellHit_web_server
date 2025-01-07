@@ -129,13 +129,6 @@ def analysis(self, file, dataset):
 
         df = pd.read_csv(StringIO(file), sep=",", header=0, index_col=0)
 
-        # # Validate file
-        # df = validate_file(self, file)
-        #
-        # print(df)
-        # if df is None:
-        #     return {}
-
         # Get TCGA_CODE code
         code = str(df['TCGA_CODE'].unique()[0])
 
@@ -195,7 +188,10 @@ def analysis(self, file, dataset):
         umap_concat = umap_concat.reset_index(drop=True)
 
         # Convert umap data in json format
-        umap_json = draw_scatter_plot(umap_concat, code)
+        umap_json = draw_scatter_plot(umap_concat, code, 'oncotree_code')
+
+        # Convert umap data in json format
+        umap_json_tissue = draw_scatter_plot(umap_concat, code, 'tissue')
 
         results_pipeline['transformed'] = transformed
 
@@ -240,7 +236,7 @@ def analysis(self, file, dataset):
         result = {
             "heatmap": {'data': heatmap_json[0], "height": heatmap_json[1]},
             "table": predictions_json,
-            "umap": umap_json,
+            "umap":  {'oncotree': umap_json, "tissue": umap_json_tissue}
         }
 
         return result
@@ -319,7 +315,8 @@ def preprocess_shap_dict(shap_str):
 
 
 # Draw scatter plot for UMAP
-def draw_scatter_plot(umap, code):
+def draw_scatter_plot(umap, code, color):
+
     symbol_map = {
         'TCGA': 'cross',
         'CCLE': 'circle',
@@ -346,7 +343,7 @@ def draw_scatter_plot(umap, code):
         umap,
         x='UMAP1',
         y='UMAP2',
-        color='oncotree_code',
+        color=color,
         symbol='Source',  # Assign different markers based on 'Source'
         symbol_map=symbol_map,
         hover_data=['oncotree_code', 'Source', 'oncotree_code', 'index', 'tissue'],  # Optionally include in hover
