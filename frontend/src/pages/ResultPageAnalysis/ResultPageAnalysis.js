@@ -113,10 +113,10 @@ useEffect(() => {
 
 
   const [height, setHeight] = useState("500");
-  const umapData = result.oncotree ? result : "{}"
+  const umapData = result ? result : "{}"
   const [inferenceData, setInferenceData] = useState([]);
   const [heatmapData, setHeatmapData] = useState("{}");
-  const [umapPlotData, setUmapPlotData] = useState(umapData);
+  const [umapPlotData, setUmapPlotData] = useState(umapData.oncotree);
   const [umapType, setUmapType] = useState('oncotree');
 
   // Dialog settings

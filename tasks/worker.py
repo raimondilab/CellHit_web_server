@@ -350,9 +350,15 @@ def draw_scatter_plot(umap, code, color):
         color_discrete_sequence=plotlyPalette
     )
 
+    if color == "oncotree_code":
+        title = color.replace("_", " ").title()
+
+    else:
+        title = "Tissue"
+
     # Customize the layout
     fig.update_layout(
-        legend_title_text='Oncotree Code and Source',  # Adjusted for multiple legends
+        legend_title_text=f'{title} and Source',  # Adjusted for multiple legends
         legend=dict(
             # You can customize legend layout here if needed
         ),
