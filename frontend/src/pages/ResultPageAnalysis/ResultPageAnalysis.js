@@ -4,6 +4,7 @@ import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 import ScatterPlot from '../../components/ScatterPlot/ScatterPlot';
 import InferenceTable from '../../components/InferenceTable/InferenceTable';
+import BarPlot from '../../components/BarPlot/BarPlot';
 import HeatMap from '../../components/HeatMap/HeatMap';
 import { Helmet } from 'react-helmet';
 import { Card } from 'primereact/card';
@@ -132,10 +133,24 @@ useEffect(() => {
   // Dialog settings
   const [position, setPosition] = useState('center');
   const [visible, setVisible] = useState(false);
+  const [positionIn, setPositionIn] = useState('center');
+  const [visibleIn, setVisibleIn] = useState(false);
+  const [positionHeat, setPositionHeat] = useState('center');
+  const [visibleHeat, setVisibleHeat] = useState(false);
 
   const show = (position) => {
     setPosition(position);
     setVisible(true);
+  };
+
+  const showIn = (positionIn) => {
+    setPositionIn(positionIn);
+    setVisibleIn(true);
+  };
+
+  const showHeat = (positionHeat) => {
+    setPositionHeat(positionHeat);
+    setVisibleHeat(true);
   };
 
 // Control Calls
@@ -144,6 +159,7 @@ const [callNumberHeatmap, setCallNumberHeatmap] = useState(1);
 const [activeTabIndex, setActiveTabIndex] = useState(0);
 const [tableLoadData, setTableLoadData] = useState(false);
 const [heatmapLoadData, setHeatmapLoadData] = useState(false);
+const [shapData, setShapData] = useState();
 
 const handleColorBy = (e) => {
     let value = e.target.value;
@@ -245,17 +261,34 @@ useEffect(() => {
          <h1 className="display-5 fw-bold line mb-4">Task id:{task}</h1>
 
           {/* Help message */}
-          <Dialog header="CellHit" visible={visible} position={position} style={{ width: '50vw' }} onHide={() => setVisible(false)}
+          <Dialog header="UMAP" visible={visible} position={position} style={{ width: '50vw' }} onHide={() => setVisible(false)}
             draggable={false} resizable={false} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
             <p className="m-0 mb-1 text-justify">
-              We trained explainable machine learning algorithms by employing cell
-              line transcriptomics to predict the growth inhibitory potential of drugs. We used large
-              language models (LLMs) to expand descriptions of the mechanisms of action (MOA) for
-              each drug starting from available annotations, which were matched to the semantically
-              closest pathways from reference knowledge bases.
+              UMAP 2D projection of Celligner alignment coloured by oncotree or tissue. Users can see the UMAP plot with colours representing the oncotree code or tissue name by selecting it in the "colour by" options field.
             </p>
             <p className="m-0 mb-1 text-justify">For more information, please refer to the
-              <Link className="" to="/about/" target="_blank"><b> about</b></Link> page.
+              <Link className="" to="/help/" target="_blank"><b> help</b></Link> page.
+            </p>
+          </Dialog>
+          {/* Help message */}
+          <Dialog header="Table" visible={visibleIn} position={positionIn} style={{ width: '50vw' }} onHide={() => setVisibleIn(false)}
+            draggable={false} resizable={false} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
+            <p className="m-0 mb-1 text-justify">
+              The inference table displays the results from the CelHit pipeline for each sample. Users can filter the results by drugs or datasets. Furthermore, users can select the columns to visualize, export the data in various formats, and copy the URL of the results to share them.
+              Besides, Users can click on a specific row to view the SHAP plot, which illustrates the importance of the top genes. The selected row will be highlighted with a blue background. To reset the selection and hide the SHAP plot, click the button featuring a replay icon.
+            </p>
+            <p className="m-0 mb-1 text-justify">For more information, please refer to the
+              <Link className="" to="/help/" target="_blank"><b> help</b></Link> page.
+            </p>
+          </Dialog>
+          {/* Help message */}
+          <Dialog header="Heatmap" visible={visibleHeat} position={positionHeat} style={{ width: '50vw' }} onHide={() => setVisibleHeat(false)}
+            draggable={false} resizable={false} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
+            <p className="m-0 mb-1 text-justify">
+              Heatmap of CellHit predictions of GDSC/PRISM drugs (columns) for each sample (rows). Cells contain the predicted lnIC50 values normalized by median subtraction.
+            </p>
+            <p className="m-0 mb-1 text-justify">For more information, please refer to the
+              <Link className="" to="/help/" target="_blank"><b> help</b></Link> page.
             </p>
           </Dialog>
         </div>
@@ -287,24 +320,31 @@ useEffect(() => {
                 </TabPanel>
                 <TabPanel header="Inference">
                    <h4 className="display-6 fw-bold mb-5">Inference<sup><Button icon="pi pi-info"
-                   onClick={() => show('top-right')} text size="small" className="btn-dialog" /></sup></h4>
+                   onClick={() => showIn('top-right')} text size="small" className="btn-dialog" /></sup></h4>
                     { tableLoadData &&  (
-                         <div className="row mb-4">
+                         <div className="row mb-5">
                             <ProgressSpinner style={{width: '50px', height: '50px'}}
                             strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s" />
                          </div>
                     )}
                     { !tableLoadData &&  (
-                       <div className="row">
+                       <div className="row mb-4">
                         <div className="col-12 nopadding">
-                          <InferenceTable inferenceData={inferenceData}/>
+                          <InferenceTable inferenceData={inferenceData}  setShapData={setShapData} />
                          </div>
                        </div>
+                     )}
+                     { (!tableLoadData && shapData) && (
+                        <div className="row">
+                         <div className="col-4 nopadding">
+                            <BarPlot jsonData={shapData}/>
+                          </div>
+                        </div>
                      )}
                 </TabPanel>
                 <TabPanel header="Heatmap">
                    <h4 className="display-6 fw-bold mb-5">Heatmap<sup><Button icon="pi pi-info"
-                   onClick={() => show('top-right')} text size="small" className="btn-dialog" /></sup></h4>
+                   onClick={() => showHeat('top-right')} text size="small" className="btn-dialog" /></sup></h4>
                     { heatmapLoadData &&  (
                          <div className="row mb-4">
                             <ProgressSpinner style={{width: '50px', height: '50px'}}

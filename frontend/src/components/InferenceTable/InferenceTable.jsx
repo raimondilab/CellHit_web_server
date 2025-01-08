@@ -7,9 +7,9 @@ import { FilterMatchMode, FilterOperator } from 'primereact/api';
 import { MultiSelect } from 'primereact/multiselect';
 import { IconField } from 'primereact/iconfield';
 import { InputIcon } from 'primereact/inputicon';
+import 'primeicons/primeicons.css';
 
-
-const InferenceTable = ({ inferenceData }) => {
+const InferenceTable = ({ inferenceData, setShapData }) => {
 
   const handleClick = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -39,6 +39,7 @@ const InferenceTable = ({ inferenceData }) => {
  const [selectedDatasets, setSelectedDatasets] = useState([]);
  const [selectedDrugs, setSelectedDrugs] = useState([]);
  const [selectedColumns, setSelectedColumns] = useState(columnsDefault);
+ const [selectedRow, setSelectedRow] = useState(null);
 
  const datasets = [
         { label: 'GDSC', value: 'GDSC' },
@@ -47,9 +48,11 @@ const InferenceTable = ({ inferenceData }) => {
 
     // Extract unique drugs
     const uniqueDrugs = [
-    ...new Set(inferenceData.map(inference => inference.DrugName?.trim()))
-    ].filter(drug => drug) // Remove any undefined/null values
-    .map(drug => ({ label: drug, value: drug }));
+      ...new Set(inferenceData.map((inference) => inference.DrugName?.trim()))
+    ]
+      .filter((drug) => drug) // Remove any undefined/null values
+      .map((drug) => ({ label: drug, value: drug }))
+      .sort((a, b) => a.label.localeCompare(b.label)); // Sort by the label property
 
 
    const onColumnToggle = (event) => {
@@ -80,6 +83,21 @@ const InferenceTable = ({ inferenceData }) => {
   const dynamicColumns = visibleColumns.map((col) => {
     return <Column key={col.field} field={col.field} header={col.header} sortable />;
  });
+
+ const onRowClick = (e) => {
+    const clickedRowData = e.data;
+    console.log(clickedRowData.ShapDictionary)
+    if (clickedRowData && clickedRowData.ShapDictionary) {
+      setShapData(clickedRowData.ShapDictionary);
+    }
+
+    // Update the selected row
+    setSelectedRow(clickedRowData);
+  };
+
+ const getRowClass = (rowData) => {
+    return rowData === selectedRow ? 'highlighted-row' : '';
+  };
 
 const exportCSV = (tableRef, selectionOnly) => {
         tableRef.current.exportCSV({ selectionOnly });
@@ -139,6 +157,11 @@ const exportCSV = (tableRef, selectionOnly) => {
         setFilters(_filters);
     };
 
+    const handleResetData = (event) => {
+        setSelectedRow([]);
+        setShapData();
+    };
+
   const header = (
   <div className="row align-items-center">
       <div className="col">
@@ -176,6 +199,7 @@ const exportCSV = (tableRef, selectionOnly) => {
             </div>
       </div>
       <div className="col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                    <Button type="button" icon="pi pi-replay" text className="p-button-rounded p-mr-2"  onClick={handleResetData} tooltip="Unselect row"/>
           <MultiSelect
                 value={visibleColumns.map(col => col.field)}
                 options={multiSelectOptions}
@@ -197,8 +221,8 @@ const exportCSV = (tableRef, selectionOnly) => {
 return (
 <>
  <DataTable ref={dt} value={filteredData} paginator rows={5}  emptyMessage="No inference found."
- removableSort header={header} filters={filters}   removableSort
- onFilter={(e) => setFilters(e.filters)} tableStyle={{ minWidth: '50rem' }}>
+ removableSort header={header} filters={filters}   removableSort  rowClassName={getRowClass}
+ onFilter={(e) => setFilters(e.filters)} tableStyle={{ minWidth: '50rem' }}  onRowClick={onRowClick}>
           {dynamicColumns}
   </DataTable>
 </>

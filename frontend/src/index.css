@@ -19041,6 +19041,10 @@ box-shadow: none !important;
     font-weight: 400 !important;
 }
 
+.p-button {
+   outline: none !important;
+}
+
 .gdsc-border {
    border-radius: 3px 0px 0px 3px !important;
 }
@@ -19066,3 +19070,14 @@ input:checked {
   opacity: 0.5;
   pointer-events: none;
 }
+
+td {
+  cursor: pointer;
+}
+
+.highlighted-row{
+ background-color: #00b7d6 !important;
+ font-weight: bold;
+ color: #fff;
+}
+
