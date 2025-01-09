@@ -237,6 +237,7 @@ def analysis(self, file, dataset):
         # Merge cell distributions for later visualization purposes
         predictions_df = merge_cell_distrib_with_dataframe(result_df['distrib_cells'], predictions_df)
 
+        predictions_df = predictions_df.reset_index(drop=True)
         predictions_json = predictions_df.to_dict(orient='records')
 
         result = {
@@ -470,7 +471,7 @@ def merge_drug_distrib_with_dataframe(ref, ref_df):
     distrib_df = distrib_df[['DrugDictionary']].reset_index()
 
     # Merge the original DataFrame (ref_df) with the temporary DataFrame (distrib_df) on the 'DrugID' column
-    merged_df = ref_df.merge(distrib_df, on='DrugID', how='left')  # Use left join to retain all rows from ref_df
+    merged_df = ref_df.merge(distrib_df, on='DrugID', how='left').fillna("no_value")  # Use left join to retain all rows from ref_df
 
     return merged_df
 
@@ -487,10 +488,11 @@ def merge_cell_distrib_with_dataframe(ref, ref_df):
     Returns:
         pd.DataFrame: The merged DataFrame with a new column 'DrugDictionary'.
     """
-    # Extract the 'distrib_drugs' dictionary and convert it into a temporary DataFrame
-    distrib_drugs = ref.get('distrib_cells', {})
+    # Extract the 'distrib_cells' dictionary and convert it into a temporary DataFrame
+
+    distrib_cell = ref.get('distrib_cells', {})
     distrib_df = pd.DataFrame.from_dict(
-        {key: value.tolist() for key, value in distrib_drugs.items()},  # Convert each array to a list
+        {key: value.tolist() for key, value in distrib_cell.items()},  # Convert each array to a list
         orient='index'  # Use dictionary keys as the index
     )
 
@@ -509,6 +511,6 @@ def merge_cell_distrib_with_dataframe(ref, ref_df):
     distrib_df = distrib_df[['CellDictionary']].reset_index()
 
     # Merge the original DataFrame (ref_df) with the temporary DataFrame (distrib_df) on the 'DrugID' column
-    merged_df = ref_df.merge(distrib_df, on='index', how='left')  # Use left join to retain all rows from ref_df
+    merged_df = ref_df.merge(distrib_df, on='index', how='left').fillna("no_value")  # Use left join to retain all rows from ref_df
 
     return merged_df
