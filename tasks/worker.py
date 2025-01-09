@@ -235,18 +235,16 @@ def analysis(self, file, dataset):
 
         # Set up distrib_cells dataframe
         distrib_cells_df = result_df['distrib_cells']
-        distrib_cells_json = distrib_cells_df.to_dict(orient='records')
 
         # Set up predictions dataframe
         distrib_drugs_df = result_df['distrib_drugs']
-        distrib_drugs_json = distrib_drugs_df.to_dict(orient='records')
 
         result = {
             "heatmap": {'data': heatmap_json[0], "height": heatmap_json[1]},
             "table": predictions_json,
             "umap":  {'oncotree': umap_json, "tissue": umap_json_tissue},
-            "distrib_cells": distrib_cells_json,
-            "distrib_cells": distrib_drugs_json
+            "distrib_cells": distrib_cells_df,
+            "distrib_cells": distrib_drugs_df
         }
 
         return result
