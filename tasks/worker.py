@@ -231,20 +231,18 @@ def analysis(self, file, dataset):
         predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].astype(str)
         predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].apply(preprocess_shap_dict)
 
+        # Merge drug distributions for later visualization purposes
+        predictions_df = merge_drug_distrib_with_dataframe(result_df['distrib_drugs'], predictions_df)
+
+        # Merge cell distributions for later visualization purposes
+        predictions_df = merge_cell_distrib_with_dataframe(result_df['distrib_cells'], predictions_df)
+
         predictions_json = predictions_df.to_dict(orient='records')
-
-        # Set up distrib_cells dataframe
-        distrib_cells_df = result_df['distrib_cells']
-
-        # Set up predictions dataframe
-        distrib_drugs_df = result_df['distrib_drugs']
 
         result = {
             "heatmap": {'data': heatmap_json[0], "height": heatmap_json[1]},
             "table": predictions_json,
-            "umap":  {'oncotree': umap_json, "tissue": umap_json_tissue},
-            "distrib_cells": distrib_cells_df,
-            "distrib_cells": distrib_drugs_df
+            "umap":  {'oncotree': umap_json, "tissue": umap_json_tissue}
         }
 
         return result
@@ -436,3 +434,81 @@ def ensg_to_hgnc(df_columns):
     mapped_columns = [ensg_to_symbol.get(col, col) for col in columns]
 
     return pd.Index(mapped_columns)
+
+
+def merge_drug_distrib_with_dataframe(ref, ref_df):
+    """
+    Merges the dictionary ref['distrib_drugs'] with a DataFrame ref_df based on the 'DrugID' column.
+    Adds a new column "DrugDictionary" containing the values from distrib_drugs as dictionaries.
+
+    Args:
+        ref (dict): Dictionary containing a 'distrib_drugs' key with the data to merge.
+        ref_df (pd.DataFrame): DataFrame with a column 'DrugID' to join on.
+
+    Returns:
+        pd.DataFrame: The merged DataFrame with a new column 'DrugDictionary'.
+    """
+    # Extract the 'distrib_drugs' dictionary and convert it into a temporary DataFrame
+    distrib_drugs = ref.get('distrib_drugs', {})
+    distrib_df = pd.DataFrame.from_dict(
+        {key: value.tolist() for key, value in distrib_drugs.items()},  # Convert each array to a list
+        orient='index'  # Use dictionary keys as the index
+    )
+
+    # Assign names to the temporary DataFrame columns (optional, based on feature identifiers)
+    distrib_df.columns = [f"Feature_{i}" for i in range(distrib_df.shape[1])]
+    distrib_df.index.name = 'DrugID'  # Rename the index to match 'DrugID'
+
+    # Create a new column "DrugDictionary" by converting each row into a dictionary
+    distrib_df['DrugDictionary'] = distrib_df.apply(
+        lambda row: {f"Feature_{i}": row[f"Feature_{i}"] for i in range(len(row) - 1)},
+        # Build a dictionary for each row
+        axis=1
+    )
+
+    # Keep only the 'DrugDictionary' column and reset the index
+    distrib_df = distrib_df[['DrugDictionary']].reset_index()
+
+    # Merge the original DataFrame (ref_df) with the temporary DataFrame (distrib_df) on the 'DrugID' column
+    merged_df = ref_df.merge(distrib_df, on='DrugID', how='left')  # Use left join to retain all rows from ref_df
+
+    return merged_df
+
+
+def merge_cell_distrib_with_dataframe(ref, ref_df):
+    """
+    Merges the dictionary ref['distrib_cells'] with a DataFrame ref_df based on the 'DrugID' column.
+    Adds a new column "DrugDictionary" containing the values from distrib_drugs as dictionaries.
+
+    Args:
+        ref (dict): Dictionary containing a 'distrib_drugs' key with the data to merge.
+        ref_df (pd.DataFrame): DataFrame with a column 'DrugID' to join on.
+
+    Returns:
+        pd.DataFrame: The merged DataFrame with a new column 'DrugDictionary'.
+    """
+    # Extract the 'distrib_drugs' dictionary and convert it into a temporary DataFrame
+    distrib_drugs = ref.get('distrib_cells', {})
+    distrib_df = pd.DataFrame.from_dict(
+        {key: value.tolist() for key, value in distrib_drugs.items()},  # Convert each array to a list
+        orient='index'  # Use dictionary keys as the index
+    )
+
+    # Assign names to the temporary DataFrame columns (optional, based on feature identifiers)
+    distrib_df.columns = [f"Feature_{i}" for i in range(distrib_df.shape[1])]
+    distrib_df.index.name = 'index'  # Rename the index to match 'DrugID'
+
+    # Create a new column "DrugDictionary" by converting each row into a dictionary
+    distrib_df['CellDictionary'] = distrib_df.apply(
+        lambda row: {f"Feature_{i}": row[f"Feature_{i}"] for i in range(len(row) - 1)},
+        # Build a dictionary for each row
+        axis=1
+    )
+
+    # Keep only the 'DrugDictionary' column and reset the index
+    distrib_df = distrib_df[['CellDictionary']].reset_index()
+
+    # Merge the original DataFrame (ref_df) with the temporary DataFrame (distrib_df) on the 'DrugID' column
+    merged_df = ref_df.merge(distrib_df, on='index', how='left')  # Use left join to retain all rows from ref_df
+
+    return merged_df
