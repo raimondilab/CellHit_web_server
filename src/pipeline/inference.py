@@ -5,12 +5,10 @@ from pathlib import Path
 import gc
 from tqdm.auto import tqdm
 
-import sys
 
-sys.path.append('/home/fcarli/CellHit/')
-from CellHit.models import EnsembleXGBoost
-from CellHit.data import obtain_drugs_metadata
-from CellHit.utils import QuantileScoreComputer
+from ..models import EnsembleXGBoost
+from ..data import obtain_drugs_metadata
+from ..utils import QuantileScoreComputer
 
 from .neighbors import FaissKNN, add_tcga_metadata, add_ccle_metadata
 from .dataclasses import InferencePaths
