@@ -232,10 +232,10 @@ def analysis(self, file, dataset):
         predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].apply(preprocess_shap_dict)
 
         # Merge drug distributions for later visualization purposes
-        predictions_df = merge_drug_distrib_with_dataframe(result_df['distrib_drugs'], predictions_df)
+        predictions_df = merge_drug_distrib_with_dataframe(result_df, predictions_df)
 
         # Merge cell distributions for later visualization purposes
-        predictions_df = merge_cell_distrib_with_dataframe(result_df['distrib_cells'], predictions_df)
+        predictions_df = merge_cell_distrib_with_dataframe(result_df, predictions_df)
 
         predictions_df = predictions_df.reset_index(drop=True)
         predictions_json = predictions_df.to_dict(orient='records')
