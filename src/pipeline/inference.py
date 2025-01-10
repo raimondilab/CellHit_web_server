@@ -304,6 +304,12 @@ def run_full_inference(
     output['distrib_cells'] = quantile_computer.distrib_cells
     output['distrib_drugs'] = quantile_computer.distrib_drugs
 
+    df = pd.DateFrame(output['distrib_drugs'])
+    df.to_csv("DrugDictionary.csv")
+
+    df = pd.DateFrame(output['distrib_cells'])
+    df.to_csv("CellDictionary.csv")
+
     if return_heatmap:
         # Compute heatmap data
         drug_stats = pd.read_csv(drug_stats_path or inference_paths.drug_stats)

@@ -470,9 +470,6 @@ def merge_drug_distrib_with_dataframe(ref, ref_df):
     # Keep only the 'DrugDictionary' column and reset the index
     distrib_df = distrib_df[['DrugDictionary']].reset_index()
 
-    df = pd.DateFrame(ref['distrib_drugs'])
-    df.to_csv("DrugDictionary.csv")
-
     # Merge the original DataFrame (ref_df) with the temporary DataFrame (distrib_df) on the 'DrugID' column
     merged_df = ref_df.merge(distrib_df, on='DrugID', how='left').fillna("no_value") # Use left join to retain all rows from ref_df
 
@@ -510,8 +507,6 @@ def merge_cell_distrib_with_dataframe(ref, ref_df):
         axis=1
     )
 
-    df = pd.DateFrame(ref['distrib_cells'])
-    df.to_csv("CellDictionary.csv")
 
     # Keep only the 'DrugDictionary' column and reset the index
     distrib_df = distrib_df[['CellDictionary']].reset_index()
