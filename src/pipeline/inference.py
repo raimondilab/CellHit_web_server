@@ -307,8 +307,8 @@ def run_full_inference(
     df = pd.DateFrame(output['distrib_drugs'])
     df.to_csv("DrugDictionary.csv")
 
-    df = pd.DateFrame(output['distrib_cells'])
-    df.to_csv("CellDictionary.csv")
+    df2 = pd.DateFrame(output['distrib_cells'])
+    df2.to_csv("CellDictionary.csv")
 
     if return_heatmap:
         # Compute heatmap data

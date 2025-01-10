@@ -243,7 +243,7 @@ def analysis(self, file, dataset):
         result = {
             "heatmap": {'data': heatmap_json[0], "height": heatmap_json[1]},
             "table": predictions_json,
-            "umap":  {'oncotree': umap_json, "tissue": umap_json_tissue}
+            "umap": {'oncotree': umap_json, "tissue": umap_json_tissue}
         }
 
         return result
@@ -255,7 +255,6 @@ def analysis(self, file, dataset):
 
 # Preprocess user data
 def preprocess_data(data, code):
-
     # Transpose data
     data = data.transpose()
 
@@ -291,7 +290,6 @@ def preprocess_data(data, code):
 
 # Draw IC50 heatmap
 def draw_heatmap(heatmap_df):
-
     # Exclude non-numeric columns
     numeric_data = heatmap_df.select_dtypes(include='number')
 
@@ -323,7 +321,6 @@ def preprocess_shap_dict(shap_str):
 
 # Draw scatter plot for UMAP
 def draw_scatter_plot(umap, code, color):
-
     symbol_map = {
         'TCGA': 'cross',
         'CCLE': 'circle',
@@ -471,7 +468,8 @@ def merge_drug_distrib_with_dataframe(ref, ref_df):
     distrib_df = distrib_df[['DrugDictionary']].reset_index()
 
     # Merge the original DataFrame (ref_df) with the temporary DataFrame (distrib_df) on the 'DrugID' column
-    merged_df = ref_df.merge(distrib_df, on='DrugID', how='left').fillna("no_value") # Use left join to retain all rows from ref_df
+    merged_df = ref_df.merge(distrib_df, on='DrugID', how='left').fillna(
+        "no_value")  # Use left join to retain all rows from ref_df
 
     return merged_df
 
@@ -507,11 +505,11 @@ def merge_cell_distrib_with_dataframe(ref, ref_df):
         axis=1
     )
 
-
     # Keep only the 'DrugDictionary' column and reset the index
     distrib_df = distrib_df[['CellDictionary']].reset_index()
 
     # Merge the original DataFrame (ref_df) with the temporary DataFrame (distrib_df) on the 'DrugID' column
-    merged_df = ref_df.merge(distrib_df, on='index', how='left').fillna("no_value")  # Use left join to retain all rows from ref_df
+    merged_df = ref_df.merge(distrib_df, on='index', how='left').fillna(
+        "no_value")  # Use left join to retain all rows from ref_df
 
     return merged_df
