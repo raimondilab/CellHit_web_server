@@ -472,6 +472,7 @@ def merge_drug_distrib_with_dataframe(ref, ref_df):
     merged_df = ref_df.merge(distrib_df, on='DrugID', how='left')
     merged_df['DrugDictionary'] = merged_df['DrugDictionary'].fillna("no_value")
 
+    merged_df.to_csv("DrugDictionary.csv")
     return merged_df
 
 
@@ -513,4 +514,5 @@ def merge_cell_distrib_with_dataframe(ref, ref_df):
     merged_df = ref_df.merge(distrib_df, on='DrugID', how='left')
     merged_df['CellDictionary'] = merged_df['CellDictionary'].fillna("no_value")
 
+    merged_df.to_csv("CellDictionary.csv")
     return merged_df
