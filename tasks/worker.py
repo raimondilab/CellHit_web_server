@@ -446,30 +446,31 @@ def merge_drug_distrib_with_dataframe(ref, ref_df):
     Returns:
         pd.DataFrame: The merged DataFrame with a new column 'DrugDictionary'.
     """
-    # Extract the 'distrib_drugs' dictionary and convert it into a temporary DataFrame
+    # Extract the 'distrib_drugs' dictionary
     distrib_drugs = ref.get('distrib_drugs', {})
+
+    # Filter 'distrib_drugs' to include only keys present in ref_df['DrugID']
+    common_keys = set(ref_df['DrugID']).intersection(distrib_drugs.keys())
+    if not common_keys:
+        # If there are no common keys, return the original DataFrame with an empty 'DrugDictionary'
+        ref_df['DrugDictionary'] = "no_value"
+        return ref_df
+
+    # Convert the filtered dictionary into a DataFrame directly
+    filtered_distrib_drugs = {key: distrib_drugs[key].tolist() for key in common_keys}
     distrib_df = pd.DataFrame.from_dict(
-        {key: value.tolist() for key, value in distrib_drugs.items()},  # Convert each array to a list
-        orient='index'  # Use dictionary keys as the index
-    )
+        filtered_distrib_drugs,
+        orient='index',
+        columns=[f"Feature_{i}" for i in range(len(next(iter(filtered_distrib_drugs.values()), [])))]
+    ).rename_axis('DrugID')
 
-    # Assign names to the temporary DataFrame columns (optional, based on feature identifiers)
-    distrib_df.columns = [f"Feature_{i}" for i in range(distrib_df.shape[1])]
-    distrib_df.index.name = 'DrugID'  # Rename the index to match 'DrugID'
-
-    # Create a new column "DrugDictionary" by converting each row into a dictionary
-    distrib_df['DrugDictionary'] = distrib_df.apply(
-        lambda row: {f"Feature_{i}": row[f"Feature_{i}"] for i in range(len(row) - 1)},
-        # Build a dictionary for each row
-        axis=1
-    )
-
-    # Keep only the 'DrugDictionary' column and reset the index
+    # Add 'DrugDictionary' column efficiently
+    distrib_df['DrugDictionary'] = distrib_df.to_dict(orient='records')
     distrib_df = distrib_df[['DrugDictionary']].reset_index()
 
-    # Merge the original DataFrame (ref_df) with the temporary DataFrame (distrib_df) on the 'DrugID' column
-    merged_df = ref_df.merge(distrib_df, on='DrugID', how='left').fillna(
-        "no_value")  # Use left join to retain all rows from ref_df
+    # Merge with the original DataFrame
+    merged_df = ref_df.merge(distrib_df, on='DrugID', how='left')
+    merged_df['DrugDictionary'] = merged_df['DrugDictionary'].fillna("no_value")
 
     return merged_df
 
@@ -477,39 +478,39 @@ def merge_drug_distrib_with_dataframe(ref, ref_df):
 def merge_cell_distrib_with_dataframe(ref, ref_df):
     """
     Merges the dictionary ref['distrib_cells'] with a DataFrame ref_df based on the 'DrugID' column.
-    Adds a new column "DrugDictionary" containing the values from distrib_drugs as dictionaries.
+    Adds a new column "CellDictionary" containing the values from distrib_cells as dictionaries.
 
     Args:
-        ref (dict): Dictionary containing a 'distrib_drugs' key with the data to merge.
+        ref (dict): Dictionary containing a 'distrib_cells' key with the data to merge.
         ref_df (pd.DataFrame): DataFrame with a column 'DrugID' to join on.
 
     Returns:
-        pd.DataFrame: The merged DataFrame with a new column 'DrugDictionary'.
+        pd.DataFrame: The merged DataFrame with a new column 'CellDictionary'.
     """
-    # Extract the 'distrib_cells' dictionary and convert it into a temporary DataFrame
-
+    # Extract the 'distrib_cells' dictionary
     distrib_cell = ref.get('distrib_cells', {})
+
+    # Filter 'distrib_cells' to include only keys present in ref_df['DrugID']
+    common_keys = set(ref_df['DrugID']).intersection(distrib_cell.keys())
+    if not common_keys:
+        # If there are no common keys, return the original DataFrame with an empty 'CellDictionary'
+        ref_df['CellDictionary'] = "no_value"
+        return ref_df
+
+    # Convert the filtered dictionary into a DataFrame directly
+    filtered_distrib_cell = {key: distrib_cell[key].tolist() for key in common_keys}
     distrib_df = pd.DataFrame.from_dict(
-        {key: value.tolist() for key, value in distrib_cell.items()},  # Convert each array to a list
-        orient='index'  # Use dictionary keys as the index
-    )
+        filtered_distrib_cell,
+        orient='index',
+        columns=[f"Feature_{i}" for i in range(len(next(iter(filtered_distrib_cell.values()), [])))]
+    ).rename_axis('DrugID')
 
-    # Assign names to the temporary DataFrame columns (optional, based on feature identifiers)
-    distrib_df.columns = [f"Feature_{i}" for i in range(distrib_df.shape[1])]
-    distrib_df.index.name = 'index'  # Rename the index to match 'DrugID'
-
-    # Create a new column "DrugDictionary" by converting each row into a dictionary
-    distrib_df['CellDictionary'] = distrib_df.apply(
-        lambda row: {f"Feature_{i}": row[f"Feature_{i}"] for i in range(len(row) - 1)},
-        # Build a dictionary for each row
-        axis=1
-    )
-
-    # Keep only the 'DrugDictionary' column and reset the index
+    # Add 'CellDictionary' column efficiently
+    distrib_df['CellDictionary'] = distrib_df.to_dict(orient='records')
     distrib_df = distrib_df[['CellDictionary']].reset_index()
 
-    # Merge the original DataFrame (ref_df) with the temporary DataFrame (distrib_df) on the 'DrugID' column
-    merged_df = ref_df.merge(distrib_df, on='index', how='left').fillna(
-        "no_value")  # Use left join to retain all rows from ref_df
+    # Merge with the original DataFrame
+    merged_df = ref_df.merge(distrib_df, on='DrugID', how='left')
+    merged_df['CellDictionary'] = merged_df['CellDictionary'].fillna("no_value")
 
     return merged_df
