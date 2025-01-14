@@ -51,7 +51,7 @@ def start_flower():
         "-A",
         __name__,
         "flower",
-        "--port=5555"
+        "--port=5556"
     ]
     try:
         process = Popen(flower_cmd)
@@ -61,14 +61,15 @@ def start_flower():
         return None
 
 
-def start_celery():
+def start_celery(worker_name):
     celery_cmd = [
         "celery",
         "-A",
         __name__,
         "worker",
         "--pool=solo",
-        "--loglevel=info"
+        "--loglevel=info",
+          "-n", f"{worker_name}@%h"
     ]
     try:
         process = Popen(celery_cmd)

@@ -23,7 +23,7 @@ from sentry_sdk.integrations.fastapi import FastApiIntegration
 
 # Start Flower (task monitoring) and Celery worker
 flower_process = worker.start_flower()
-celery_worker = worker.start_celery()
+celery_worker = worker.start_celery("cellhit")
 
 # Create FastAPI app
 app = FastAPI()
