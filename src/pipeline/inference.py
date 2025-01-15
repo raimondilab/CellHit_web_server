@@ -298,17 +298,8 @@ def run_full_inference(
     # final_df = pd.merge(final_df, response_neighs_df, left_on='index', right_on='query_point', how='inner')
     # final_df.drop(columns=['query_point_x', 'query_point_y'], inplace=True)
 
-    output = {}
-
     # save drug and cells distributions for later visualization purposes
-    output['distrib_cells'] = quantile_computer.distrib_cells
-    output['distrib_drugs'] = quantile_computer.distrib_drugs
-
-    distrib_cells = pd.DataFrame(output['distrib_cells'])
-    distrib_cells.to_csv("CellDictionary.csv")
-
-    distrib_drugs = pd.DataFrame(output['distrib_drugs'])
-    distrib_drugs.to_csv("DrugDictionary.csv")
+    output = {'distrib_cells': quantile_computer.distrib_cells, 'distrib_drugs': quantile_computer.distrib_drugs}
 
     if return_heatmap:
         # Compute heatmap data
