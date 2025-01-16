@@ -25,11 +25,17 @@ from src.pipeline.align import batch_correct, impute_missing, celligner_transfor
 from src.pipeline import InferencePaths, run_full_inference
 import plotly.express as px
 
+import numpy as np
+import os
+
 # Get the base directory of the script
 BASE_DIR = Path(__file__).resolve().parent
 
 # Get the parent folder of the base directory
 PARENT_DIR = BASE_DIR.parent
+
+# Distribution file folder
+RESULTS_DIR = PARENT_DIR / 'distrib_files/'
 
 celery = Celery(__name__)
 celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/1")
@@ -84,18 +90,8 @@ def start_celery(worker_name):
 
 @celery.task
 def get_task(task_id):
-
     res = AsyncResult(task_id)
-
-    # Check if result is compressed
-    if isinstance(res, bytes):
-        try:
-            decompressed_result = decompress_result(res.result)
-            return decompressed_result
-        except Exception as e:
-            return e
-    else:
-        return res
+    return res
 
 
 # Setup preprocess_paths
@@ -137,6 +133,8 @@ inference_paths_gdsc = InferencePaths(
 def analysis(self, file, dataset):
     try:
         results_pipeline = {}
+
+        task_id = self.request.id  # Get the task ID
 
         # Step 1: Processing
         self.update_state(state='PROGRESS', meta='Processing')
@@ -245,11 +243,11 @@ def analysis(self, file, dataset):
         predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].astype(str)
         predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].apply(preprocess_shap_dict)
 
-        # Merge drug distributions for later visualization purposes
-        predictions_df = merge_drug_distrib_with_dataframe(result_df, predictions_df)
+        # Save drug distributions for later visualization purposes
+        save_numpy_dict(task_id, 'distrib_drugs', result_df['distrib_drugs'])
 
-        # Merge cell distributions for later visualization purposes
-        predictions_df = merge_cell_distrib_with_dataframe(result_df, predictions_df)
+        # Save cell distributions for later visualization purposes
+        save_numpy_dict(task_id, 'distrib_cells', result_df['distrib_cells'])
 
         predictions_df = predictions_df.reset_index(drop=True)
         predictions_json = predictions_df.to_dict(orient='records')
@@ -260,7 +258,7 @@ def analysis(self, file, dataset):
             "umap": {'oncotree': umap_json, "tissue": umap_json_tissue}
         }
 
-        return compress_result(result)
+        return result
 
     except Exception as e:
         print(f"Error during analysis: {e}")
@@ -453,70 +451,41 @@ def ensg_to_hgnc(df_columns):
     return pd.Index(mapped_columns)
 
 
-def merge_drug_distrib_with_dataframe(ref, ref_df):
+def save_numpy_dict(task_id, dic_type, data):
     """
-    Merges the dictionary ref['distrib_drugs'] with a DataFrame ref_df based on the 'DrugID' column.
-    Adds a new column "DrugDictionary" containing the values from distrib_drugs as dictionaries.
+    Save a dictionary with numpy array values to a directory.
 
     Args:
-        ref (dict): Dictionary containing a 'distrib_drugs' key with the data to merge.
-        ref_df (pd.DataFrame): DataFrame with a column 'DrugID' to join on.
-
-    Returns:
-        pd.DataFrame: The merged DataFrame with a new column 'DrugDictionary'.
+        :param data: distribution dictionary
+        :param task_id: Celery task ID
+        :param dic_type: Dictionary type
     """
 
-    # Extract the 'distrib_drugs' dictionary
-    distrib_drugs = ref.get('distrib_drugs', {})
-
-    # Map values from the dictionary directly to the DataFrame
-    ref_df['DrugDictionary'] = ref_df['DrugID'].map(distrib_drugs)
-
-    # Replace missing values with "no_value"
-    ref_df['DrugDictionary'] = ref_df['DrugDictionary'].apply(
-        lambda x: x.tolist() if hasattr(x, 'tolist') else "no_value"
-    )
-
-    return ref_df
+    os.makedirs(RESULTS_DIR, exist_ok=True)
+    file_path = os.path.join(RESULTS_DIR, f"{task_id}_{dic_type}.npz")
+    np.savez_compressed(file_path, **data)  # Save as compressed file
 
 
-def merge_cell_distrib_with_dataframe(ref, ref_df):
+def load_numpy_key(task_id, dic_type, key):
     """
-    Merges the dictionary ref['distrib_cells'] with a DataFrame ref_df based on the 'DrugID' column.
-    Adds a new column "CellDictionary" containing the values from distrib_cells as dictionaries.
+    Load a specific key from a saved file.
 
     Args:
-        ref (dict): Dictionary containing a 'distrib_cells' key with the data to merge.
-        ref_df (pd.DataFrame): DataFrame with a column 'DrugID' to join on.
+        task_id (str): The ID of the task.
+        key (str): The key to load.
+        dic_type (str): Dictionary type
 
     Returns:
-        pd.DataFrame: The merged DataFrame with a new column 'CellDictionary'.
-    """
-    # Extract the 'distrib_cells' dictionary
-    distrib_cell = ref.get('distrib_cells', {})
+         list: The value associated with the key, converted to a list.
+   """
 
-    # Map values from the dictionary directly to the DataFrame
-    ref_df['CellDictionary'] = ref_df['index'].map(distrib_cell)
+    file_path = os.path.join(RESULTS_DIR, f"{task_id}_{dic_type}.npz")
 
-    # Replace missing values with "no_value"
-    ref_df['CellDictionary'] = ref_df['CellDictionary'].apply(
-        lambda x: x.tolist() if hasattr(x, 'tolist') else "no_value"
-    )
+    if not os.path.exists(file_path):
+        raise ""
 
-    return ref_df
-
-
-def compress_result(result):
-    """Compress the result stored in Redis."""
-    try:
-        return gzip.compress(pickle.dumps(result))
-    except Exception as e:
-        raise ValueError(f"Failed to compress result: {e}")
-
-
-def decompress_result(compressed_result):
-    """Decompress the result stored in Redis."""
-    try:
-        return pickle.loads(gzip.decompress(compressed_result))
-    except Exception as e:
-        raise ValueError(f"Failed to decompress result: {e}")
+    with np.load(file_path, allow_pickle=True) as data:
+        if key not in data:
+            raise KeyError(f"Key '{key}' not found in task results.")
+            # Convert numpy array to list before returning
+            return data[key].tolist()  # Convert the numpy array to a list

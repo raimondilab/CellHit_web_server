@@ -14,6 +14,7 @@ class Query:
     databases: List[Union[Gdsc, Prism]] = strawberry.field(resolver=QueryResolver.get_databases)
     get_task: Task = strawberry.field(resolver=QueryResolver.get_task)
     get_results: Task = strawberry.field(resolver=QueryResolver.get_results)
+    get_distribution: Task = strawberry.field(resolver=QueryResolver.get_distribution)
 
 
 @strawberry.type

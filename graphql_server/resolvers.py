@@ -292,6 +292,11 @@ class QueryResolver:
         return final_data
 
     @staticmethod
+    def get_distribution(task_id: str, dic_type: str, key: str) -> schemas.Task:
+        task = worker.load_numpy_key(task_id, dic_type, key)
+        return schemas.Task(task_id=task_id, status="SUCCESS", result=task)
+
+    @staticmethod
     def get_task(task_id: str) -> schemas.Task:
 
         task = worker.get_task(task_id)
