@@ -70,4 +70,4 @@ async def download_gbm_file():
 # Main entry point
 if __name__ == "__main__":
     # Start FastAPI server
-    uvicorn.run(app, host="127.0.0.1", port=8003)
+    uvicorn.run(app, host="127.0.0.1", port=8007)
