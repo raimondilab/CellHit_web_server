@@ -176,8 +176,6 @@ def analysis(self, file, dataset):
                                                device='cuda:0',
                                                transform_source='target')
 
-        transformed['transformed'].to_csv('./gbm_aligned.csv')
-
         umap_path = preprocess_paths.umap_path
 
         if umap_path:
