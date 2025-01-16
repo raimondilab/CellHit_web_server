@@ -244,10 +244,10 @@ def analysis(self, file, dataset):
         predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].apply(preprocess_shap_dict)
 
         # Save drug distributions for later visualization purposes
-        save_numpy_dict(task_id, 'distrib_drugs', result_df['distrib_drugs'])
+        save_numpy_dict(task_id, result_df['distrib_drugs'], 'distrib_drugs')
 
         # Save cell distributions for later visualization purposes
-        save_numpy_dict(task_id, 'distrib_cells', result_df['distrib_cells'])
+        save_numpy_dict(task_id, result_df['distrib_cells'], 'distrib_cells')
 
         predictions_df = predictions_df.reset_index(drop=True)
         predictions_json = predictions_df.to_dict(orient='records')
@@ -485,7 +485,6 @@ def load_numpy_key(task_id, dic_type, key):
         raise ""
 
     with np.load(file_path, allow_pickle=True) as data:
-        if key not in data:
-            raise KeyError(f"Key '{key}' not found in task results.")
+        if key in data:
             # Convert numpy array to list before returning
             return data[key].tolist()  # Convert the numpy array to a list
