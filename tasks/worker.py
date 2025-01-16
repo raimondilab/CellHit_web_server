@@ -463,7 +463,7 @@ def save_numpy_dict(task_id, dic_type, data):
 
     os.makedirs(RESULTS_DIR, exist_ok=True)
     file_path = os.path.join(RESULTS_DIR, f"{task_id}_{dic_type}.npz")
-    np.savez_compressed(file_path, **data)  # Save as compressed file
+    np.savez_compressed(file_path, **{key: value for key, value in data.items()})
 
 
 def load_numpy_key(task_id, dic_type, key):
