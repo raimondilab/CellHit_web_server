@@ -244,10 +244,10 @@ def analysis(self, file, dataset):
         predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].apply(preprocess_shap_dict)
 
         # Save drug distributions for later visualization purposes
-        save_numpy_dict(task_id, result_df['distrib_drugs'], 'distrib_drugs')
+        save_numpy_dict(task_id, 'distrib_drugs', result_df['distrib_drugs'])
 
         # Save cell distributions for later visualization purposes
-        save_numpy_dict(task_id, result_df['distrib_cells'], 'distrib_cells')
+        save_numpy_dict(task_id, 'distrib_cells', result_df['distrib_cells'])
 
         predictions_df = predictions_df.reset_index(drop=True)
         predictions_json = predictions_df.to_dict(orient='records')
