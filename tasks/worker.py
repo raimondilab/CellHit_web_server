@@ -319,8 +319,8 @@ def draw_heatmap(heatmap_df):
         processed_data = heatmap_df.drop(columns=columns_to_remove)
 
     # Calculate dimensions for the heatmap
-    height = len(processed_data) * 20
-    width = len(processed_data.columns) * 10
+    height = len(heatmap_df) * 20
+    width = len(processed_data) * 100
 
     # Generate heatmap using pt.clustergram (assuming pt is a valid library here)
     return pt.clustergram(processed_data, height=height, width=width, xpad=100), height
