@@ -7,6 +7,9 @@ import numpy as np
 import ast
 import mygene
 
+import gzip
+import pickle
+
 from celery import Celery
 from celery.result import AsyncResult
 from subprocess import Popen
@@ -69,7 +72,7 @@ def start_celery(worker_name):
         "worker",
         "--pool=solo",
         "--loglevel=info",
-          "-n", f"{worker_name}@%h"
+        "-n", f"{worker_name}@%h"
     ]
     try:
         process = Popen(celery_cmd)
@@ -81,8 +84,18 @@ def start_celery(worker_name):
 
 @celery.task
 def get_task(task_id):
+
     res = AsyncResult(task_id)
-    return res
+
+    # Check if result is compressed
+    if isinstance(res, bytes):
+        try:
+            decompressed_result = decompress_result(res.result)
+            return decompressed_result
+        except Exception as e:
+            return e
+    else:
+        return res
 
 
 # Setup preprocess_paths
@@ -162,6 +175,8 @@ def analysis(self, file, dataset):
                                                preprocess_paths=preprocess_paths,
                                                device='cuda:0',
                                                transform_source='target')
+
+        transformed['transformed'].to_csv('./gbm_aligned.csv')
 
         umap_path = preprocess_paths.umap_path
 
@@ -247,7 +262,7 @@ def analysis(self, file, dataset):
             "umap": {'oncotree': umap_json, "tissue": umap_json_tissue}
         }
 
-        return result
+        return compress_result(result)
 
     except Exception as e:
         print(f"Error during analysis: {e}")
@@ -294,17 +309,24 @@ def draw_heatmap(heatmap_df):
     # Exclude non-numeric columns
     numeric_data = heatmap_df.select_dtypes(include='number')
 
-    # Identify columns to remove based on conditions
+    # Identify columns to remove where all values are ≥ -1
     columns_to_remove = numeric_data.columns[
-        numeric_data.ge(-1).all()  # All values ≥  -1
+        numeric_data.ge(-1).all()
     ]
 
     # Drop these columns from the original dataframe
-    processed_data = heatmap_df.drop(columns=columns_to_remove)
+    if not numeric_data.columns.equals(columns_to_remove):
+        processed_data = heatmap_df.drop(columns=columns_to_remove)
+    else:
+        # Identify columns with all positive
+        columns_to_remove = numeric_data.columns[(numeric_data.gt(0).all())]
+        processed_data = heatmap_df.drop(columns=columns_to_remove)
 
-    height = len(heatmap_df) * 20
-    width = len(processed_data) * 10
+    # Calculate dimensions for the heatmap
+    height = len(processed_data) * 20
+    width = len(processed_data.columns) * 10
 
+    # Generate heatmap using pt.clustergram (assuming pt is a valid library here)
     return pt.clustergram(processed_data, height=height, width=width, xpad=100), height
 
 
@@ -389,8 +411,6 @@ def ensg_to_hgnc(df_columns):
     Returns:
     pd.Index: A pandas Index with corresponding HGNC symbols. Returns the original ENSG ID for unmapped IDs.
     """
-    import mygene
-    import pandas as pd
 
     # Initialize MyGeneInfo client
     mg = mygene.MyGeneInfo()
@@ -447,34 +467,19 @@ def merge_drug_distrib_with_dataframe(ref, ref_df):
     Returns:
         pd.DataFrame: The merged DataFrame with a new column 'DrugDictionary'.
     """
+
     # Extract the 'distrib_drugs' dictionary
     distrib_drugs = ref.get('distrib_drugs', {})
 
-    # Filter 'distrib_drugs' to include only keys present in ref_df['DrugID']
-    common_keys = set(ref_df['DrugID']).intersection(distrib_drugs.keys())
-    if not common_keys:
-        # If there are no common keys, return the original DataFrame with an empty 'DrugDictionary'
-        ref_df['DrugDictionary'] = "no_value"
-        return ref_df
+    # Map values from the dictionary directly to the DataFrame
+    ref_df['DrugDictionary'] = ref_df['DrugID'].map(distrib_drugs)
 
-    # Convert the filtered dictionary into a DataFrame directly
-    filtered_distrib_drugs = {key: distrib_drugs[key].tolist() for key in common_keys}
-    distrib_df = pd.DataFrame.from_dict(
-        filtered_distrib_drugs,
-        orient='index',
-        columns=[f"Feature_{i}" for i in range(len(next(iter(filtered_distrib_drugs.values()), [])))]
-    ).rename_axis('DrugID')
+    # Replace missing values with "no_value"
+    ref_df['DrugDictionary'] = ref_df['DrugDictionary'].apply(
+        lambda x: x.tolist() if hasattr(x, 'tolist') else "no_value"
+    )
 
-    # Add 'DrugDictionary' column efficiently
-    distrib_df['DrugDictionary'] = distrib_df.to_dict(orient='records')
-    distrib_df = distrib_df[['DrugDictionary']].reset_index()
-
-    # Merge with the original DataFrame
-    merged_df = ref_df.merge(distrib_df, on='DrugID', how='left')
-    merged_df['DrugDictionary'] = merged_df['DrugDictionary'].fillna("no_value")
-
-    merged_df.to_csv("DrugDictionary.csv")
-    return merged_df
+    return ref_df
 
 
 def merge_cell_distrib_with_dataframe(ref, ref_df):
@@ -492,28 +497,28 @@ def merge_cell_distrib_with_dataframe(ref, ref_df):
     # Extract the 'distrib_cells' dictionary
     distrib_cell = ref.get('distrib_cells', {})
 
-    # Filter 'distrib_cells' to include only keys present in ref_df['DrugID']
-    common_keys = set(ref_df['DrugID']).intersection(distrib_cell.keys())
-    if not common_keys:
-        # If there are no common keys, return the original DataFrame with an empty 'CellDictionary'
-        ref_df['CellDictionary'] = "no_value"
-        return ref_df
+    # Map values from the dictionary directly to the DataFrame
+    ref_df['CellDictionary'] = ref_df['index'].map(distrib_cell)
 
-    # Convert the filtered dictionary into a DataFrame directly
-    filtered_distrib_cell = {key: distrib_cell[key].tolist() for key in common_keys}
-    distrib_df = pd.DataFrame.from_dict(
-        filtered_distrib_cell,
-        orient='index',
-        columns=[f"Feature_{i}" for i in range(len(next(iter(filtered_distrib_cell.values()), [])))]
-    ).rename_axis('DrugID')
+    # Replace missing values with "no_value"
+    ref_df['CellDictionary'] = ref_df['CellDictionary'].apply(
+        lambda x: x.tolist() if hasattr(x, 'tolist') else "no_value"
+    )
 
-    # Add 'CellDictionary' column efficiently
-    distrib_df['CellDictionary'] = distrib_df.to_dict(orient='records')
-    distrib_df = distrib_df[['CellDictionary']].reset_index()
+    return ref_df
 
-    # Merge with the original DataFrame
-    merged_df = ref_df.merge(distrib_df, on='DrugID', how='left')
-    merged_df['CellDictionary'] = merged_df['CellDictionary'].fillna("no_value")
 
-    merged_df.to_csv("CellDictionary.csv")
-    return merged_df
+def compress_result(result):
+    """Compress the result stored in Redis."""
+    try:
+        return gzip.compress(pickle.dumps(result))
+    except Exception as e:
+        raise ValueError(f"Failed to compress result: {e}")
+
+
+def decompress_result(compressed_result):
+    """Decompress the result stored in Redis."""
+    try:
+        return pickle.loads(gzip.decompress(compressed_result))
+    except Exception as e:
+        raise ValueError(f"Failed to decompress result: {e}")
