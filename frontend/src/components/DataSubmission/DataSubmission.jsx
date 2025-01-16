@@ -40,11 +40,14 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
     setFormValues({ ...formValues, [name]: value.trim() });
   };
 
-  // Send file to analysis
   const handleFormSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
+  if (submitted) return; // Prevent multiple submissions if already submitted
+
+  setSubmitted(true); // Disable button after first click
+
+  try {
     // Read file as text
     const fileContent = await selectedFile.text();
 
@@ -53,27 +56,33 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
 
     // If validation passes, send the file
     setIsSubmit(true);
-    setSubmitted(true);
     await sendFile();
 
   } catch (error) {
     // Handle validation or upload error
     setIsSubmit(false);
-    setSubmitted(false);
+    setSubmitted(false); // Re-enable the button if there's an error
 
     Swal.fire({
       icon: "error",
       text: `Error: ${error.message}`,
     });
   }
-  };
+};
 
-  // Get results by taskId
-  const handleFormSubmitTask = (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    getTaskResults();
-  };
+
+// Get results by taskId
+const handleFormSubmitTask = (e) => {
+
+  e.preventDefault();
+
+  setIsLoading(true);
+
+  getTaskResults().finally(() => {
+    setIsLoading(false);
+  });
+};
+
 
 
 // Send file to back-end and get TaskId
@@ -113,6 +122,7 @@ async function sendFile() {
       });
     } else {
       setTaskId(response.data.data.runAnalysis.taskId);
+      console.log(response.data.data.runAnalysis.status)
       setTaskStatus(response.data.data.runAnalysis.status);
     }
   } catch (error) {
@@ -271,14 +281,15 @@ function validateFile(fileContent) {
                       PRISM
                     </label>
 
-                  <label htmlFor="search" className="label-btn" disabled={submitted}>{submitted ?  <i className="pi pi-spin pi-spinner"></i> : 'Submit'}</label>
-                  <button
-                          id="search"
-                          className="btn button shadow-none"
-                          type="submit"
-                          disabled={submitted}
-                        >
-                        </button>
+                   <label htmlFor="search" className="label-btn" disabled={submitted}>
+                  {submitted ?  <i className="pi pi-spin pi-spinner"></i> : 'Submit'}
+                  </label>
+                <button
+                  id="search"
+                  className="btn button shadow-none"
+                  type="submit"
+                  disabled={submitted} // Disable the button immediately after first submission
+                ></button>
                 </div>
               </form>
               <span>

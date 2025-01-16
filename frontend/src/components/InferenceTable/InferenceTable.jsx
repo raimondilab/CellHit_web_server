@@ -9,7 +9,7 @@ import { IconField } from 'primereact/iconfield';
 import { InputIcon } from 'primereact/inputicon';
 import 'primeicons/primeicons.css';
 
-const InferenceTable = ({ inferenceData, setShapData }) => {
+const InferenceTable = ({ inferenceData, setShapData, setDrugKey, setCellKey, setPredictedValue, setTitleDrug }) => {
 
   const handleClick = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -86,9 +86,12 @@ const InferenceTable = ({ inferenceData, setShapData }) => {
 
  const onRowClick = (e) => {
     const clickedRowData = e.data;
-    console.log(clickedRowData.ShapDictionary)
     if (clickedRowData && clickedRowData.ShapDictionary) {
       setShapData(clickedRowData.ShapDictionary);
+      setCellKey(clickedRowData.index);
+      setDrugKey(clickedRowData.DrugID);
+      setPredictedValue(clickedRowData.prediction);
+      setTitleDrug(clickedRowData.DrugName);
     }
 
     // Update the selected row

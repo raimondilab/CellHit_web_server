@@ -5,6 +5,7 @@ import Footer from '../../components/Footer/Footer';
 import ScatterPlot from '../../components/ScatterPlot/ScatterPlot';
 import InferenceTable from '../../components/InferenceTable/InferenceTable';
 import BarPlot from '../../components/BarPlot/BarPlot';
+import DensityPlot from '../../components/DensityPlot/DensityPlot';
 import HeatMap from '../../components/HeatMap/HeatMap';
 import { Helmet } from 'react-helmet';
 import { Card } from 'primereact/card';
@@ -15,7 +16,7 @@ import Swal from 'sweetalert2';
 import axios from 'axios';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { TabView, TabPanel } from 'primereact/tabview';
-import { getTaskResultsStep } from '../../ApiFunctions.js';
+import { getTaskResultsStep, getDistribution } from '../../ApiFunctions.js';
 
 const ResultPageAnalysis = () => {
 
@@ -157,9 +158,39 @@ useEffect(() => {
 const [callNumberTable, setCallNumberTable] = useState(1);
 const [callNumberHeatmap, setCallNumberHeatmap] = useState(1);
 const [activeTabIndex, setActiveTabIndex] = useState(0);
+
+// Load data tab
 const [tableLoadData, setTableLoadData] = useState(false);
 const [heatmapLoadData, setHeatmapLoadData] = useState(false);
 const [shapData, setShapData] = useState();
+const [cellData, setCellData] = useState();
+const [drugData, setDrugData] = useState();
+const [titleDrug, setTitleDrug] = useState();
+const [titleCell, setTitleCell] = useState();
+const [predictedValue, setPredictedValue] = useState(0);
+const [drugKey, setDrugKey] = useState();
+const [cellKey, setCellKey] = useState();
+
+
+useEffect(() => {
+    const fetchData = async () => {
+        try {
+            const result_cell = await getDistribution(task, 'distrib_cells', cellKey);
+            const result_drug = await getDistribution(task, 'distrib_drugs', drugKey);
+            console.log(result_drug);
+            setDrugData(result_drug);
+            setCellData(result_cell);
+            setTitleCell(cellKey);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
+    if (cellKey && drugKey && predictedValue){
+        fetchData();
+    }
+
+}, [cellKey, drugKey, predictedValue]);
 
 const handleColorBy = (e) => {
     let value = e.target.value;
@@ -234,6 +265,13 @@ useEffect(() => {
     if (activeTabIndex === 2 && callNumberHeatmap === 1) {
         handleHeatmap();
     }
+
+     // Reset plots
+     setShapData();
+     setCellKey();
+     setDrugKey();
+     setPredictedValue();
+     setTitleDrug();
 
 }, [activeTabIndex, callNumberTable, callNumberHeatmap]);
 
@@ -330,16 +368,30 @@ useEffect(() => {
                     { !tableLoadData &&  (
                        <div className="row mb-4">
                         <div className="col-12 nopadding">
-                          <InferenceTable inferenceData={inferenceData}  setShapData={setShapData} />
+                          <InferenceTable inferenceData={inferenceData}  setShapData={setShapData}  setTitleDrug={setTitleDrug}
+                          setDrugKey={setDrugKey} setCellKey={setCellKey} setPredictedValue={setPredictedValue}/>
                          </div>
                        </div>
                      )}
                      { (!tableLoadData && shapData) && (
                         <div className="row">
-                         <div className="col-4 nopadding">
-                            <BarPlot jsonData={shapData}/>
+                          <div className="col-12 col-md-4 nopadding">
+                            <div className="rounded-3 shadow img-fluid">
+                              <BarPlot jsonData={shapData} />
+                            </div>
+                          </div>
+                          <div className="col-12 col-md-4 nopadding">
+                            <div className="rounded-3 shadow img-fluid">
+                              <DensityPlot title={titleDrug} data={drugData} predictionValue={predictedValue} />
+                            </div>
+                          </div>
+                          <div className="col-12 col-md-4 nopadding">
+                            <div className="rounded-3 shadow img-fluid">
+                              <DensityPlot title={titleCell} data={cellData} predictionValue={predictedValue} />
+                            </div>
                           </div>
                         </div>
+
                      )}
                 </TabPanel>
                 <TabPanel header="Heatmap">
