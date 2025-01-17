@@ -267,12 +267,14 @@ def analysis(self, file, dataset):
 
 # Preprocess user data
 def preprocess_data(data, code):
+
     # Transpose data
     data = data.transpose()
 
     # Mapping genes if any value in the first column starts with 'ENSG'
     if data.columns.str.startswith("ENSG").any():
         data.columns = ensg_to_hgnc(data.columns)
+        data = data.reset_index()
 
     # Remove "GENE" from column names
     data.columns = data.columns.str.replace("GENE", " ", regex=True)
