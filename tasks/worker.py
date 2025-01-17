@@ -267,27 +267,23 @@ def analysis(self, file, dataset):
 
 # Preprocess user data
 def preprocess_data(data, code):
-    # Transpose data
-    data = data.transpose()
 
     # Mapping genes if any value in the first column starts with 'ENSG'
-    if data.columns.str.startswith("ENSG").any():
-        data.columns = ensg_to_hgnc(data.columns)
+    if data.index.str.startswith("ENSG").any():
+        data.index = ensg_to_hgnc(data.index)
+        data = data.reset_index().set_index("GENE")
 
     # Remove "GENE" from column names
-    data.columns = data.columns.str.replace("GENE", " ", regex=True)
+    data.columns.name = None
 
-    # Replace "GENE" in values, if necessary
-    data = data.replace("GENE", "", regex=True)
+    # Transpose data
+    data = data.transpose()
 
     # Remove columns with zero standard deviation
     data = data.loc[:, data.std() != 0]
 
-    # Update column names after filtering
-    genes = data.columns
-
     # Group and calculate the mean for duplicate columns
-    data = data.groupby(genes, axis=1).mean()
+    data = data.groupby(data.columns, axis=1).mean()
 
     # Reset the index and modify it
     data = data.reset_index()
@@ -466,7 +462,6 @@ def save_numpy_dict(task_id, dic_type, data):
     np.savez_compressed(file_path, **{str(key): value for key, value in data.items()})
 
 
-
 def load_numpy_key(task_id, dic_type, key):
     """
     Load a specific key from a saved file.
@@ -483,7 +478,7 @@ def load_numpy_key(task_id, dic_type, key):
     file_path = os.path.join(RESULTS_DIR, f"{task_id}_{dic_type}.npz")
 
     if not os.path.exists(file_path):
-        raise ""
+        return ""
 
     with np.load(file_path, allow_pickle=True) as data:
         if key in data:
