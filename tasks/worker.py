@@ -416,6 +416,9 @@ def ensg_to_hgnc(df_columns):
     # Extract unique ENSG IDs to minimize redundant queries
     unique_ensg = [col for col in columns if col.startswith("ENSG")]
 
+    # Split each value by '.' and take the first part
+    unique_ensg = [value.split('.')[0] for value in unique_ensg]
+
     if not unique_ensg:
         return pd.Index(columns)  # Return original columns if no valid ENSG IDs are present
 
