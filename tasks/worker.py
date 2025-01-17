@@ -267,6 +267,7 @@ def analysis(self, file, dataset):
 
 # Preprocess user data
 def preprocess_data(data, code):
+
     # Transpose data
     data = data.transpose()
 
@@ -279,6 +280,9 @@ def preprocess_data(data, code):
 
     # Replace "GENE" in values, if necessary
     data = data.replace("GENE", "", regex=True)
+
+    # Reset the index
+    data = data.set_index('index')
 
     # Remove columns with zero standard deviation
     data = data.loc[:, data.std() != 0]
@@ -417,36 +421,27 @@ def ensg_to_hgnc(df_columns):
     else:
         columns = df_columns
 
-    # Extract unique ENSG IDs to minimize redundant queries
-    unique_ensg = [col for col in columns if col.startswith("ENSG")]
+    # Extract unique ENSG IDs to minimize redundant queries and normalize them
+    unique_ensg = {col.split('.')[0] for col in columns if col.startswith("ENSG")}
 
     if not unique_ensg:
         return pd.Index(columns)  # Return original columns if no valid ENSG IDs are present
 
-    # Query MyGeneInfo in batch
-    print('Querying MyGeneInfo...')
+    # Query MyGeneInfo for all unique ENSG IDs
+    print('Querying MyGeneInfo for all unique ENSG IDs...')
     try:
-        # Query in batches for efficiency
-        batch_size = 1000
-        results = []
-        for i in range(0, len(unique_ensg), batch_size):
-            batch = unique_ensg[i:i + batch_size]
-            results.extend(
-                mg.querymany(batch, scopes='ensembl.gene', fields='symbol', species='human', as_dataframe=False)
-            )
+        results = mg.querymany(list(unique_ensg), scopes='ensembl.gene', fields='symbol', species='human',
+                               as_dataframe=False)
         print('MyGeneInfo query completed.')
     except Exception as e:
         print(f"Error during MyGeneInfo query: {e}")
         return pd.Index(columns)
 
-    # Create a mapping dictionary from Ensembl IDs to HGNC symbols
-    ensg_to_symbol = {
-        entry['query']: entry.get('symbol', entry['query'])  # Fallback to ENSG ID if no symbol is found
-        for entry in results if 'query' in entry
-    }
+    # Use a dictionary comprehension to create the mapping (query -> first symbol or fallback to query)
+    ensg_to_symbol = {entry['query']: entry.get('symbol', entry['query']) for entry in results if 'query' in entry}
 
-    # Map the original columns using the dictionary
-    mapped_columns = [ensg_to_symbol.get(col, col) for col in columns]
+    # Map the original columns using the dictionary, falling back to the original ID if no match is found
+    mapped_columns = [ensg_to_symbol.get(col.split('.')[0], col) for col in columns]
 
     return pd.Index(mapped_columns)
 
