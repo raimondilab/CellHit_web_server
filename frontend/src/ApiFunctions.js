@@ -17,7 +17,7 @@ export async function getTaskResultsStep(task, step) {
             `
         };
 
-        const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
+        const apiUrl = 'https://test.bioinfolab.sns.it/graphql';
         const taskData = await axios.post(apiUrl, query);
 
         if (!taskData.data.data || taskData.data.errors) {
@@ -62,7 +62,7 @@ export async function getDistribution(task, dicType, key) {
             `
         };
 
-        const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
+        const apiUrl = 'https://test.bioinfolab.sns.it/graphql';
         const taskData = await axios.post(apiUrl, query);
 
         if (!taskData.data.data || taskData.data.errors) {

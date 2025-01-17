@@ -42,7 +42,7 @@ async function getTaskResults(taskID) {
             `
         };
 
-        const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
+        const apiUrl = 'https://test.bioinfolab.sns.it/graphql';
         const taskData = await axios.post(apiUrl, query);
 
         if (!taskData.data.data || taskData.data.errors) {
@@ -177,7 +177,6 @@ useEffect(() => {
         try {
             const result_cell = await getDistribution(task, 'distrib_cells', cellKey);
             const result_drug = await getDistribution(task, 'distrib_drugs', drugKey);
-            console.log(result_drug);
             setDrugData(result_drug);
             setCellData(result_cell);
             setTitleCell(cellKey);
