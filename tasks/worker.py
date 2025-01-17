@@ -267,7 +267,6 @@ def analysis(self, file, dataset):
 
 # Preprocess user data
 def preprocess_data(data, code):
-
     # Transpose data
     data = data.transpose()
 
@@ -324,7 +323,7 @@ def draw_heatmap(heatmap_df):
 
     # Calculate dimensions for the heatmap
     height = len(heatmap_df) * 20
-    width = len(processed_data) * 100
+    width = len(processed_data) * 10
 
     # Generate heatmap using pt.clustergram (assuming pt is a valid library here)
     return pt.clustergram(processed_data, height=height, width=width, xpad=100), height
@@ -459,7 +458,6 @@ def save_numpy_dict(task_id, dic_type, data):
     os.makedirs(RESULTS_DIR, exist_ok=True)
     file_path = os.path.join(RESULTS_DIR, f"{task_id}_{dic_type}.npz")
     np.savez_compressed(file_path, **{str(key): value for key, value in data.items()})
-
 
 
 def load_numpy_key(task_id, dic_type, key):
