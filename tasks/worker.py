@@ -268,22 +268,27 @@ def analysis(self, file, dataset):
 # Preprocess user data
 def preprocess_data(data, code):
 
-    # Mapping genes if any value in the first column starts with 'ENSG'
-    if data.index.str.startswith("ENSG").any():
-        data.index = ensg_to_hgnc(data.index)
-        data = data.reset_index().set_index("GENE")
-
-    # Remove "GENE" from column names
-    data.columns.name = None
-
     # Transpose data
     data = data.transpose()
+
+    # Mapping genes if any value in the first column starts with 'ENSG'
+    if data.columns.str.startswith("ENSG").any():
+        data.columns = ensg_to_hgnc(data.columns)
+
+    # Remove "GENE" from column names
+    data.columns = data.columns.str.replace("GENE", " ", regex=True)
+
+    # Replace "GENE" in values, if necessary
+    data = data.replace("GENE", "", regex=True)
 
     # Remove columns with zero standard deviation
     data = data.loc[:, data.std() != 0]
 
+    # Update column names after filtering
+    genes = data.columns
+
     # Group and calculate the mean for duplicate columns
-    data = data.groupby(data.columns, axis=1).mean()
+    data = data.groupby(genes, axis=1).mean()
 
     # Reset the index and modify it
     data = data.reset_index()
