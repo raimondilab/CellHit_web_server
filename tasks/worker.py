@@ -272,7 +272,7 @@ def preprocess_data(data, code):
     if data.index.str.startswith("ENSG").any():
         data.index = ensg_to_hgnc(data.index)
         data = data.reset_index()
-        data = data.fillna("ENSG").set_index("GENE")
+        data = data.dropna().set_index("GENE")
 
     # Replace "GENE" in values, if necessary
     data.columns.name = None
