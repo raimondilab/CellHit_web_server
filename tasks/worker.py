@@ -267,7 +267,6 @@ def analysis(self, file, dataset):
 
 # Preprocess user data
 def preprocess_data(data, code):
-
     # Transpose data
     data = data.transpose()
 
@@ -324,8 +323,8 @@ def draw_heatmap(heatmap_df):
         processed_data = heatmap_df.drop(columns=columns_to_remove)
 
     # Calculate dimensions for the heatmap
-    height = len(heatmap_df) * 20
-    width = len(processed_data) * 10
+    height = len(heatmap_df) * 20 if len(heatmap_df) * 20 >= 500 else 500
+    width = len(processed_data) * 10 if len(processed_data) * 10 >= 500 else 500
 
     # Generate heatmap using pt.clustergram (assuming pt is a valid library here)
     return pt.clustergram(processed_data, height=height, width=width, xpad=100), height
