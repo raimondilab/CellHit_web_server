@@ -87,10 +87,10 @@ const handleDownload = () => {
                       className="center-help shrink img-fluid mb-5"
                     />
                <p className="fs-1 text-justify mb-4">
-                Users can click on a specific row to view the SHAP plot, which illustrates the importance of the top genes. The selected row will be highlighted with a blue background. To reset the selection and hide the SHAP plot, click the button featuring a replay icon.
+                Users can click on a specific row to view more detailed information about the prediction, including the SHAP and predicted response distribution plots. These visuals illustrate the importance of the top genes and drugs and the distribution of the predicted responses. The selected row will be highlighted with a blue background. Click the replay icon to reset the selection and hide the SHAP plot and distribution plots.
               </p>
                 <div className="row">
-                <div className="col-md-6 text-center">
+                <div className="col-md-12 text-center">
                   <img
                     tabIndex="1"
                     src="/assets/images/table.png"
@@ -98,20 +98,43 @@ const handleDownload = () => {
                     data-placement="top"
                     title="Click to zoom-in"
                     alt="Learning Workflow"
+                    className="center-help shrink img-fluid mb-5"
+                  />
+                </div>
+              </div>
+              <div className="row">
+                <div className="col-md-4 text-center">
+                  <img
+                    tabIndex="1"
+                    src="/assets/images/gene_importance.png"
+                    data-toggle="tooltip"
+                    data-placement="top"
+                    title="Click to zoom-in"
+                    alt="Gene importance SHAP plot"
                     className="shrink img-fluid mb-5"
                   />
                 </div>
-                <div className="col-md-6 text-center">
-                   <img
-                      tabIndex="1"
-                      src="/assets/images/gene_importance.png"
-                      data-toggle="tooltip"
-                      data-placement="top"
-                      title="Click to zoom-in"
-                      alt="Learning Workflow"
-                      className="shrink img-fluid mb-5"
-                    />
-
+                 <div className="col-md-4 text-center">
+                  <img
+                    tabIndex="1"
+                    src="/assets/images/drug_cell.png"
+                    data-toggle="tooltip"
+                    data-placement="top"
+                    title="Click to zoom-in"
+                    alt="Drug distribution plot"
+                    className="shrink img-fluid mb-5"
+                  />
+                </div>
+                <div className="col-md-4 text-center">
+                  <img
+                    tabIndex="1"
+                    src="/assets/images/drug_distr.png"
+                    data-toggle="tooltip"
+                    data-placement="top"
+                    title="Click to zoom-in"
+                    alt="Cell distribution plot"
+                    className="shrink img-fluid mb-5"
+                  />
                 </div>
               </div>
                <h5 className="display-6 fw-bold mb-4">Heatmap</h5>
