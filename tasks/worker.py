@@ -60,7 +60,7 @@ def start_flower():
         "-A",
         __name__,
         "flower",
-        "--port=5556"
+        "--port=5555"
     ]
     try:
         process = Popen(flower_cmd)
@@ -116,14 +116,29 @@ umap_df = pd.read_csv(PARENT_DIR / 'src/overall_umap_df.csv', index_col=0)
 
 inference_paths_gdsc = InferencePaths(
     cellhit_data=PARENT_DIR / 'src/data',
-    ccle_transcr_neighs=PARENT_DIR / 'src/ccle_transcr_neighs.pkl',
-    tcga_transcr_neighs=PARENT_DIR / 'src/tcga_transcr_neighs.pkl',
-    ccle_response_neighs=PARENT_DIR / 'src/ccle_response_neighs.pkl',
-    tcga_response_neighs=PARENT_DIR / 'src/tcga_response_neighs.pkl',
+    ccle_transcr_neighs=PARENT_DIR / 'src/gdsc_ccle_transcr_neighs.pkl',
+    tcga_transcr_neighs=PARENT_DIR / 'src/gdsc_tcga_transcr_neighs.pkl',
+    ccle_response_neighs=PARENT_DIR / 'src/gdsc_ccle_response_neighs.pkl',
+    tcga_response_neighs=PARENT_DIR / 'src/gdsc_tcga_response_neighs.pkl',
     pretrained_models_path=PARENT_DIR / 'src/gdsc',
     drug_stats=PARENT_DIR / 'src/gdsc_drug_stats.csv',
     drug_metadata=PARENT_DIR / 'src/data/',
     quantile_computer=PARENT_DIR / 'src/gdsc_quantile_computer.npy',
+    ccle_metadata=PARENT_DIR / 'src/Model.csv',
+    tcga_metadata=PARENT_DIR / 'src/tcga_oncotree_data.csv'
+)
+
+
+inference_paths_prism = InferencePaths(
+    cellhit_data=PARENT_DIR / 'src/data',
+    ccle_transcr_neighs=PARENT_DIR / 'src/prism_ccle_transcr_neighs.pkl',
+    tcga_transcr_neighs=PARENT_DIR / 'src/prism_tcga_transcr_neighs.pkl',
+    ccle_response_neighs=PARENT_DIR / 'src/prism_ccle_response_neighs.pkl',
+    tcga_response_neighs=PARENT_DIR / 'src/prism_tcga_response_neighs.pkl',
+    pretrained_models_path=PARENT_DIR / 'src/prism',
+    drug_stats=PARENT_DIR / 'src/prism_drug_stats.csv',
+    drug_metadata=PARENT_DIR / 'src/data/',
+    quantile_computer=PARENT_DIR / 'src/prism_quantile_computer.npy',
     ccle_metadata=PARENT_DIR / 'src/Model.csv',
     tcga_metadata=PARENT_DIR / 'src/tcga_oncotree_data.csv'
 )
@@ -215,6 +230,12 @@ def analysis(self, file, dataset):
             result_df = run_full_inference(results_pipeline['transformed'],
                                            dataset=dataset,
                                            inference_paths=inference_paths_gdsc,
+                                           return_heatmap=True)
+
+        if dataset == "prism":
+            result_df = run_full_inference(results_pipeline['transformed'],
+                                           dataset=dataset,
+                                           inference_paths=inference_paths_prism,
                                            return_heatmap=True)
 
         # Step 6: Result elaboration
@@ -324,13 +345,16 @@ def draw_heatmap(heatmap_df):
 
     # Calculate dimensions for the heatmap
     height = len(heatmap_df) * 20 if len(heatmap_df) * 20 >= 500 else 500
-    width = len(processed_data) * 10 if len(processed_data) * 10 >= 500 else 500
+    width = len(processed_data) * 10 if len(processed_data) * 10 >= 500 else 1000
 
     # Find the length of the longest column name
-    max_col_name_length = max(len(col) for col in heatmap_df.columns)
+    max_col_name_length = max(len(col) for col in heatmap_df.columns) + 200
+
+    # Set xpad
+    xpad = 100 if max_col_name_length <= 15 else max_col_name_length
 
     # Generate heatmap using pt.clustergram (assuming pt is a valid library here)
-    return pt.clustergram(processed_data, height=height, width=width, xpad=100 + max_col_name_length), height
+    return pt.clustergram(processed_data, height=height, width=width, xpad=xpad), height
 
 
 # Preprocess 'ShapDictionary' to replace `np.float32(...)` with plain float values
