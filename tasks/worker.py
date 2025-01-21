@@ -38,8 +38,8 @@ PARENT_DIR = BASE_DIR.parent
 RESULTS_DIR = PARENT_DIR / 'distrib_files/'
 
 celery = Celery(__name__)
-celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/1")
-celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/1")
+celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
+celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
 
 celery.conf.update(
     task_serializer='json',
@@ -60,7 +60,7 @@ def start_flower():
         "-A",
         __name__,
         "flower",
-        "--port=5556"
+        "--port=5555"
     ]
     try:
         process = Popen(flower_cmd)
@@ -118,12 +118,27 @@ inference_paths_gdsc = InferencePaths(
     cellhit_data=PARENT_DIR / 'src/data',
     ccle_transcr_neighs=PARENT_DIR / 'src/ccle_transcr_neighs.pkl',
     tcga_transcr_neighs=PARENT_DIR / 'src/tcga_transcr_neighs.pkl',
-    ccle_response_neighs=PARENT_DIR / 'src/ccle_response_neighs.pkl',
-    tcga_response_neighs=PARENT_DIR / 'src/tcga_response_neighs.pkl',
+    ccle_response_neighs=PARENT_DIR / 'src/gdsc_ccle_response_neighs.pkl',
+    tcga_response_neighs=PARENT_DIR / 'src/gdsc_tcga_response_neighs.pkl',
     pretrained_models_path=PARENT_DIR / 'src/gdsc',
     drug_stats=PARENT_DIR / 'src/gdsc_drug_stats.csv',
     drug_metadata=PARENT_DIR / 'src/data/',
     quantile_computer=PARENT_DIR / 'src/gdsc_quantile_computer.npy',
+    ccle_metadata=PARENT_DIR / 'src/Model.csv',
+    tcga_metadata=PARENT_DIR / 'src/tcga_oncotree_data.csv'
+)
+
+
+inference_paths_prism = InferencePaths(
+    cellhit_data=PARENT_DIR / 'src/data',
+    ccle_transcr_neighs=PARENT_DIR / 'src/ccle_transcr_neighs.pkl',
+    tcga_transcr_neighs=PARENT_DIR / 'src/tcga_transcr_neighs.pkl',
+    ccle_response_neighs=PARENT_DIR / 'src/prism_ccle_response_neighs.pkl',
+    tcga_response_neighs=PARENT_DIR / 'src/prism_tcga_response_neighs.pkl',
+    pretrained_models_path=PARENT_DIR / 'src/prism',
+    drug_stats=PARENT_DIR / 'src/prism_drug_stats.csv',
+    drug_metadata=PARENT_DIR / 'src/data/',
+    quantile_computer=PARENT_DIR / 'src/prism_quantile_computer.npy',
     ccle_metadata=PARENT_DIR / 'src/Model.csv',
     tcga_metadata=PARENT_DIR / 'src/tcga_oncotree_data.csv'
 )
@@ -217,6 +232,12 @@ def analysis(self, file, dataset):
                                            inference_paths=inference_paths_gdsc,
                                            return_heatmap=True)
 
+        if dataset == "prism":
+            result_df = run_full_inference(results_pipeline['transformed'],
+                                           dataset=dataset,
+                                           inference_paths=inference_paths_prism,
+                                           return_heatmap=True)
+
         # Step 6: Result elaboration
         self.update_state(state='PROGRESS', meta='Results elaboration')
 
@@ -267,24 +288,32 @@ def analysis(self, file, dataset):
 
 # Preprocess user data
 def preprocess_data(data, code):
-
-    # Mapping genes if any value in the first column starts with 'ENSG'
-    if data.index.str.startswith("ENSG").any():
-        data.index = ensg_to_hgnc(data.index)
-        data = data.reset_index()
-        data = data.dropna().set_index("GENE")
-
-    # Replace "GENE" in values, if necessary
-    data.columns.name = None
-
+  
     # Transpose data
     data = data.transpose()
+
+    # Mapping genes if any value in the first column starts with 'ENSG'
+    if data.columns.str.startswith("ENSG").any():
+        data.columns = ensg_to_hgnc(data.columns)
+        data = data.reset_index()
+
+    # Remove "GENE" from column names
+    data.columns = data.columns.str.replace("GENE", " ", regex=True)
+    
+    # Replace "GENE" in values, if necessary
+    data = data.replace("GENE", "", regex=True)
+   
+    # Reset the index
+    data = data.set_index('index')
 
     # Remove columns with zero standard deviation
     data = data.loc[:, data.std() != 0]
 
+    # Update column names after filtering
+    genes = data.columns
+
     # Group and calculate the mean for duplicate columns
-    data = data.groupby(data.columns, axis=1).mean()
+    data = data.groupby(genes, axis=1).mean()
 
     # Reset the index and modify it
     data = data.reset_index()
@@ -316,11 +345,17 @@ def draw_heatmap(heatmap_df):
         processed_data = heatmap_df.drop(columns=columns_to_remove)
 
     # Calculate dimensions for the heatmap
-    height = len(heatmap_df) * 20
-    width = len(processed_data) * 10
+    height = len(heatmap_df) * 20 if len(heatmap_df) * 20 >= 500 else 500
+    width = len(processed_data) * 10 if len(processed_data) * 10 >= 500 else 1000
+
+    # Find the length of the longest column name
+    max_col_name_length = max(len(col) for col in heatmap_df.columns) + 200
+
+    # Set xpad
+    xpad = 100 if max_col_name_length <= 15 else max_col_name_length
 
     # Generate heatmap using pt.clustergram (assuming pt is a valid library here)
-    return pt.clustergram(processed_data, height=height, width=width, xpad=100), height
+    return pt.clustergram(processed_data, height=height, width=width, xpad=xpad), height
 
 
 # Preprocess 'ShapDictionary' to replace `np.float32(...)` with plain float values
@@ -414,8 +449,8 @@ def ensg_to_hgnc(df_columns):
     else:
         columns = df_columns
 
-    # Extract unique ENSG IDs to minimize redundant queries
-    unique_ensg = [col for col in columns if col.startswith("ENSG")]
+    # Extract unique ENSG IDs to minimize redundant queries and normalize them
+    unique_ensg = {col.split('.')[0] for col in columns if col.startswith("ENSG")}
 
     # Split each value by '.' and take the first part
     unique_ensg = [value.split('.')[0] for value in unique_ensg]
@@ -423,30 +458,21 @@ def ensg_to_hgnc(df_columns):
     if not unique_ensg:
         return pd.Index(columns)  # Return original columns if no valid ENSG IDs are present
 
-    # Query MyGeneInfo in batch
-    print('Querying MyGeneInfo...')
+    # Query MyGeneInfo for all unique ENSG IDs
+    print('Querying MyGeneInfo for all unique ENSG IDs...')
     try:
-        # Query in batches for efficiency
-        batch_size = 1000
-        results = []
-        for i in range(0, len(unique_ensg), batch_size):
-            batch = unique_ensg[i:i + batch_size]
-            results.extend(
-                mg.querymany(batch, scopes='ensembl.gene', fields='symbol', species='human', as_dataframe=False)
-            )
+        results = mg.querymany(list(unique_ensg), scopes='ensembl.gene', fields='symbol', species='human',
+                               as_dataframe=False)
         print('MyGeneInfo query completed.')
     except Exception as e:
         print(f"Error during MyGeneInfo query: {e}")
         return pd.Index(columns)
 
-    # Create a mapping dictionary from Ensembl IDs to HGNC symbols
-    ensg_to_symbol = {
-        entry['query']: entry.get('symbol', entry['query'])  # Fallback to ENSG ID if no symbol is found
-        for entry in results if 'query' in entry
-    }
+    # Use a dictionary comprehension to create the mapping (query -> first symbol or fallback to query)
+    ensg_to_symbol = {entry['query']: entry.get('symbol', entry['query']) for entry in results if 'query' in entry}
 
-    # Map the original columns using the dictionary
-    mapped_columns = [ensg_to_symbol.get(col, col) for col in columns]
+    # Map the original columns using the dictionary, falling back to the original ID if no match is found
+    mapped_columns = [ensg_to_symbol.get(col.split('.')[0], col) for col in columns]
 
     return pd.Index(mapped_columns)
 
