@@ -19,7 +19,7 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setIsLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [value, setValue] = useState("GDSC");
+  const [value, setValue] = useState("gdsc");
 
   const show = (position) => {
     setPosition(position);
@@ -268,15 +268,15 @@ function validateFile(fileContent) {
                   </label>
                   <label
                       htmlFor="gdsc"
-                      className={`label-btn gdsc-border me-01 ${value === "GDSC" ? "hover" : ""}`}
+                      className={`label-btn gdsc-border me-01 ${value === "gdsc" ? "hover" : ""}`}
                       onClick={() => setValue("gdsc")}
                     >
                       GDSC
                     </label>
                     <label
                       htmlFor="prism"
-                      className={`label-btn prism-border me-2 disabled ${value === "PRISM" ? "hover" : ""}`}
-                      onClick={() => setValue("prism")} disabled
+                      className={`label-btn prism-border me-2 ${value === "prism" ? "hover" : ""}`}
+                      onClick={() => setValue("prism")}
                     >
                       PRISM
                     </label>
@@ -309,6 +309,7 @@ function validateFile(fileContent) {
                       onChange={onChangeHandler}
                       style={{ width: '100%' }}
                       placeholder="Task ID"
+                      required
                     />
                     <Button
                       type="submit"
