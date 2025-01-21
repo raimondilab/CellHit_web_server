@@ -116,8 +116,8 @@ umap_df = pd.read_csv(PARENT_DIR / 'src/overall_umap_df.csv', index_col=0)
 
 inference_paths_gdsc = InferencePaths(
     cellhit_data=PARENT_DIR / 'src/data',
-    ccle_transcr_neighs=PARENT_DIR / 'src/gdsc_ccle_transcr_neighs.pkl',
-    tcga_transcr_neighs=PARENT_DIR / 'src/gdsc_tcga_transcr_neighs.pkl',
+    ccle_transcr_neighs=PARENT_DIR / 'src/ccle_transcr_neighs.pkl',
+    tcga_transcr_neighs=PARENT_DIR / 'src/tcga_transcr_neighs.pkl',
     ccle_response_neighs=PARENT_DIR / 'src/gdsc_ccle_response_neighs.pkl',
     tcga_response_neighs=PARENT_DIR / 'src/gdsc_tcga_response_neighs.pkl',
     pretrained_models_path=PARENT_DIR / 'src/gdsc',
@@ -131,8 +131,8 @@ inference_paths_gdsc = InferencePaths(
 
 inference_paths_prism = InferencePaths(
     cellhit_data=PARENT_DIR / 'src/data',
-    ccle_transcr_neighs=PARENT_DIR / 'src/prism_ccle_transcr_neighs.pkl',
-    tcga_transcr_neighs=PARENT_DIR / 'src/prism_tcga_transcr_neighs.pkl',
+    ccle_transcr_neighs=PARENT_DIR / 'src/ccle_transcr_neighs.pkl',
+    tcga_transcr_neighs=PARENT_DIR / 'src/tcga_transcr_neighs.pkl',
     ccle_response_neighs=PARENT_DIR / 'src/prism_ccle_response_neighs.pkl',
     tcga_response_neighs=PARENT_DIR / 'src/prism_tcga_response_neighs.pkl',
     pretrained_models_path=PARENT_DIR / 'src/prism',
