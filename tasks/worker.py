@@ -288,6 +288,7 @@ def analysis(self, file, dataset):
 
 # Preprocess user data
 def preprocess_data(data, code):
+  
     # Transpose data
     data = data.transpose()
 
@@ -298,10 +299,10 @@ def preprocess_data(data, code):
 
     # Remove "GENE" from column names
     data.columns = data.columns.str.replace("GENE", " ", regex=True)
-
+    
     # Replace "GENE" in values, if necessary
     data = data.replace("GENE", "", regex=True)
-
+   
     # Reset the index
     data = data.set_index('index')
 
@@ -451,6 +452,9 @@ def ensg_to_hgnc(df_columns):
     # Extract unique ENSG IDs to minimize redundant queries and normalize them
     unique_ensg = {col.split('.')[0] for col in columns if col.startswith("ENSG")}
 
+    # Split each value by '.' and take the first part
+    unique_ensg = [value.split('.')[0] for value in unique_ensg]
+
     if not unique_ensg:
         return pd.Index(columns)  # Return original columns if no valid ENSG IDs are present
 
@@ -504,7 +508,7 @@ def load_numpy_key(task_id, dic_type, key):
     file_path = os.path.join(RESULTS_DIR, f"{task_id}_{dic_type}.npz")
 
     if not os.path.exists(file_path):
-        raise ""
+        return ""
 
     with np.load(file_path, allow_pickle=True) as data:
         if key in data:

@@ -9,7 +9,6 @@ import { Button } from 'primereact/button';
 
 
 const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit }) => {
-
     const navigate = useNavigate();
     const currentEventColor = "#FF9800";
     const successEventColor = "#4CAF50";
@@ -18,18 +17,7 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit }) => {
     const [highlightedEvents, setHighlightedEvents] = useState([]);
     const [taskStatus, setTaskStatusState] = useState(statusTask);
     const [completionMessage, setCompletionMessage] = useState("");
-    const [notificationsEnabled, setNotificationsEnabled] = useState();
-
-
-    useEffect(() => {
-    // Set the initial state for notifications based on browser permission
-    if ("Notification" in window) {
-        setNotificationsEnabled(Notification.permission === "granted");
-    } else {
-        setNotificationsEnabled(false);
-    }
-    }, []);
-
+    const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
    const baseEvents = [
     { status: 'Data sending', date: '15/10/2020 10:30', icon: 'pi pi-send', color: '#607D8B' },
@@ -153,7 +141,7 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit }) => {
                 `
             };
 
-            const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
+            const apiUrl = 'http://127.0.0.1:8007/graphql';
             const taskData = await axios.post(apiUrl, query);
 
             if (!taskData.data.data || taskData.data.errors) {
