@@ -60,7 +60,7 @@ def start_flower():
         "-A",
         __name__,
         "flower",
-        "--port=5555"
+        "--port=5556"
     ]
     try:
         process = Popen(flower_cmd)
@@ -118,8 +118,8 @@ inference_paths_gdsc = InferencePaths(
     cellhit_data=PARENT_DIR / 'src/data',
     ccle_transcr_neighs=PARENT_DIR / 'src/ccle_transcr_neighs.pkl',
     tcga_transcr_neighs=PARENT_DIR / 'src/tcga_transcr_neighs.pkl',
-    ccle_response_neighs=PARENT_DIR / 'src/gdsc_ccle_response_neighs.pkl',
-    tcga_response_neighs=PARENT_DIR / 'src/gdsc_tcga_response_neighs.pkl',
+    ccle_response_neighs=PARENT_DIR / 'src/gdsc_gdsc_ccle_response_neighs.pkl',
+    tcga_response_neighs=PARENT_DIR / 'src/gdsc_gdsc_tcga_response_neighs.pkl',
     pretrained_models_path=PARENT_DIR / 'src/gdsc',
     drug_stats=PARENT_DIR / 'src/gdsc_drug_stats.csv',
     drug_metadata=PARENT_DIR / 'src/data/',
