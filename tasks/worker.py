@@ -128,7 +128,6 @@ inference_paths_gdsc = InferencePaths(
     tcga_metadata=PARENT_DIR / 'src/tcga_oncotree_data.csv'
 )
 
-
 inference_paths_prism = InferencePaths(
     cellhit_data=PARENT_DIR / 'src/data',
     ccle_transcr_neighs=PARENT_DIR / 'src/ccle_transcr_neighs.pkl',
@@ -145,7 +144,7 @@ inference_paths_prism = InferencePaths(
 
 
 @celery.task(bind=True)
-def analysis(self, file, dataset):
+def analysis(self, file, datasets):
     try:
         results_pipeline = {}
 
@@ -225,56 +224,77 @@ def analysis(self, file, dataset):
         # Step 5: Inference
         self.update_state(state='PROGRESS', meta='Inference')
 
-        dataset = dataset.lower()
-        if dataset == "gdsc":
-            result_df = run_full_inference(results_pipeline['transformed'],
-                                           dataset=dataset,
-                                           inference_paths=inference_paths_gdsc,
-                                           return_heatmap=True)
+        combined_results = {}
 
-        if dataset == "prism":
-            result_df = run_full_inference(results_pipeline['transformed'],
-                                           dataset=dataset,
-                                           inference_paths=inference_paths_prism,
-                                           return_heatmap=True)
+        for dataset in datasets:
+
+            dataset = dataset.lower()
+
+            result_df = run_full_inference(
+                results_pipeline['transformed'],
+                dataset=dataset,
+                inference_paths=inference_paths_gdsc if dataset == "gdsc" else inference_paths_prism,
+                return_heatmap=True
+            )
+
+            combined_results[dataset.upper()] = result_df
 
         # Step 6: Result elaboration
         self.update_state(state='PROGRESS', meta='Results elaboration')
 
-        heatmap_df = result_df['heatmap_data']
-        heatmap_df = heatmap_df.reset_index()
+        # Initialize an empty DataFrame to combine results from all datasets
+        combined_predictions_df = pd.DataFrame()
 
-        # Draw heatmap and get heatmap's height
-        heatmap_json = draw_heatmap(heatmap_df)
+        combined_heatmap_df = {}
 
-        # Set up predictions dataframe
-        predictions_df = result_df['predictions']
+        for dataset in datasets:
 
-        predictions_df['RecoveredTargets'] = predictions_df['RecoveredTargets'].fillna("No recovered targets")
-        predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].fillna("No putative target")
-        predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].astype(str)
-        predictions_df['TopGenes'] = predictions_df['TopGenes'].astype(str)
-        predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].fillna("No tissue")
-        predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].astype(str)
+            result_df = combined_results[dataset.upper()]
 
-        predictions_df['dataset'] = "GDSC"
+            heatmap_df = result_df['heatmap_data']
+            heatmap_df = heatmap_df.reset_index()
 
-        predictions_df = predictions_df.reset_index(drop=True)
+            # Draw heatmap and get heatmap's height
+            heatmap_json = draw_heatmap(heatmap_df)
 
-        predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].astype(str)
-        predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].apply(preprocess_shap_dict)
+            # combined heatmap results
+            combined_heatmap_df[dataset.upper()] = {'data': heatmap_json[0], "height": heatmap_json[1]}
 
-        # Save drug distributions for later visualization purposes
-        save_numpy_dict(task_id, 'distrib_drugs', result_df['distrib_drugs'])
+            # Set up predictions dataframe
+            predictions_df = result_df['predictions']
 
-        # Save cell distributions for later visualization purposes
-        save_numpy_dict(task_id, 'distrib_cells', result_df['distrib_cells'])
+            predictions_df['RecoveredTargets'] = predictions_df['RecoveredTargets'].fillna("No recovered targets")
+            predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].fillna("No putative target")
+            predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].astype(str)
+            predictions_df['TopGenes'] = predictions_df['TopGenes'].astype(str)
+            predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].fillna("No tissue")
+            predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].astype(str)
 
-        predictions_df = predictions_df.reset_index(drop=True)
-        predictions_json = predictions_df.to_dict(orient='records')
+            # Add the dataset identifier
+            predictions_df['dataset'] = dataset.upper()
+
+            predictions_df = predictions_df.reset_index(drop=True)
+
+            predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].astype(str)
+            predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].apply(preprocess_shap_dict)
+
+            # Save drug distributions for later visualization purposes
+            save_numpy_dict(task_id, 'distrib_drugs', dataset, result_df['distrib_drugs'])
+
+            # Save cell distributions for later visualization purposes
+            save_numpy_dict(task_id, 'distrib_cells', dataset, result_df['distrib_cells'])
+
+            # Append to the combined dataframe
+            combined_predictions_df = pd.concat([combined_predictions_df, predictions_df], ignore_index=True)
+
+        # Reset index of the combined dataframe
+        combined_predictions_df = combined_predictions_df.reset_index(drop=True)
+
+        # Convert the combined dataframe to JSON
+        predictions_json = combined_predictions_df.to_dict(orient='records')
 
         result = {
-            "heatmap": {'data': heatmap_json[0], "height": heatmap_json[1]},
+            "heatmap": combined_heatmap_df,
             "table": predictions_json,
             "umap": {'oncotree': umap_json, "tissue": umap_json_tissue}
         }
@@ -288,7 +308,6 @@ def analysis(self, file, dataset):
 
 # Preprocess user data
 def preprocess_data(data, code):
-  
     # Transpose data
     data = data.transpose()
 
@@ -299,10 +318,10 @@ def preprocess_data(data, code):
 
     # Remove "GENE" from column names
     data.columns = data.columns.str.replace("GENE", " ", regex=True)
-    
+
     # Replace "GENE" in values, if necessary
     data = data.replace("GENE", "", regex=True)
-   
+
     # Reset the index
     data = data.set_index('index')
 
@@ -477,7 +496,7 @@ def ensg_to_hgnc(df_columns):
     return pd.Index(mapped_columns)
 
 
-def save_numpy_dict(task_id, dic_type, data):
+def save_numpy_dict(task_id, dic_type, dataset, data):
     """
     Save a dictionary with numpy array values to a directory.
 
@@ -488,11 +507,11 @@ def save_numpy_dict(task_id, dic_type, data):
     """
 
     os.makedirs(RESULTS_DIR, exist_ok=True)
-    file_path = os.path.join(RESULTS_DIR, f"{task_id}_{dic_type}.npz")
+    file_path = os.path.join(RESULTS_DIR, f"{task_id}_{dataset}_{dic_type}.npz")
     np.savez_compressed(file_path, **{str(key): value for key, value in data.items()})
 
 
-def load_numpy_key(task_id, dic_type, key):
+def load_numpy_key(task_id, dic_type, dataset, key):
     """
     Load a specific key from a saved file.
 
@@ -505,7 +524,7 @@ def load_numpy_key(task_id, dic_type, key):
          list: The value associated with the key, converted to a list.
    """
 
-    file_path = os.path.join(RESULTS_DIR, f"{task_id}_{dic_type}.npz")
+    file_path = os.path.join(RESULTS_DIR, f"{task_id}_{dataset}_{dic_type}.npz")
 
     if not os.path.exists(file_path):
         return ""

@@ -292,8 +292,8 @@ class QueryResolver:
         return final_data
 
     @staticmethod
-    def get_distribution(task_id: str, dic_type: str, key: str) -> schemas.Task:
-        task = worker.load_numpy_key(task_id, dic_type, key)
+    def get_distribution(task_id: str, dic_type: str, dataset: str, key: str) -> schemas.Task:
+        task = worker.load_numpy_key(task_id, dic_type, dataset, key)
         return schemas.Task(task_id=task_id, status="SUCCESS", result=task)
 
     @staticmethod
@@ -322,7 +322,7 @@ class QueryResolver:
 
 class MutationResolver:
     @staticmethod
-    async def run_analysis(file: Upload, dataset: str) -> schemas.Task:
+    async def run_analysis(file: Upload, datasets: List[str]) -> schemas.Task:
 
         try:
 
@@ -332,8 +332,17 @@ class MutationResolver:
             # Decoding the bytes to string and converting to a StringIO object
             csv_data = contents.decode("utf-8")  # Decode bytes to string
 
+            # Validate the datasets input
+            valid_datasets = {"gdsc", "prism"}
+            selected_datasets = set(datasets)
+            if not selected_datasets.issubset(valid_datasets):
+                raise ValueError(f"Invalid dataset selection: {selected_datasets - valid_datasets}")
+
+            # Log the selected datasets
+            print(f"Selected datasets for analysis: {selected_datasets}")
+
             # Delay execution of the analysis task using Celery
-            task = worker.analysis.s(csv_data, dataset).delay()
+            task = worker.analysis.s(csv_data, list(selected_datasets)).delay()
 
             # Return task metadata with initial status
             return schemas.Task(task_id=task.id, status='Data sending', result="")
