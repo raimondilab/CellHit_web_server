@@ -255,7 +255,7 @@ def analysis(self, file, datasets):
             heatmap_df = heatmap_df.reset_index()
 
             # Draw heatmap and get heatmap's height
-            heatmap_json = draw_heatmap(heatmap_df)
+            heatmap_json = draw_heatmap(heatmap_df, dataset)
 
             # combined heatmap results
             combined_heatmap_df[dataset.upper()] = {'data': heatmap_json[0], "height": heatmap_json[1]}
