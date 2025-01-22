@@ -19,7 +19,7 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setIsLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [value, setValue] = useState("gdsc");
+  const [values, setValues] = useState(["gdsc"]);
 
   const show = (position) => {
     setPosition(position);
@@ -34,6 +34,21 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
   }
   setSelectedFile(file);
 };
+
+  const toggleDataset = (dataset) => {
+    const newValues = values.includes(dataset)
+      ? values.filter((v) => v !== dataset) // Remove dataset if already selected
+      : [...values, dataset]; // Add dataset if not selected
+
+    setValues(newValues);
+
+    if (newValues.length > 1) {
+      Swal.fire({
+        icon: "info",
+        text: "You have selected both GDSC and PRISM datasets. This may take longer to process.",
+      });
+    }
+  };
 
   const onChangeHandler = (e) => {
     const { name, value } = e.target;
@@ -91,8 +106,8 @@ async function sendFile() {
     const formData = new FormData();
     formData.append("operations", JSON.stringify({
       query: `
-        mutation runAnalysis($file: Upload!, $dataset: String!) {
-          runAnalysis(file: $file, dataset: $dataset) {
+        mutation runAnalysis($file: Upload!, $datasets: [String!]!) {
+          runAnalysis(file: $file,  datasets: $datasets) {
             taskId
             status
           }
@@ -100,9 +115,10 @@ async function sendFile() {
       `,
       variables: {
         file: null,  // Will be filled by the file upload
-        dataset: value,
+        datasets: values,
       },
     }));
+
     formData.append("map", JSON.stringify({ 0: ["variables.file"] }));
     formData.append("0", selectedFile);  // Add file to the request
 
@@ -268,15 +284,15 @@ function validateFile(fileContent) {
                   </label>
                   <label
                       htmlFor="gdsc"
-                      className={`label-btn gdsc-border me-01 ${value === "gdsc" ? "hover" : ""}`}
-                      onClick={() => setValue("gdsc")}
+                      className={`label-btn gdsc-border me-01 ${values.includes("gdsc") ? "hover" : ""}`}
+                      onClick={() => toggleDataset("gdsc")}
                     >
                       GDSC
                     </label>
                     <label
                       htmlFor="prism"
-                      className={`label-btn prism-border me-2 ${value === "prism" ? "hover" : ""}`}
-                      onClick={() => setValue("prism")}
+                      className={`label-btn prism-border me-2 ${values.includes("prism") ? "hover" : ""}`}
+                      onClick={() => toggleDataset("prism")}
                     >
                       PRISM
                     </label>

@@ -47,13 +47,13 @@ export async function getTaskResultsStep(task, step) {
 
 
 // Get task results
-export async function getDistribution(task, dicType, key) {
+export async function getDistribution(task, dicType, dataset, key) {
 
     try {
         const query = {
             query: `
                 query getDistribution {
-                    getDistribution (taskId: "${task}", dicType: "${dicType}", key: "${key}" ) {
+                    getDistribution (taskId: "${task}", dicType: "${dicType}", dataset: "${dataset}", key: "${key}" ) {
                         taskId
                         status
                         result

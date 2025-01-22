@@ -255,7 +255,7 @@ def analysis(self, file, datasets):
             heatmap_df = heatmap_df.reset_index()
 
             # Draw heatmap and get heatmap's height
-            heatmap_json = draw_heatmap(heatmap_df, dataset)
+            heatmap_json = draw_heatmap(heatmap_df, dataset.upper())
 
             # combined heatmap results
             combined_heatmap_df[dataset.upper()] = {'data': heatmap_json[0], "height": heatmap_json[1]}
@@ -374,7 +374,7 @@ def draw_heatmap(heatmap_df, dataset):
     xpad = 100 if max_col_name_length <= 15 else max_col_name_length
 
     # Set color bar title
-    color_bar_title = "LFC " if dataset == "prism" else "ln(IC50)"
+    color_bar_title = "LFC " if dataset == "PRISM" else "ln(IC50)"
 
     # Generate heatmap using pt.clustergram (assuming pt is a valid library here)
     return pt.clustergram(processed_data, height=height, width=width, xpad=xpad, color_bar_title=color_bar_title), height

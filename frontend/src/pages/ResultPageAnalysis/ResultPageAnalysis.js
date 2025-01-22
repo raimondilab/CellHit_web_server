@@ -120,6 +120,7 @@ useEffect(() => {
   const [heatmapData, setHeatmapData] = useState("{}");
   const [umapPlotData, setUmapPlotData] = useState("{}");
   const [umapType, setUmapType] = useState('oncotree');
+  const [heatmapDataJson, setHeatmapDataJson] = useState();
 
 
 useEffect(() => {
@@ -170,13 +171,28 @@ const [titleCell, setTitleCell] = useState();
 const [predictedValue, setPredictedValue] = useState(0);
 const [drugKey, setDrugKey] = useState();
 const [cellKey, setCellKey] = useState();
+const [cellDatabase, setCellDatabase] = useState();
+
+// set heatmap variable tab
+const [database, setDatabase] = useState();
+const [uniqueDatabase, setUniqueDatabase] = useState([]);
+
+const handleDatabase = (e) => {
+    const value = e.target.value
+    setDatabase(value);
+
+    // Set Heatmap base on database
+    setHeatmapData(heatmapDataJson[value].data ? heatmapDataJson[value].data : "{}");
+    setHeight(heatmapDataJson[value].height? heatmapDataJson[value].height : "500");
+}
 
 
+// Get distribution data
 useEffect(() => {
     const fetchData = async () => {
         try {
-            const result_cell = await getDistribution(task, 'distrib_cells', cellKey);
-            const result_drug = await getDistribution(task, 'distrib_drugs', drugKey);
+            const result_cell = await getDistribution(task, 'distrib_cells', cellDatabase.toLowerCase(), cellKey);
+            const result_drug = await getDistribution(task, 'distrib_drugs', cellDatabase.toLowerCase(), drugKey);
             setDrugData(result_drug);
             setCellData(result_cell);
             setTitleCell(cellKey);
@@ -185,11 +201,11 @@ useEffect(() => {
         }
     };
 
-    if (cellKey && drugKey && predictedValue){
+    if (cellKey && drugKey && predictedValue && cellDatabase){
         fetchData();
     }
 
-}, [cellKey, drugKey, predictedValue]);
+}, [cellKey, drugKey, predictedValue, cellDatabase]);
 
 const handleColorBy = (e) => {
     let value = e.target.value;
@@ -234,11 +250,19 @@ const handleHeatmap = async () => {
 
         try {
 
-            const heatmapDataJson = await getTaskResultsStep(task, "heatmap");
+            const heatmapJson = await getTaskResultsStep(task, "heatmap");
 
-            if (heatmapDataJson){
-                 setHeatmapData(heatmapDataJson.data? heatmapDataJson.data : "{}");
-                 setHeight(heatmapDataJson.height? heatmapDataJson.height : "500");
+            setHeatmapDataJson(heatmapJson);
+
+            if (heatmapJson){
+
+                // Getting first key
+                const firstKey = heatmapJson && typeof heatmapJson === "object" ? Object.keys(heatmapJson)[0] : null;
+                setUniqueDatabase(Object.keys(heatmapJson));
+                setDatabase(firstKey);
+                setHeatmapData(heatmapJson[firstKey].data ? heatmapJson[firstKey].data : "{}");
+                setHeight(heatmapJson[firstKey].height? heatmapJson[firstKey].height : "500");
+
             } else {
                 // No heatmap data available
                 setHeatmapData("{}");
@@ -269,6 +293,7 @@ useEffect(() => {
      setShapData();
      setCellKey();
      setDrugKey();
+     setCellDatabase();
      setPredictedValue();
      setTitleDrug();
 
@@ -312,7 +337,7 @@ useEffect(() => {
             draggable={false} resizable={false} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
             <p className="m-0 mb-1 text-justify">
               The inference table displays the results from the CelHit pipeline for each sample. Users can filter the results by drugs or datasets. Furthermore, users can select the columns to visualize, export the data in various formats, and copy the URL of the results to share them.
-              Besides, Users can click on a specific row to view the SHAP plot, which illustrates the importance of the top genes. The selected row will be highlighted with a blue background. To reset the selection and hide the SHAP plot, click the button featuring a replay icon.
+              Besides, Users can click on a specific row to view more detailed information about the prediction, including the SHAP and predicted response distribution plots. These visuals illustrate the importance of the top genes and drugs and the distribution of the predicted responses. The selected row will be highlighted with a blue background. Click the replay icon to reset the selection and hide the SHAP plot and distribution plots.
             </p>
             <p className="m-0 mb-1 text-justify">For more information, please refer to the
               <Link className="" to="/help/" target="_blank"><b> help</b></Link> page.
@@ -349,7 +374,7 @@ useEffect(() => {
                      </div>
                     </div>
                     <div className="col-10 mb-1">
-                    <div className="p-3 ">
+                    <div className="p-3">
                         <ScatterPlot  jsonData={umapPlotData}/>
                     </div>
                    </div>
@@ -368,7 +393,7 @@ useEffect(() => {
                        <div className="row mb-4">
                         <div className="col-12 nopadding">
                           <InferenceTable inferenceData={inferenceData}  setShapData={setShapData}  setTitleDrug={setTitleDrug}
-                          setDrugKey={setDrugKey} setCellKey={setCellKey} setPredictedValue={setPredictedValue}/>
+                          setDrugKey={setDrugKey} setCellKey={setCellKey} setPredictedValue={setPredictedValue} setCellDatabase={setCellDatabase}/>
                          </div>
                        </div>
                      )}
@@ -404,7 +429,21 @@ useEffect(() => {
                     )}
                     { !heatmapLoadData &&  (
                     <div className="row">
-                      <div className="col-12 nopadding">
+                    <div className="col-2 mb-1">
+                    <div className="bg-light rounded-3">
+                    <div className="p-3">
+                      <div className="mb-2">
+                        <label htmlFor="color" className="form-label">Drug database&nbsp;</label>
+                        <select className="form-select mb-3" name="database" value={database} onChange={handleDatabase}>
+                            {uniqueDatabase.map(database => (
+                              <option key={database} value={database.toUpperCase().trim()}>{database.toUpperCase().trim()}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                     </div>
+                    </div>
+                      <div className="col-10 nopadding">
                         <div className="img-fluid" style={{ height: height}}>
                          <HeatMap jsonData={heatmapData}/>
                         </div>

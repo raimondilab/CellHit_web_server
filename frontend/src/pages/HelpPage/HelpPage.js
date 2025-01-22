@@ -47,7 +47,8 @@ const handleDownload = () => {
             </p>
               <h5 className="display-6 fw-bold mb-4">UMAP</h5>
               <p className="fs-1 text-justify mb-4">
-                UMAP 2D projection of Celligner alignment coloured by oncotree or tissue. Users can see the UMAP plot with colours representing the oncotree code or tissue name by selecting it in the "colour by" options field.
+                The UMAP scatterplot consists of aligned sample transcriptomic RNA-seq data. To enable a quick qualitative assessment of the aligned data, the server generates a low-dimensional projection using parametric-UMAP mapping. This projection maps the incoming data within the pre-existing aligned transcriptomics spaces of the TCGA and CCLE datasets, providing contextualization against established datasets. The data is displayed in an interactive scatterplot, allowing users to visualize metadata associated with transcriptomic neighbors in the space.
+                Users can see the scatterplot with colours representing the oncotree code or tissue name by selecting it in the "colour by" options field.
               </p>
               <div className="row">
                 <div className="col-md-6 text-center">
@@ -73,9 +74,23 @@ const handleDownload = () => {
                   />
                 </div>
               </div>
-              <h5 className="display-6 fw-bold mb-4">Table</h5>
+              <h5 className="display-6 fw-bold mb-4">Inference</h5>
+              <p className="fs-1 text-justify mb-1">
+                The inference table  is a comprehensive tabular dataset that includes detailed predictions and metadata for each sample and selected assay. </p>
+             <p className="fs-1 text-justify">Specifically, it contains:</p>
+             <ul>
+                <li  class="fs-1 text-justify">Predictions for each sample, including ln(IC50) values for GDSC and LFC values for PRISM;</li>
+                <li  class="fs-1 text-justify">Uncertainty estimates for predictions, represented as standard deviations derived from the ensemble model;</li>
+                <li  class="fs-1 text-justify">Quantile Scores, a quantitative metric introduced in <Link to="https://doi.org/10.1101/2024.03.28.586783" target="_blank" rel="noopener noreferrer"><b><i> Learning and actioning general principles of cancer cell drug sensitivity</i></b></Link> to balance specificity and efficacy in drug response predictions;</li>
+                <li  class="fs-1 text-justify">Empirical statistics for each drug (derived from experimental data), including minimum, median, and maximum values;</li>
+                <li  class="fs-1 text-justify">Transcriptomic neighbors identified in both CCLE and TCGA datasets, representing the closest matching cell lines and cancer samples in transcriptomic space;</li>
+                <li  class="fs-1 text-justify">Response neighbors, identifying CCLE or TCGA samples with predicted responses most similar to the given data;</li>
+                <li  class="fs-1 text-justify">Annotation of neighbors with metadata, including Oncotree classifications and tissue of origin;</li>
+                <li  class="fs-1 text-justify">The top 15 genes ranked by SHAP importance, offering interpretability for the trained models;</li>
+                <li  class="fs-1 text-justify">Putative gene annotations for each drug, providing insights into potential drug-gene associations;</li>
+             </ul>
               <p className="fs-1 text-justify mb-4">
-                The inference table displays the results from the CelHit pipeline for each sample. Users can filter the results by drugs or datasets. Furthermore, users can select the columns to visualize, export the data in various formats, and copy the URL of the results to share them.
+                Users can filter the results by drugs or datasets. Furthermore, users can select the columns to visualize, export the data in various formats, and copy the URL of the results to share them.
               </p>
               <img
                       tabIndex="1"
@@ -139,7 +154,8 @@ const handleDownload = () => {
               </div>
                <h5 className="display-6 fw-bold mb-4">Heatmap</h5>
               <p className="fs-1 text-justify mb-4">
-                Heatmap of CellHit predictions of GDSC/PRISM drugs (columns) for each sample (rows). Cells contain the predicted lnIC50 values normalized by median subtraction.
+                Heatmap of CellHit predictions is a graphical heatmap that visualizes sensitivity data or, in other words, the responsiveness profile of the input samples, represented as rows, while drugs are represented in columns. The heatmap values correspond to median-centered IC50/LFC for each sample-drug pair.
+                Drugs with activity below the median are shown in red, indicating reduced activity, while those above the median are displayed in blue, suggesting increased activity. This visualization provides an at-a-glance summary of drug sensitivities, helping users to quickly identify the most interesting drugs for a given sample. Rows and columns are clustered based on predicted sensitivities, grouping drugs and samples sharing similar response profiles, which might be useful to reveal patient subgroups with distinct sensitivity characteristics.
               </p>
               <img
                       tabIndex="1"

@@ -9,7 +9,7 @@ import { IconField } from 'primereact/iconfield';
 import { InputIcon } from 'primereact/inputicon';
 import 'primeicons/primeicons.css';
 
-const InferenceTable = ({ inferenceData, setShapData, setDrugKey, setCellKey, setPredictedValue, setTitleDrug }) => {
+const InferenceTable = ({ inferenceData, setShapData, setDrugKey, setCellKey, setPredictedValue, setTitleDrug, setCellDatabase }) => {
 
   const handleClick = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -41,11 +41,6 @@ const InferenceTable = ({ inferenceData, setShapData, setDrugKey, setCellKey, se
  const [selectedColumns, setSelectedColumns] = useState(columnsDefault);
  const [selectedRow, setSelectedRow] = useState(null);
 
- const datasets = [
-        { label: 'GDSC', value: 'GDSC' },
-        { label: 'PRISM ', value: 'PRISM' }
-        ];
-
     // Extract unique drugs
     const uniqueDrugs = [
       ...new Set(inferenceData.map((inference) => inference.DrugName?.trim()))
@@ -54,6 +49,13 @@ const InferenceTable = ({ inferenceData, setShapData, setDrugKey, setCellKey, se
       .map((drug) => ({ label: drug, value: drug }))
       .sort((a, b) => a.label.localeCompare(b.label)); // Sort by the label property
 
+    // Extract unique dataset
+    const datasets = [
+      ...new Set(inferenceData.map((inference) => inference.dataset?.trim()))
+    ]
+      .filter((dataset) => dataset) // Remove any undefined/null values
+      .map((dataset) => ({ label: dataset, value: dataset }))
+      .sort((a, b) => a.label.localeCompare(b.label)); // Sort by the label property
 
    const onColumnToggle = (event) => {
     const selectedFieldNames = event.value;
@@ -92,6 +94,7 @@ const InferenceTable = ({ inferenceData, setShapData, setDrugKey, setCellKey, se
       setDrugKey(clickedRowData.DrugID);
       setPredictedValue(clickedRowData.prediction);
       setTitleDrug(clickedRowData.DrugName);
+      setCellDatabase(clickedRowData.dataset);
     }
 
     // Update the selected row
