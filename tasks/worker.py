@@ -118,8 +118,8 @@ inference_paths_gdsc = InferencePaths(
     cellhit_data=PARENT_DIR / 'src/data',
     ccle_transcr_neighs=PARENT_DIR / 'src/ccle_transcr_neighs.pkl',
     tcga_transcr_neighs=PARENT_DIR / 'src/tcga_transcr_neighs.pkl',
-    ccle_response_neighs=PARENT_DIR / 'src/gdsc_gdsc_ccle_response_neighs.pkl',
-    tcga_response_neighs=PARENT_DIR / 'src/gdsc_gdsc_tcga_response_neighs.pkl',
+    ccle_response_neighs=PARENT_DIR / 'src/gdsc_ccle_response_neighs.pkl',
+    tcga_response_neighs=PARENT_DIR / 'src/gdsc_tcga_response_neighs.pkl',
     pretrained_models_path=PARENT_DIR / 'src/gdsc',
     drug_stats=PARENT_DIR / 'src/gdsc_drug_stats.csv',
     drug_metadata=PARENT_DIR / 'src/data/',
@@ -346,7 +346,7 @@ def preprocess_data(data, code):
 
 
 # Draw IC50 heatmap
-def draw_heatmap(heatmap_df):
+def draw_heatmap(heatmap_df, dataset):
     # Exclude non-numeric columns
     numeric_data = heatmap_df.select_dtypes(include='number')
 
@@ -373,8 +373,11 @@ def draw_heatmap(heatmap_df):
     # Set xpad
     xpad = 100 if max_col_name_length <= 15 else max_col_name_length
 
+    # Set color bar title
+    color_bar_title = "LFC " if dataset == "PRISM" else "ln(IC50)"
+
     # Generate heatmap using pt.clustergram (assuming pt is a valid library here)
-    return pt.clustergram(processed_data, height=height, width=width, xpad=xpad), height
+    return pt.clustergram(processed_data, height=height, width=width, xpad=xpad, color_bar_title=color_bar_title), height
 
 
 # Preprocess 'ShapDictionary' to replace `np.float32(...)` with plain float values
