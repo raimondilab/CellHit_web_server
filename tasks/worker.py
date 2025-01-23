@@ -38,8 +38,8 @@ PARENT_DIR = BASE_DIR.parent
 RESULTS_DIR = PARENT_DIR / 'distrib_files/'
 
 celery = Celery(__name__)
-celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
-celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/1")
+celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/1")
 
 celery.conf.update(
     task_serializer='json',
@@ -60,7 +60,7 @@ def start_flower():
         "-A",
         __name__,
         "flower",
-        "--port=5555"
+        "--port=5556"
     ]
     try:
         process = Popen(flower_cmd)
