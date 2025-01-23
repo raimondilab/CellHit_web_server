@@ -347,25 +347,25 @@ def preprocess_data(data, code):
 
 # Draw IC50 heatmap
 def draw_heatmap(heatmap_df, dataset):
+
     # Exclude non-numeric columns
     numeric_data = heatmap_df.select_dtypes(include='number')
 
-    # Identify columns to remove where all values are ≥ -1
-    columns_to_remove = numeric_data.columns[
-        numeric_data.ge(-1).all()
-    ]
+    # Calculate standard deviation for each column
+    std_devs = numeric_data.std()
+
+    # Define a threshold for low variability (optional, or keep the top N columns)
+    low_variability_threshold = std_devs.quantile(0.25)  # Example: bottom 25% variability
+
+    # Identify columns to remove based on low variability
+    columns_to_remove = std_devs[std_devs <= low_variability_threshold].index
 
     # Drop these columns from the original dataframe
-    if not numeric_data.columns.equals(columns_to_remove):
-        processed_data = heatmap_df.drop(columns=columns_to_remove)
-    else:
-        # Identify columns with all positive
-        columns_to_remove = numeric_data.columns[(numeric_data.gt(0).all())]
-        processed_data = heatmap_df.drop(columns=columns_to_remove)
+    processed_data = heatmap_df.drop(columns=columns_to_remove)
 
     # Calculate dimensions for the heatmap
     height = len(heatmap_df) * 20 if len(heatmap_df) * 20 >= 500 else 500
-    width = len(processed_data) * 10 if len(processed_data) * 10 >= 500 else 1000
+    width = len(processed_data) * 15 if len(processed_data) * 10 >= 500 else 1000
 
     # Find the length of the longest column name
     max_col_name_length = max(len(col) for col in heatmap_df.columns) + 200
@@ -378,6 +378,7 @@ def draw_heatmap(heatmap_df, dataset):
 
     # Generate heatmap using pt.clustergram (assuming pt is a valid library here)
     return pt.clustergram(processed_data, height=height, width=width, xpad=xpad, color_bar_title=color_bar_title), height
+
 
 
 # Preprocess 'ShapDictionary' to replace `np.float32(...)` with plain float values
