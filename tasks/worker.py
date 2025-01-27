@@ -365,7 +365,7 @@ def draw_heatmap(heatmap_df, dataset):
 
     # Calculate dimensions for the heatmap
     height = len(heatmap_df) * 20 if len(heatmap_df) * 20 >= 500 else 500
-    width = len(processed_data) * 10 + 200 if len(processed_data) * 10 <= 500 else 500
+    width = len(processed_data) * 10 + 200 if len(processed_data) * 10 >= 500 else 500
 
     # Find the length of the longest column name
     max_col_name_length = max(len(col) for col in heatmap_df.columns) + 200
