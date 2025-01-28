@@ -38,8 +38,8 @@ PARENT_DIR = BASE_DIR.parent
 RESULTS_DIR = PARENT_DIR / 'distrib_files/'
 
 celery = Celery(__name__)
-celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/1")
-celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/1")
+celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
+celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
 
 celery.conf.update(
     task_serializer='json',
@@ -60,7 +60,7 @@ def start_flower():
         "-A",
         __name__,
         "flower",
-        "--port=5556"
+        "--port=5555"
     ]
     try:
         process = Popen(flower_cmd)
@@ -183,11 +183,12 @@ def analysis(self, file, datasets):
 
         # Step 4: Transform
         self.update_state(state='PROGRESS', meta='Transform')
+        print(imputed.head())
         transformed = celligner_transform_data(data=imputed,
                                                preprocess_paths=preprocess_paths,
                                                device='cuda:0',
                                                transform_source='target')
-
+        print(transformed.head())
         umap_path = preprocess_paths.umap_path
 
         if umap_path:
@@ -308,6 +309,7 @@ def analysis(self, file, datasets):
 
 # Preprocess user data
 def preprocess_data(data, code):
+
     # Transpose data
     data = data.transpose()
 
@@ -316,31 +318,30 @@ def preprocess_data(data, code):
         data.columns = ensg_to_hgnc(data.columns)
         data = data.reset_index()
 
-    # Remove "GENE" from column names
-    data.columns = data.columns.str.replace("GENE", " ", regex=True)
+        # Remove "GENE" from column names
+        data.columns = data.columns.str.replace("GENE", " ", regex=True)
 
-    # Replace "GENE" in values, if necessary
-    data = data.replace("GENE", "", regex=True)
+        # Replace "GENE" in values, if necessary
+        data = data.replace("GENE", "", regex=True)
 
-    # Reset the index
-    data = data.set_index('index')
+        data = data.set_index('index')
 
-    # Remove columns with zero standard deviation
-    data = data.loc[:, data.std() != 0]
+        # Remove columns with zero standard deviation
+        data = data.loc[:, data.std() != 0]
 
-    # Update column names after filtering
-    genes = data.columns
+        # Update column names after filtering
+        genes = data.columns
 
-    # Group and calculate the mean for duplicate columns
-    data = data.groupby(genes, axis=1).mean()
+        # Group and calculate the mean for duplicate columns
+        data = data.groupby(genes, axis=1).mean()
 
-    # Reset the index and modify it
-    data = data.reset_index()
-    data['index'] = data['index'].apply(lambda x: code + '_' + x)
-    data = data.set_index('index')
+        # Reset the index and modify it
+        data = data.reset_index()
+        data['index'] = data['index'].apply(lambda x: code + '_' + x)
+        data = data.set_index('index')
 
-    # Add 1 to all values and take the log2
-    data = data.apply(lambda x: np.log2(x + 1))
+        # Add 1 to all values and take the log2
+        data = data.apply(lambda x: np.log2(x + 1))
 
     return data
 
@@ -351,24 +352,40 @@ def draw_heatmap(heatmap_df, dataset):
     # Exclude non-numeric columns
     numeric_data = heatmap_df.select_dtypes(include='number')
 
-    # Calculate standard deviation for each column
+    # Step 1: Remove drugs with low variability (based on standard deviation or CV)
     std_devs = numeric_data.std()
+    cv = std_devs / numeric_data.mean()
+    cv_threshold = 0.1  # Define a threshold for CV
+    significant_columns = cv[cv > cv_threshold].index
 
-    # Calculate the threshold as the mean of the standard deviations
-    threshold = std_devs.mean()
+    # Filter numeric_data to keep significant columns
+    filtered_data = numeric_data[significant_columns]
 
-    # Identify columns to remove based on low variability
-    columns_to_remove = std_devs[std_devs <= threshold].index
+    # Step 2: Remove highly correlated drugs
+    correlation_matrix = filtered_data.corr().abs()
+    upper_triangle = np.triu(np.ones(correlation_matrix.shape), k=1)
+    highly_correlated = (correlation_matrix > 0.9) & (upper_triangle == 1)
 
-    # Drop these columns from the original dataframe
-    processed_data = heatmap_df.drop(columns=columns_to_remove)
+    # Identify columns to drop due to high correlation
+    columns_to_drop = [
+        column for column in highly_correlated.columns if any(highly_correlated[column])
+    ]
+
+    # Drop redundant columns
+    filtered_data = filtered_data.drop(columns=columns_to_drop)
+
+    # Step 3: Keep the top N most variable drugs
+    std_devs_filtered = filtered_data.std()
+    top_n = 50  # Keep the top 50 most variable drugs (adjust as needed)
+    top_columns = std_devs_filtered.nlargest(top_n).index
+    final_data = filtered_data[top_columns]
 
     # Calculate dimensions for the heatmap
-    height = len(heatmap_df) * 20 if len(heatmap_df) * 20 >= 500 else 500
-    width = len(processed_data) * 10 + 200 if len(processed_data) * 10 >= 500 else 500
+    height = len(final_data) * 20 if len(final_data) * 20 >= 500 else 500
+    width = len(final_data.columns) * 10 + 200 if len(final_data.columns) * 10 >= 500 else 500
 
     # Find the length of the longest column name
-    max_col_name_length = max(len(col) for col in heatmap_df.columns) + 200
+    max_col_name_length = max(len(col) for col in final_data.columns) + 200
 
     # Set xpad
     xpad = 100 if max_col_name_length <= 15 else max_col_name_length
@@ -377,7 +394,7 @@ def draw_heatmap(heatmap_df, dataset):
     color_bar_title = "LFC " if dataset == "PRISM" else "ln(IC50)"
 
     # Generate heatmap using pt.clustergram (assuming pt is a valid library here)
-    return pt.clustergram(processed_data, height=height, width=width, xpad=xpad, color_bar_title=color_bar_title), height
+    return pt.clustergram(final_data, height=height, width=width, xpad=xpad, color_bar_title=color_bar_title), height
 
 
 # Preprocess 'ShapDictionary' to replace `np.float32(...)` with plain float values
@@ -446,9 +463,11 @@ def draw_scatter_plot(umap, code, color):
     # Optionally, customize the marker symbols and sizes further
     fig.update_traces(marker=dict(size=6, line=dict(width=0.2, color='DarkSlateGrey')))
 
+    fig.show()
+
     # Convert the figure to JSON
-    fig_json = fig.to_json(remove_uids=False)
-    return fig_json
+    #fig_json = fig.to_json(remove_uids=False)
+    #return fig_json
 
 
 def ensg_to_hgnc(df_columns):
