@@ -373,7 +373,7 @@ def draw_heatmap(heatmap_df, dataset):
 
     # Step 3: Keep the top N most variable drugs
     std_devs_filtered = filtered_data.std()
-    top_n = 10  # Keep the top 10 most variable drugs (adjust as needed)
+    top_n = 15  # Keep the top 10 most variable drugs (adjust as needed)
     top_columns = std_devs_filtered.nlargest(top_n).index
 
     # Drop these columns from the original dataframe
