@@ -373,13 +373,16 @@ def draw_heatmap(heatmap_df, dataset):
 
     # Step 3: Keep the top N most variable drugs
     std_devs_filtered = filtered_data.std()
-    top_n = 15  # Keep the top 10 most variable drugs (adjust as needed)
+    std_devs_filtered = std_devs_filtered[~std_devs_filtered.index.str.contains("Cluster")]
+    top_n = 15
     top_columns = std_devs_filtered.nlargest(top_n).index
 
     # Drop these columns from the original dataframe
     processed_data = heatmap_df[top_columns].copy()
-    string_columns = heatmap_df.select_dtypes(exclude='number').columns
-    processed_data[string_columns] = heatmap_df[string_columns]
+
+    # Reset index
+    if processed_data.index.name == "index" or processed_data.index.name is not None:
+        processed_data = processed_data.reset_index()
 
     # Calculate dimensions for the heatmap
     height = len(heatmap_df) * 20 if len(heatmap_df) * 20 >= 500 else 500
