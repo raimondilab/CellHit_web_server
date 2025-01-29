@@ -376,11 +376,8 @@ def draw_heatmap(heatmap_df, dataset):
     top_n = 50  # Keep the top 50 most variable drugs (adjust as needed)
     top_columns = std_devs_filtered.nlargest(top_n).index
 
-    # Identify columns to remove based on low variability
-    columns_to_remove = top_columns.index
-
     # Drop these columns from the original dataframe
-    processed_data = heatmap_df.drop(columns=columns_to_remove)
+    processed_data = heatmap_df.drop(columns=top_columns)
 
     # Calculate dimensions for the heatmap
     height = len(heatmap_df) * 20 if len(heatmap_df) * 20 >= 500 else 500
