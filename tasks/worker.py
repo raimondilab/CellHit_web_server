@@ -399,7 +399,7 @@ def draw_heatmap(heatmap_df, dataset):
 
     # Generate heatmap using pt.clustergram (assuming pt is a valid library here)
     return pt.clustergram(processed_data, height=height, width=width, xpad=xpad,
-                          color_bar_title=color_bar_title), height
+                          color_bar_title=color_bar_title, index_column='index'), height
 
 
 # Preprocess 'ShapDictionary' to replace `np.float32(...)` with plain float values
