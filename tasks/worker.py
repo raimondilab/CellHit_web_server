@@ -183,12 +183,12 @@ def analysis(self, file, datasets):
 
         # Step 4: Transform
         self.update_state(state='PROGRESS', meta='Transform')
-        print(imputed.head())
+
         transformed = celligner_transform_data(data=imputed,
                                                preprocess_paths=preprocess_paths,
                                                device='cuda:0',
                                                transform_source='target')
-        print(transformed.head())
+
         umap_path = preprocess_paths.umap_path
 
         if umap_path:
@@ -291,7 +291,7 @@ def analysis(self, file, datasets):
         combined_predictions_df = combined_predictions_df.reset_index(drop=True)
 
         # Convert the combined dataframe to JSON
-        predictions_json = combined_predictions_df.to_dict(orient='records')
+        predictions_json = combined_predictions_df.fillna("").to_dict(orient='records')
 
         result = {
             "heatmap": combined_heatmap_df,
@@ -373,7 +373,7 @@ def draw_heatmap(heatmap_df, dataset):
 
     # Step 3: Keep the top N most variable drugs
     std_devs_filtered = filtered_data.std()
-    top_n = 50  # Keep the top 50 most variable drugs (adjust as needed)
+    top_n = 10  # Keep the top 10 most variable drugs (adjust as needed)
     top_columns = std_devs_filtered.nlargest(top_n).index
 
     # Drop these columns from the original dataframe
@@ -463,11 +463,9 @@ def draw_scatter_plot(umap, code, color):
     # Optionally, customize the marker symbols and sizes further
     fig.update_traces(marker=dict(size=6, line=dict(width=0.2, color='DarkSlateGrey')))
 
-    fig.show()
-
     # Convert the figure to JSON
-    # fig_json = fig.to_json(remove_uids=False)
-    # return fig_json
+    fig_json = fig.to_json(remove_uids=False)
+    return fig_json
 
 
 def ensg_to_hgnc(df_columns):
