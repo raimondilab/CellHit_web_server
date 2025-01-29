@@ -346,6 +346,7 @@ def preprocess_data(data, code):
 
 # Draw IC50 heatmap
 def draw_heatmap(heatmap_df, dataset):
+
     # Exclude non-numeric columns
     numeric_data = heatmap_df.select_dtypes(include='number')
 
@@ -369,20 +370,7 @@ def draw_heatmap(heatmap_df, dataset):
     ]
 
     # Drop redundant columns
-    filtered_data = filtered_data.drop(columns=columns_to_drop)
-
-    # Step 3: Keep the top N most variable drugs
-    std_devs_filtered = filtered_data.std()
-    std_devs_filtered = std_devs_filtered[~std_devs_filtered.index.str.contains("Cluster")]
-    top_n = 15
-    top_columns = std_devs_filtered.nlargest(top_n).index
-
-    # Drop these columns from the original dataframe
-    processed_data = heatmap_df[top_columns].copy()
-
-    # Reset index
-    if processed_data.index.name == "index" or processed_data.index.name is not None:
-        processed_data = processed_data.reset_index()
+    processed_data = heatmap_df.drop(columns=columns_to_drop)
 
     # Calculate dimensions for the heatmap
     height = len(heatmap_df) * 20 if len(heatmap_df) * 20 >= 500 else 500
@@ -399,7 +387,7 @@ def draw_heatmap(heatmap_df, dataset):
 
     # Generate heatmap using pt.clustergram (assuming pt is a valid library here)
     return pt.clustergram(processed_data, height=height, width=width, xpad=xpad,
-                          color_bar_title=color_bar_title, index_column='index'), height
+                          color_bar_title=color_bar_title), height
 
 
 # Preprocess 'ShapDictionary' to replace `np.float32(...)` with plain float values
