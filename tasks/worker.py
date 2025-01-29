@@ -228,7 +228,6 @@ def analysis(self, file, datasets):
         combined_results = {}
 
         for dataset in datasets:
-
             dataset = dataset.lower()
 
             result_df = run_full_inference(
@@ -249,7 +248,6 @@ def analysis(self, file, datasets):
         combined_heatmap_df = {}
 
         for dataset in datasets:
-
             result_df = combined_results[dataset.upper()]
 
             heatmap_df = result_df['heatmap_data']
@@ -268,7 +266,8 @@ def analysis(self, file, datasets):
             predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].fillna("No putative target")
             predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].astype(str)
             predictions_df['TopGenes'] = predictions_df['TopGenes'].astype(str)
-            predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].fillna("No tissue")
+            predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].fillna(
+                "No tissue")
             predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].astype(str)
 
             # Add the dataset identifier
@@ -309,7 +308,6 @@ def analysis(self, file, datasets):
 
 # Preprocess user data
 def preprocess_data(data, code):
-
     # Transpose data
     data = data.transpose()
 
@@ -348,7 +346,6 @@ def preprocess_data(data, code):
 
 # Draw IC50 heatmap
 def draw_heatmap(heatmap_df, dataset):
-
     # Exclude non-numeric columns
     numeric_data = heatmap_df.select_dtypes(include='number')
 
@@ -378,14 +375,19 @@ def draw_heatmap(heatmap_df, dataset):
     std_devs_filtered = filtered_data.std()
     top_n = 50  # Keep the top 50 most variable drugs (adjust as needed)
     top_columns = std_devs_filtered.nlargest(top_n).index
-    final_data = filtered_data[top_columns]
+
+    # Identify columns to remove based on low variability
+    columns_to_remove = top_columns.index
+
+    # Drop these columns from the original dataframe
+    processed_data = heatmap_df.drop(columns=columns_to_remove)
 
     # Calculate dimensions for the heatmap
-    height = len(final_data) * 20 if len(final_data) * 20 >= 500 else 500
-    width = len(final_data.columns) * 10 + 200 if len(final_data.columns) * 10 >= 500 else 500
+    height = len(heatmap_df) * 20 if len(heatmap_df) * 20 >= 500 else 500
+    width = len(processed_data) * 10 + 200 if len(processed_data) * 10 >= 500 else 500
 
     # Find the length of the longest column name
-    max_col_name_length = max(len(col) for col in final_data.columns) + 200
+    max_col_name_length = max(len(col) for col in heatmap_df.columns) + 200
 
     # Set xpad
     xpad = 100 if max_col_name_length <= 15 else max_col_name_length
@@ -394,7 +396,8 @@ def draw_heatmap(heatmap_df, dataset):
     color_bar_title = "LFC " if dataset == "PRISM" else "ln(IC50)"
 
     # Generate heatmap using pt.clustergram (assuming pt is a valid library here)
-    return pt.clustergram(final_data, height=height, width=width, xpad=xpad, color_bar_title=color_bar_title), height
+    return pt.clustergram(processed_data, height=height, width=width, xpad=xpad,
+                          color_bar_title=color_bar_title), height
 
 
 # Preprocess 'ShapDictionary' to replace `np.float32(...)` with plain float values
@@ -466,8 +469,8 @@ def draw_scatter_plot(umap, code, color):
     fig.show()
 
     # Convert the figure to JSON
-    #fig_json = fig.to_json(remove_uids=False)
-    #return fig_json
+    # fig_json = fig.to_json(remove_uids=False)
+    # return fig_json
 
 
 def ensg_to_hgnc(df_columns):
