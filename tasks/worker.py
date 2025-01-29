@@ -378,7 +378,8 @@ def draw_heatmap(heatmap_df, dataset):
 
     # Drop these columns from the original dataframe
     processed_data = heatmap_df[top_columns].copy()
-    processed_data["index"] = heatmap_df['index']
+    string_columns = heatmap_df.select_dtypes(exclude='number').columns
+    processed_data[string_columns] = heatmap_df[string_columns]
 
     # Calculate dimensions for the heatmap
     height = len(heatmap_df) * 20 if len(heatmap_df) * 20 >= 500 else 500
