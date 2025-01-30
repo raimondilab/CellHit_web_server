@@ -370,7 +370,22 @@ def draw_heatmap(heatmap_df, dataset):
     ]
 
     # Drop redundant columns
-    processed_data = heatmap_df.drop(columns=columns_to_drop)
+    filtered_data = filtered_data.drop(columns=columns_to_drop)
+
+    # Step 3: Keep the top N most variable drugs
+    std_devs_filtered = filtered_data.std()
+    std_devs_filtered = std_devs_filtered[~std_devs_filtered.index.str.contains("Cluster")]
+    top_n = 15
+    top_columns = std_devs_filtered.nlargest(top_n).index
+
+    # Drop these columns from the original dataframe
+    processed_data = heatmap_df[top_columns].copy()
+
+    # Reset index
+    if processed_data.index.name == "index" or processed_data.index.name is not None:
+        processed_data = processed_data.reset_index()
+        processed_data.set_index('index')
+
 
     # Calculate dimensions for the heatmap
     height = len(heatmap_df) * 20 if len(heatmap_df) * 20 >= 500 else 500
@@ -384,6 +399,12 @@ def draw_heatmap(heatmap_df, dataset):
 
     # Set color bar title
     color_bar_title = "LFC " if dataset == "PRISM" else "ln(IC50)"
+
+    print(processed_data.head())
+
+    rows = list(processed_data['index'])
+
+    print(rows)
 
     # Generate heatmap using pt.clustergram (assuming pt is a valid library here)
     return pt.clustergram(processed_data, height=height, width=width, xpad=xpad,
