@@ -350,6 +350,8 @@ def draw_heatmap(heatmap_df, dataset):
     # Exclude non-numeric columns
     numeric_data = heatmap_df.select_dtypes(include='number')
 
+    print(heatmap_df)
+
     # Step 1: Remove drugs with low variability (based on standard deviation or CV)
     std_devs = numeric_data.std()
     cv = std_devs / numeric_data.mean()
@@ -382,10 +384,8 @@ def draw_heatmap(heatmap_df, dataset):
     processed_data = heatmap_df[top_columns].copy()
 
     # Reset index
-    if processed_data.index.name == "index" or processed_data.index.name is not None:
-        processed_data = processed_data.reset_index()
-        processed_data.set_index('index')
-
+    processed_data = processed_data.reset_index()
+    processed_data['index'] = heatmap_df['index']
 
     # Calculate dimensions for the heatmap
     height = len(heatmap_df) * 20 if len(heatmap_df) * 20 >= 500 else 500
