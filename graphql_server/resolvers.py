@@ -297,6 +297,19 @@ class QueryResolver:
         return schemas.Task(task_id=task_id, status="SUCCESS", result=task)
 
     @staticmethod
+    def get_heatmap(task_id: str, dataset: str, threshold: float, top_n: int, remove_negative: bool) -> schemas.Task:
+        task_data = worker.get_task(task_id)
+
+        if task_data.result and "heatmap_raw" in task_data.result:
+            result = task_data.result["heatmap_raw"].get(dataset)
+            heatmap_df = pd.DataFrame(result)
+            task = worker.draw_heatmap(heatmap_df, dataset, threshold, top_n, remove_negative)
+        else:
+            return schemas.Task(task_id=task_id, status="SUCCESS", result="")
+
+        return schemas.Task(task_id=task_id, status="SUCCESS", result=task)
+
+    @staticmethod
     def get_task(task_id: str) -> schemas.Task:
 
         task = worker.get_task(task_id)
