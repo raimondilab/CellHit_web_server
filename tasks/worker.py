@@ -412,10 +412,10 @@ def draw_heatmap(heatmap_df, dataset, threshold=-1, top_n=15, max_columns=30, mi
 
     # Step 11: Set heatmap dimensions
     height = max(len(heatmap_df) * 20, 500)  # Adjust height based on data
-    width = max(len(processed_data) * 15, 500)  # Adjust width based on data
+    width = max(len(processed_data) * 1000, 900)  # Adjust width based on data
 
     # Step 12: Set padding for column names
-    max_col_name_length = max(len(col) for col in heatmap_df.columns) + 150
+    max_col_name_length = max(len(col) for col in heatmap_df.columns) + 200
     xpad = max(100, max_col_name_length)
 
     # Step 13: Set color bar title based on dataset

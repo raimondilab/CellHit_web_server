@@ -303,6 +303,7 @@ class QueryResolver:
         if task_data.result and "heatmap_raw" in task_data.result:
             result = task_data.result["heatmap_raw"].get(dataset)
             heatmap_df = pd.DataFrame(result)
+            heatmap_df = heatmap_df.set_index("index")
             task = worker.draw_heatmap(heatmap_df, dataset, threshold, top_n, remove_negative)
         else:
             return schemas.Task(task_id=task_id, status="SUCCESS", result="")
