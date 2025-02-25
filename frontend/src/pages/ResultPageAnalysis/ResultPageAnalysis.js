@@ -16,7 +16,12 @@ import Swal from 'sweetalert2';
 import axios from 'axios';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { TabView, TabPanel } from 'primereact/tabview';
-import { getTaskResultsStep, getDistribution } from '../../ApiFunctions.js';
+import { getTaskResultsStep, getDistribution, getHeatmap } from '../../ApiFunctions.js';
+import { InputNumber } from 'primereact/inputnumber';
+import { Checkbox } from 'primereact/checkbox';
+import { SelectButton } from 'primereact/selectbutton';
+import { Tooltip } from 'primereact/tooltip';
+
 
 const ResultPageAnalysis = () => {
 
@@ -174,8 +179,13 @@ const [cellKey, setCellKey] = useState();
 const [cellDatabase, setCellDatabase] = useState();
 
 // set heatmap variable tab
-const [database, setDatabase] = useState();
+const [database, setDatabase] = useState(null);
 const [uniqueDatabase, setUniqueDatabase] = useState([]);
+const options = ['ON','OFF'];
+const [value, setValue] = useState(options[0]);
+const [top, setTop] = useState(15);
+const [threshold, setThreshold] = useState(-1);
+const [heatmapInitialized, setHeatmapInitialized] = useState(false);
 
 const handleDatabase = (e) => {
     const value = e.target.value
@@ -184,7 +194,58 @@ const handleDatabase = (e) => {
     // Set Heatmap base on database
     setHeatmapData(heatmapDataJson[value].data ? heatmapDataJson[value].data : "{}");
     setHeight(heatmapDataJson[value].height? heatmapDataJson[value].height : "500");
+    setValue(options[0]);
+    setThreshold(-1);
+    setTop(15);
 }
+
+const handleValue = () => {
+   setHeatmapInitialized(true);
+}
+
+const handleTop = (e) => {
+   setTop(e.target.value);
+   setHeatmapInitialized(true);
+}
+
+const handleThreshold = (e) => {
+   setThreshold(e.target.value);
+   setHeatmapInitialized(true);
+}
+
+// Get heatmap data
+useEffect(() => {
+
+    if (!heatmapInitialized) return;
+
+    const fetchDataHeatmap = async () => {
+
+        setHeatmapLoadData(true);
+
+        try {
+            const heatmapJson = await getHeatmap(task, top, threshold, database, value);
+            console.log(task, top, threshold, database, value)
+            setHeatmapDataJson(heatmapJson);
+
+            if (heatmapJson) {
+                    setHeatmapData(heatmapJson[database].data ? heatmapJson[database].data : "{}");
+                    setHeight(heatmapJson[database].height ? heatmapJson[database].height : "500");
+
+            } else {
+                setHeatmapData("{}");
+            }
+        } catch (error) {
+            console.error("Error fetching heatmap data:", error);
+        } finally {
+            setHeatmapLoadData(false);
+        }
+    };
+
+    if (value && top && threshold && database && heatmapInitialized) {
+        fetchDataHeatmap();
+    }
+}, [value, top, threshold, database, heatmapInitialized]);
+
 
 
 // Get distribution data
@@ -242,6 +303,10 @@ const handleTable = async () => {
     }
 }
 
+const handleClick = () => {
+    navigator.clipboard.writeText(window.location.href);
+  };
+
 const handleHeatmap = async () => {
 
     if (activeTabIndex === 2 && heatmapData === "{}") {
@@ -251,7 +316,6 @@ const handleHeatmap = async () => {
         try {
 
             const heatmapJson = await getTaskResultsStep(task, "heatmap");
-
             setHeatmapDataJson(heatmapJson);
 
             if (heatmapJson){
@@ -274,7 +338,6 @@ const handleHeatmap = async () => {
         }
 
         setCallNumberHeatmap(callNumberHeatmap + 1);
-
     }
 }
 
@@ -320,7 +383,15 @@ useEffect(() => {
         <div className="container">
         <div className="row">
         <div className="col-md-12">
-         <h1 className="display-5 fw-bold line mb-4">Task id:{task}</h1>
+         <h1 className="display-5 fw-bold line mb-4">
+        Task id: {task}
+        <sup className="ms-1">
+            <button className="btn-dialog" onClick={handleClick} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                <i tabIndex="1" className="pi pi-link" />
+            </button>
+        </sup>
+</h1>
+
 
           {/* Help message */}
           <Dialog header="UMAP" visible={visible} position={position} style={{ width: '50vw' }} onHide={() => setVisible(false)}
@@ -329,7 +400,7 @@ useEffect(() => {
               UMAP 2D projection of Celligner alignment coloured by oncotree or tissue. Users can see the UMAP plot with colours representing the oncotree code or tissue name by selecting it in the "colour by" options field.
             </p>
             <p className="m-0 mb-1 text-justify">For more information, please refer to the
-              <Link className="" to="/help/" target="_blank"><b> help</b></Link> page.
+              <Link className="" to="/help/#umap" target="_blank"><b> help</b></Link> page.
             </p>
           </Dialog>
           {/* Help message */}
@@ -340,17 +411,17 @@ useEffect(() => {
               Besides, Users can click on a specific row to view more detailed information about the prediction, including the SHAP and predicted response distribution plots. These visuals illustrate the importance of the top genes and drugs and the distribution of the predicted responses. The selected row will be highlighted with a blue background. Click the replay icon to reset the selection and hide the SHAP plot and distribution plots.
             </p>
             <p className="m-0 mb-1 text-justify">For more information, please refer to the
-              <Link className="" to="/help/" target="_blank"><b> help</b></Link> page.
+              <Link className="" to="/help/#inference" target="_blank"><b> help</b></Link> page.
             </p>
           </Dialog>
           {/* Help message */}
           <Dialog header="Heatmap" visible={visibleHeat} position={positionHeat} style={{ width: '50vw' }} onHide={() => setVisibleHeat(false)}
             draggable={false} resizable={false} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
             <p className="m-0 mb-1 text-justify">
-              Heatmap of CellHit predictions of GDSC/PRISM drugs (columns) for each sample (rows). Cells contain the predicted lnIC50 values normalized by median subtraction.
+              Heatmap of CellHit predictions of GDSC/PRISM drugs (columns) for each sample (rows). Cells contain the predicted IC50/LFC values normalized by median subtraction.
             </p>
             <p className="m-0 mb-1 text-justify">For more information, please refer to the
-              <Link className="" to="/help/" target="_blank"><b> help</b></Link> page.
+              <Link className="" to="/help/#heatmap" target="_blank"><b> help</b></Link> page.
             </p>
           </Dialog>
         </div>
@@ -359,26 +430,26 @@ useEffect(() => {
                 <TabPanel header="UMAP">
                 <h4 className="display-6 fw-bold mb-5">UMAP<sup><Button icon="pi pi-info"
                 onClick={() => show('top-right')} text size="small" className="btn-dialog" /></sup></h4>
-                 <div className="row">
-                 <div className="col-2 mb-1">
-                  <div className="bg-light rounded-3">
-                    <div className="p-3">
-                      <div className="mb-2">
-                        <label htmlFor="color" className="form-label">Color by&nbsp;</label>
-                        <select className="form-select mb-3" name="color" onChange={handleColorBy} value={umapType}>
+                <div className="row">
+                  <div className="col-12 col-sm-2  mb-1">
+                    <div className="bg-light rounded-3">
+                      <div className="p-3">
+                        <div className="mb-2">
+                          <label htmlFor="color" className="form-label">Color by&nbsp;</label>
+                          <select className="form-select mb-3" name="color" onChange={handleColorBy} value={umapType}>
                             <option value="oncotree" defaultValue>Oncotree</option>
                             <option value="tissue">Tissue</option>
-                        </select>
+                          </select>
                         </div>
                       </div>
-                     </div>
                     </div>
-                    <div className="col-10 mb-1">
+                  </div>
+                  <div className="col-12 col-sm-10 mb-1">
                     <div className="p-3">
-                        <ScatterPlot  jsonData={umapPlotData}/>
+                      <ScatterPlot jsonData={umapPlotData}/>
                     </div>
-                   </div>
-               </div>
+                  </div>
+                </div>
                 </TabPanel>
                 <TabPanel header="Inference">
                    <h4 className="display-6 fw-bold mb-5">Inference<sup><Button icon="pi pi-info"

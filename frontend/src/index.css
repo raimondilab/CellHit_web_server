@@ -19059,7 +19059,7 @@ input:checked {
    border-color: #3293c3 !important;
 }
 
-.label-btn.hover {
+.label-btn.hover, .label-btn-tab.hover  {
   text-decoration: none;
   color: #fff;
   background-color: #359ccf;
@@ -19081,3 +19081,24 @@ td {
  color: #fff;
 }
 
+.label-btn-tab {
+  display: inline-block;
+  text-transform: uppercase;
+  color: #fff;
+  background: #004059;
+  text-align: center;
+  padding: 5px 5px;
+  font-size: inherit;
+  letter-spacing: 2px;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: pointer;
+  box-shadow: 5px 15px 25px rgba(0,0,0,0.35);
+  border-radius: 3px;
+}
+
+.btn-dialog .pi {
+    font-size: inherit;
+    vertical-align: middle;
+    color: #06b6d4;
+}

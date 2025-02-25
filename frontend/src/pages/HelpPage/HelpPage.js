@@ -45,7 +45,7 @@ const handleDownload = () => {
             </ol>
             <p className="fs-1 m-0 mb-4 text-justify"> Please click <b><Link onClick={handleDownload}>here</Link></b> for an example input file.
             </p>
-              <h5 className="display-6 fw-bold mb-4">UMAP</h5>
+              <h5 className="display-6 fw-bold mb-4" id="umap">UMAP</h5>
               <p className="fs-1 text-justify mb-4">
                 The UMAP scatterplot consists of aligned sample transcriptomic RNA-seq data. To enable a quick qualitative assessment of the aligned data, the server generates a low-dimensional projection using parametric-UMAP mapping. This projection maps the incoming data within the pre-existing aligned transcriptomics spaces of the TCGA and CCLE datasets, providing contextualization against established datasets. The data is displayed in an interactive scatterplot, allowing users to visualize metadata associated with transcriptomic neighbors in the space.
                 Users can see the scatterplot with colours representing the oncotree code or tissue name by selecting it in the "colour by" options field.
@@ -74,7 +74,7 @@ const handleDownload = () => {
                   />
                 </div>
               </div>
-              <h5 className="display-6 fw-bold mb-4">Inference</h5>
+              <h5 className="display-6 fw-bold mb-4" id="inference">Inference</h5>
               <p className="fs-1 text-justify mb-1">
                 The inference table  is a comprehensive tabular dataset that includes detailed predictions and metadata for each sample and selected assay. </p>
              <p className="fs-1 text-justify">Specifically, it contains:</p>
@@ -152,7 +152,7 @@ const handleDownload = () => {
                   />
                 </div>
               </div>
-               <h5 className="display-6 fw-bold mb-4">Heatmap</h5>
+               <h5 className="display-6 fw-bold mb-4" id="heatmap">Heatmap</h5>
               <p className="fs-1 text-justify mb-4">
                 Heatmap of CellHit predictions is a graphical heatmap that visualizes sensitivity data or, in other words, the responsiveness profile of the input samples, represented as rows, while drugs are represented in columns. The heatmap values correspond to median-centered IC50/LFC for each sample-drug pair.
                 Drugs with activity below the median are shown in red, indicating reduced activity, while those above the median are displayed in blue, suggesting increased activity. This visualization provides an at-a-glance summary of drug sensitivities, helping users to quickly identify the most interesting drugs for a given sample. Rows and columns are clustered based on predicted sensitivities, grouping drugs and samples sharing similar response profiles, which might be useful to reveal patient subgroups with distinct sensitivity characteristics.
