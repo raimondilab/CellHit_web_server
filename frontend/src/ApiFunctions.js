@@ -46,7 +46,7 @@ export async function getTaskResultsStep(task, step) {
 }
 
 
-// Get task results
+// Get task results - Distribution data (drugs and cells)
 export async function getDistribution(task, dicType, dataset, key) {
 
     try {
@@ -75,6 +75,55 @@ export async function getDistribution(task, dicType, dataset, key) {
             const taskID = taskData.data.data.getDistribution.taskId;
             const newStatus = taskData.data.data.getDistribution.status;
             const result = taskData.data.data.getDistribution.result;
+
+
+            if (newStatus === "SUCCESS" && task === taskID && result) {
+                return result;
+            }
+        }
+    } catch (error) {
+        Swal.fire({
+            icon: "error",
+            text: error.message
+        });
+    }
+
+    return null;
+}
+
+
+// Get task results - Distribution data (drugs and cells)
+export async function getHeatmap(task, topN, threshold, dataset, removeNegative) {
+
+   // Convert str to boolean
+   const removeN = removeNegative === "ON" ? true : false;
+
+    try {
+        const query = {
+            query: `
+                query getHeatmap {
+                    getHeatmap (taskId: "${task}", topN: ${topN}, threshold: ${threshold}, dataset: "${dataset}", removeNegative: ${removeN}  ) {
+                        taskId
+                        status
+                        result
+                    }
+                }
+            `
+        };
+
+        const apiUrl = 'https://test.bioinfolab.sns.it/graphql';
+        const taskData = await axios.post(apiUrl, query);
+
+        if (!taskData.data.data || taskData.data.errors) {
+            Swal.fire({
+                icon: "error",
+                text: "Oops... An error has occurred!"
+            });
+        } else if (taskData) {
+
+            const taskID = taskData.data.data.getHeatmap.taskId;
+            const newStatus = taskData.data.data.getHeatmap.status;
+            const result = taskData.data.data.getHeatmap.result;
 
 
             if (newStatus === "SUCCESS" && task === taskID && result) {
