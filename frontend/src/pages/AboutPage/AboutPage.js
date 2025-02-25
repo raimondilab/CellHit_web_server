@@ -20,7 +20,7 @@ const AboutPage = () => {
                     <p className="fs-1 text-justify mb-4">
                       CellHit is a web server designed to provide detailed insights into patient cancer cell sensitivities to drugs.
                       Using patient transcriptomic data, CellHit predicts drug sensitivities leveraging data from the GDSC and PRISM assays, enabling opportunities for targeted therapies and precision oncology.
-                      The platform integrates the computational pipeline from <Link to="https://doi.org/10.1101/2024.03.28.586783" target="_blank" rel="noopener noreferrer"><b><i> Learning and actioning general principles of cancer cell drug sensitivity</i></b></Link>, enhancing accessibility to state-of-the-art methods.
+                      The platform integrates the computational pipeline from <Link to="https://doi.org/10.1038/s41467-025-56827-5" target="_blank" rel="noopener noreferrer"><b><i> Learning and actioning general principles of cancer cell drug sensitivity</i></b></Link>, enhancing accessibility to state-of-the-art methods.
                       CellHit also offers an extensive suite of tools for aligning, visualizing, and modeling patient cancer cells alongside well-characterized commercial cell lines.
                       Crucially, the webserver abstracts away the necessity to set up the required running environment and most of the needed pre-processing and harmonization steps.
                       Additionally, the web server allows users to explore pre-computed predictions and outputs for the entire TCGA dataset.

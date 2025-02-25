@@ -24,9 +24,8 @@ const HeaderTitleRunCellHit = () => {
           {/* Help message */}
           <Dialog header="CellHit" visible={visible} position={position} style={{ width: '50vw' }} onHide={() => setVisible(false)}
             draggable={false} resizable={false} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
-            <p className="text-justify mb-3">To run CellHit on your data, you must upload a transcriptomic dataset of your choice.
-            Begin by clicking the "Upload Dataset" button to be directed to the upload window. Then,
-            select the drugs dataset by choosing either GDSC or PRISM. Finally, click the submit button to complete the process.
+            <p className="text-justify mb-3">To run CellHit on your data, you need to upload a transcriptomic dataset of your choice. Start by clicking the "Upload Dataset" button, which will take you to the upload window. Next, select the drug dataset by choosing either GDSC or PRISM. Finally, click the submit button to complete the process.
+            <br/>Please ensure that you provide a CSV, ZIP, or GZ file containing bulk transcriptomic data from cancer cells, formatted in log2(TPM+1).
             </p>
              <p className=" text-justify ">To properly process the input file, it must adhere to the following specific structure:</p>
              <ol>

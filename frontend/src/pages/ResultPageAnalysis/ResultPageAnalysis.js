@@ -47,7 +47,7 @@ async function getTaskResults(taskID) {
             `
         };
 
-        const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
+        const apiUrl = 'https://test.cellhit.bioinfolab.sns.it/graphql';
         const taskData = await axios.post(apiUrl, query);
 
         if (!taskData.data.data || taskData.data.errors) {
@@ -385,8 +385,8 @@ useEffect(() => {
         <div className="col-md-12">
          <h1 className="display-5 fw-bold line mb-4">
         Task id: {task}
-        <sup className="ms-1">
-            <button className="btn-dialog" onClick={handleClick} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+        <sup className="ms-1" tooltip="Click to copy the result link">
+            <button className="btn-dialog"  onClick={handleClick} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
                 <i tabIndex="1" className="pi pi-link" />
             </button>
         </sup>

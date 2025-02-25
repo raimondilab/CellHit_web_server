@@ -8,6 +8,9 @@ import Swal from 'sweetalert2';
 import { Link } from 'react-router-dom';
 import {useNavigate} from "react-router-dom";
 import Papa from 'papaparse';
+import JSZip from 'jszip';
+import { ungzip } from 'pako';
+
 
 const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
 
@@ -26,14 +29,21 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
     setVisible(true);
   };
 
- const handleFileChange = (e) => {
+const handleFileChange = async (e) => {
   const file = e.target.files[0];
 
-  if (file) {
-    setSelectedFile(file);
+  if (!file) return;
+
+  const fileExtension = file.name.split('.').pop().toLowerCase();
+
+  if (!['csv', 'zip', 'gz'].includes(fileExtension)) {
+    Swal.fire({ icon: "error", text: "Invalid file format! Please upload a .csv, .zip, or .gz file." });
+    return;
   }
+
   setSelectedFile(file);
 };
+
 
   const toggleDataset = (dataset) => {
     const newValues = values.includes(dataset)
@@ -55,28 +65,39 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
     setFormValues({ ...formValues, [name]: value.trim() });
   };
 
-  const handleFormSubmit = async (e) => {
+const handleFormSubmit = async (e) => {
   e.preventDefault();
 
-  if (submitted) return; // Prevent multiple submissions if already submitted
+  if (submitted) return;
 
-  setSubmitted(true); // Disable button after first click
+  setSubmitted(true);
 
   try {
-    // Read file as text
-    const fileContent = await selectedFile.text();
+    let processedFile = selectedFile;
 
-    // Validate file content
-    await validateFile(fileContent);
+    if (selectedFile.name.endsWith('.zip')) {
+      processedFile = await extractZip(selectedFile);
+    } else if (selectedFile.name.endsWith('.gz')) {
+      processedFile = await decompressGzip(selectedFile);
+    } else {
+      processedFile =  selectedFile;
+    }
 
-    // If validation passes, send the file
+    if (!processedFile){
+        setIsSubmit(false);
+        setSubmitted(false);
+        return;
+    }
+
+    const fileContent = await processedFile.text();
+    await validateFile(fileContent)
+
     setIsSubmit(true);
-    await sendFile();
+    await sendFile(processedFile);
 
   } catch (error) {
-    // Handle validation or upload error
     setIsSubmit(false);
-    setSubmitted(false); // Re-enable the button if there's an error
+    setSubmitted(false);
 
     Swal.fire({
       icon: "error",
@@ -85,6 +106,30 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
   }
 };
 
+async function extractZip(file) {
+  const zip = await JSZip.loadAsync(file);
+  const files = Object.keys(zip.files);
+
+  if (files.length !== 1) {
+   Swal.fire({
+      icon: "error",
+      text: `Error: Zip file must contain exactly one file.`,
+    });
+    return;
+  }
+
+  const fileName = files[0];
+  const fileContent = await zip.files[fileName].async("blob");
+
+  return new File([fileContent], fileName, { type: "text/csv" });
+}
+
+async function decompressGzip(file) {
+  const arrayBuffer = await file.arrayBuffer();
+  const decompressed = ungzip(new Uint8Array(arrayBuffer));
+
+  return new File([decompressed], file.name.replace('.gz', ''), { type: "text/csv" });
+}
 
 // Get results by taskId
 const handleFormSubmitTask = (e) => {
@@ -101,26 +146,26 @@ const handleFormSubmitTask = (e) => {
 
 
 // Send file to back-end and get TaskId
-async function sendFile() {
+async function sendFile(file) {
   try {
     const formData = new FormData();
     formData.append("operations", JSON.stringify({
       query: `
         mutation runAnalysis($file: Upload!, $datasets: [String!]!) {
-          runAnalysis(file: $file,  datasets: $datasets) {
+          runAnalysis(file: $file, datasets: $datasets) {
             taskId
             status
           }
         }
       `,
       variables: {
-        file: null,  // Will be filled by the file upload
+        file: null, // Will be filled by the file upload
         datasets: values,
       },
     }));
 
     formData.append("map", JSON.stringify({ 0: ["variables.file"] }));
-    formData.append("0", selectedFile);  // Add file to the request
+    formData.append("0", file); // Add file to the request
 
     const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
     const response = await axios.post(apiUrl, formData, {
@@ -138,7 +183,6 @@ async function sendFile() {
       });
     } else {
       setTaskId(response.data.data.runAnalysis.taskId);
-      console.log(response.data.data.runAnalysis.status)
       setTaskStatus(response.data.data.runAnalysis.status);
     }
   } catch (error) {
@@ -278,7 +322,7 @@ function validateFile(fileContent) {
             <div className="col-md-6 mb-3">
               <form id="search-box" onSubmit={handleFormSubmit} className="mb-2">
                 <div className="form-group">
-                  <input type="file" id="databaseBtn" name="dataset" accept=".csv" required onChange={handleFileChange}/>
+                  <input type="file" id="databaseBtn" name="dataset" accept=".csv, .zip, .gz" required onChange={handleFileChange}/>
                   <label htmlFor="databaseBtn" className="label-btn me-2">
                     Upload dataset
                   </label>

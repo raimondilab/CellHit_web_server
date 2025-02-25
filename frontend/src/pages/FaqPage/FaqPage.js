@@ -22,7 +22,7 @@ const FaqPage = () => {
                          It leverages data from GDSC and PRISM assays to enable targeted therapies and precision oncology, simplifying complex computational workflows.
                         </p>
                          <p className="fs-1 text-justify"><b>What publication or research supports the methods used in CellHit?</b><br/>
-                         The methods are based on research outlined in <Link to="https://doi.org/10.1101/2024.03.28.586783" target="_blank" rel="noopener noreferrer"><b><i> Learning and actioning general principles of cancer cell drug sensitivity</i></b></Link> and other supporting studies cited in the workflow.
+                         The methods are based on research outlined in <Link to="https://doi.org/10.1038/s41467-025-56827-5" target="_blank" rel="noopener noreferrer"><b><i> Learning and actioning general principles of cancer cell drug sensitivity</i></b></Link> and other supporting studies cited in the workflow.
                         </p>
                         <p className="fs-1 text-justify"><b>What kind of data does CellHit require as input?</b><br/>
                         CellHit requires bulk RNA-seq transcriptomic data from patient tissues in log2(TPM+1) format. This ensures compatibility with its harmonization and predictive models.
