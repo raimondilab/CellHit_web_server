@@ -294,7 +294,7 @@ class QueryResolver:
     @staticmethod
     def get_distribution(task_id: str, dic_type: str, dataset: str, key: str) -> schemas.Task:
         task = worker.load_numpy_key(task_id, dic_type, dataset, key)
-        return schemas.Task(task_id=task_id, status="SUCCESS", result=task)
+        return schemas.Task(task_id=task_id, status="SUCCESS", result=task, type="analysis")
 
     @staticmethod
     def get_task(task_id: str) -> schemas.Task:
@@ -302,9 +302,9 @@ class QueryResolver:
         task = worker.get_task(task_id)
 
         while not task.ready():
-            return schemas.Task(task_id=task.state, status=task.info, result="")
+            return schemas.Task(task_id=task.state, status=task.info, result="", type=task.type)
 
-        return schemas.Task(task_id=task.id, status=task.status, result=task.result)
+        return schemas.Task(task_id=task.id, status=task.status, result=task.result, type=task.type)
 
     @staticmethod
     def get_results(task_id: str, step: str) -> schemas.Task:
@@ -312,12 +312,15 @@ class QueryResolver:
         task = worker.get_task(task_id)
 
         while not task.ready():
-            return schemas.Task(task_id=task.state, status=task.info, result="")
+            return schemas.Task(task_id=task.state, status=task.info, result="", type=task.type)
 
         if task.result:
             result = task.result.get(step)
 
-        return schemas.Task(task_id=task.id, status=task.status, result=result)
+            if not result:
+                result = ""
+
+        return schemas.Task(task_id=task.id, status=task.status, result=result, type=task.type)
 
 
 class MutationResolver:
@@ -345,7 +348,7 @@ class MutationResolver:
             task = worker.analysis.s(csv_data, list(selected_datasets)).delay()
 
             # Return task metadata with initial status
-            return schemas.Task(task_id=task.id, status='Data sending', result="")
+            return schemas.Task(task_id=task.id, status='Data sending', result="", type="analysis")
         except Exception as e:
             # Handle potential errors during file saving or Celery invocation
             print(f"Error during analysis initiation: {e}")
@@ -365,7 +368,7 @@ class MutationResolver:
             task = worker.alignment.s(csv_data).delay()
 
             # Return task metadata with initial status
-            return schemas.Task(task_id=task.id, status='Data sending', result="")
+            return schemas.Task(task_id=task.id, status='Data sending', result="", type="align")
         except Exception as e:
             # Handle potential errors during file saving or Celery invocation
             print(f"Error during analysis initiation: {e}")

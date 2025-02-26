@@ -92,6 +92,7 @@ class Task:
     task_id: str
     status: Optional[str]
     result: JSON
+    type: str
 
 
 
