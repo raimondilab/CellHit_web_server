@@ -302,9 +302,11 @@ class QueryResolver:
         task = worker.get_task(task_id)
 
         while not task.ready():
-            return schemas.Task(task_id=task.state, status=task.info, result="", type=task.type)
+            return schemas.Task(task_id=task.state, status=task.info, result="", type="")
 
-        return schemas.Task(task_id=task.id, status=task.status, result=task.result, type=task.type)
+        task_type = "analysis" if "heatmap" in task.result and "table" in task.result else "align"
+
+        return schemas.Task(task_id=task.id, status=task.status, result=task.result, type=task_type)
 
     @staticmethod
     def get_results(task_id: str, step: str) -> schemas.Task:
@@ -312,15 +314,17 @@ class QueryResolver:
         task = worker.get_task(task_id)
 
         while not task.ready():
-            return schemas.Task(task_id=task.state, status=task.info, result="", type=task.type)
+            return schemas.Task(task_id=task.state, status=task.info, result="", type="")
 
         if task.result:
-            result = task.result.get(step)
-
-            if not result:
+            if task.result:
+                task_type = "analysis" if "heatmap" in task.result and "table" in task.result else "align"
+                result = task.result.get(step, "")
+            else:
+                task_type = ""
                 result = ""
 
-        return schemas.Task(task_id=task.id, status=task.status, result=result, type=task.type)
+        return schemas.Task(task_id=task.id, status=task.status, result=result, type=task_type)
 
 
 class MutationResolver:
