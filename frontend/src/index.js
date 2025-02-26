@@ -17,6 +17,7 @@ import Under from './pages/UnderPage/Under'
 import ErrorPage from './pages/ErrorPage/ErrorPage'
 import ResultPage from './pages/ResultPage/ResultPage'
 import ResultPageAnalysis from './pages/ResultPageAnalysis/ResultPageAnalysis'
+import ResultAlign from './pages/ResultPageAlign/ResultPageAlign'
 import RunCellHit from './pages/RunCellHit/RunCellHit'
 import AboutPage from './pages/AboutPage/AboutPage'
 import HelpPage from './pages/HelpPage/HelpPage'
@@ -66,6 +67,15 @@ const router = createBrowserRouter([ {
       element: (
       <ErrorBoundaryWrapper>
         <ResultPageAnalysis />
+      </ErrorBoundaryWrapper>
+      )
+    },
+    ,
+    {
+      path: "/resultAlign/",
+      element: (
+      <ErrorBoundaryWrapper>
+        <ResultAlign />
       </ErrorBoundaryWrapper>
       )
     },

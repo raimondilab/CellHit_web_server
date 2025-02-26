@@ -8,7 +8,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from 'primereact/button';
 
 
-const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit }) => {
+const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit, alignOnly }) => {
+
     const navigate = useNavigate();
     const currentEventColor = "#FF9800";
     const successEventColor = "#4CAF50";
@@ -48,19 +49,24 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit }) => {
 
    useEffect(() => {
     const indexOfCurrentTask = baseEvents.findIndex(event => event.status === statusTask);
-    const updatedEvents = baseEvents.map((event, index) => ({
+    let updatedEvents = baseEvents.map((event, index) => ({
         ...event,
         color: index <= indexOfCurrentTask ? currentEventColor : event.color,
     }));
 
+    // Hide "Inference" if alignOnly is true
+    if (alignOnly) {
+        updatedEvents = updatedEvents.filter(e => e.status !== "Inference");
+    }
+
     // Dynamically hide "Queueing" if not applicable
     if (statusTask !== "Queueing" && updatedEvents.some(e => e.status === "Queueing")) {
-        const filteredEvents = updatedEvents.filter(e => e.status !== "Queueing");
-        setHighlightedEvents(filteredEvents);
-    } else {
-        setHighlightedEvents(updatedEvents);
+        updatedEvents = updatedEvents.filter(e => e.status !== "Queueing");
     }
-}, [statusTask]);
+
+    setHighlightedEvents(updatedEvents);
+}, [statusTask, alignOnly]);
+
 
     const customizedEvents = (item) => {
         return (
@@ -141,7 +147,7 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit }) => {
                 `
             };
 
-            const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
+            const apiUrl = 'https://test.bioinfolab.sns.it/graphql';
             const taskData = await axios.post(apiUrl, query);
 
             if (!taskData.data.data || taskData.data.errors) {
@@ -193,8 +199,11 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit }) => {
 
                     const url = new URL(window.location.href);
                     url.searchParams.set('taskId', taskID);
-                    navigate('/result/' + url.search, { state: { taskID: taskID, data: result } });
+
+                    const targetRoute = alignOnly ? '/resultAlign/' : '/result/';
+                    navigate(targetRoute + url.search, { state: { taskID: taskID, data: result } });
                 }
+
             }
         } catch (error) {
             clearInterval(statusInterval.current);

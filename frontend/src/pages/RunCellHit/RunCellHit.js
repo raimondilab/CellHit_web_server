@@ -22,6 +22,7 @@ const RunCellHit = () => {
  const [isSubmit, setIsSubmit] = useState(false);
  const [taskId, setTaskId] = useState("");
  const [taskStatus, setTaskStatus] = useState("");
+ const [alignOnly, setAlignOnly] = useState('off');
 
 return (
     <>
@@ -35,9 +36,9 @@ return (
             <div className="col-12">
              <h1 className="display-5 fw-bold line mb-4">CellHit</h1>
                    { (isSubmit && taskId) ? (
-                         <ProgressionRun taskID={taskId}  statusTask={taskStatus} setTaskStatus={setTaskStatus} setIsSubmit={setIsSubmit}/>
+                         <ProgressionRun taskID={taskId}  statusTask={taskStatus} setTaskStatus={setTaskStatus} setIsSubmit={setIsSubmit} alignOnly={alignOnly}/>
                       ) : (
-                         <DataSubmission setIsSubmit={setIsSubmit} setTaskId={setTaskId} setTaskStatus={setTaskStatus} />
+                         <DataSubmission setIsSubmit={setIsSubmit} setTaskId={setTaskId} setTaskStatus={setTaskStatus}  alignOnly={alignOnly} setAlignOnly={setAlignOnly}/>
                       )}
             </div>
           </div>

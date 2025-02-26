@@ -311,8 +311,98 @@ def analysis(self, file, datasets):
         raise  # Re-raise the exception for further handling
 
 
+@celery.task(bind=True)
+def alignment(self, file):
+    try:
+        results_pipeline = {}
+
+        # Step 1: Processing
+        self.update_state(state='PROGRESS', meta='Processing')
+
+        df = pd.read_csv(StringIO(file), sep=",", header=0, index_col=0)
+
+        # Get TCGA_CODE code
+        code = str(df['TCGA_CODE'].unique()[0])
+
+        # Get Tissue
+        tissue = ''.join(df['TISSUE'].unique())
+
+        # Drop TCGA_CODE
+        df = df.drop(columns=['TCGA_CODE', 'TISSUE'])
+
+        # gbm code
+        gbm_code = tcga_code_map.get(code)
+
+        # Preprocess data
+        data = preprocess_data(df, code)
+
+        # Define covariate labels (TCGA category to which the new sample belong to)
+        covariate_labels = [gbm_code] * len(data)
+
+        # Step 2: Batch correction
+        self.update_state(state='PROGRESS', meta='Batch correction')
+        corrected = batch_correct(data, covariate_labels, preprocess_paths)
+
+        # Step 3: Imputation
+        self.update_state(state='PROGRESS', meta='Imputation')
+        imputed = impute_missing(corrected, preprocess_paths, covariate_labels)
+
+        # Step 4: Transform
+        self.update_state(state='PROGRESS', meta='Transform')
+
+        transformed = celligner_transform_data(data=imputed,
+                                               preprocess_paths=preprocess_paths,
+                                               device='cuda:0',
+                                               transform_source='target')
+
+        umap_path = preprocess_paths.umap_path
+
+        if umap_path:
+            umap = ParametricUMAP.load(umap_path)
+            embedding = umap.transform(transformed.values)
+
+            umap_results = pd.DataFrame(
+                embedding,
+                columns=['UMAP1', 'UMAP2'],
+                index=transformed.index
+            )
+
+            umap_results['Source'] = code
+            umap_results['oncotree_code'] = code
+            umap_results['tissue'] = tissue
+            umap_results = umap_results.reset_index()
+
+            results_pipeline['umap'] = umap_results
+
+        # Mapping new sample into umap space
+        umap_concat = pd.concat([umap_df, results_pipeline['umap']])
+
+        # Reset index
+        umap_concat = umap_concat.reset_index(drop=True)
+
+        # Step 5: Result elaboration
+        self.update_state(state='PROGRESS', meta='Results elaboration')
+
+        # Convert umap data in json format
+        umap_json = draw_scatter_plot(umap_concat, code, 'oncotree_code')
+
+        # Convert umap data in json format
+        umap_json_tissue = draw_scatter_plot(umap_concat, code, 'tissue')
+
+        result = {
+            "umap": {'oncotree': umap_json, "tissue": umap_json_tissue}
+        }
+
+        return result
+
+    except Exception as e:
+        print(f"Error during analysis: {e}")
+        raise  # Re-raise the exception for further handling
+
+
 # Preprocess user data
 def preprocess_data(data, code):
+
     # Transpose data
     data = data.transpose()
 
@@ -350,78 +440,66 @@ def preprocess_data(data, code):
 
 
 # Draw IC50 heatmap
-def draw_heatmap(heatmap_df, dataset, threshold=-1, top_n=15, max_columns=30, min_columns=15, remove_negative=False):
-    """
-    Generates a heatmap after filtering drugs with at least one negative prediction
-    (if remove_negative=False) and selecting those with higher variability,
-    ensuring the number of columns is between min_columns and max_columns.
-    """
+def draw_heatmap(heatmap_df, dataset):
 
-    # Step 1: Exclude non-numeric columns
+    # Exclude non-numeric columns
     numeric_data = heatmap_df.select_dtypes(include='number')
 
-    # Step 2: Filter drugs with at least one negative prediction (< logIC50_threshold)
-    if remove_negative:
-        filtered_data_neg = pd.DataFrame()  # No negative prediction columns will be considered
-    else:
-        filtered_data_neg = numeric_data.loc[:, (numeric_data < threshold).any(axis=0)]
+    # Step 1: Remove drugs with low variability (based on standard deviation or CV)
+    std_devs = numeric_data.std()
+    cv = std_devs / numeric_data.mean()
+    cv_threshold = 0.1  # Define a threshold for CV
+    significant_columns = cv[cv > cv_threshold].index
 
-    # Step 3: Remove drugs with low variability
-    std_devs = numeric_data.std()  # Calculate standard deviation
-    cv = std_devs / numeric_data.mean()  # Coefficient of variation (CV)
-    significant_columns = cv[cv > 0.1].index  # Keep columns with CV > 0.1
+    # Filter numeric_data to keep significant columns
     filtered_data = numeric_data[significant_columns]
 
-    # Step 4: Remove highly correlated drugs
-    correlation_matrix = filtered_data.corr().abs()  # Absolute correlation matrix
-    upper_triangle = np.triu(np.ones(correlation_matrix.shape), k=1)  # Upper triangle to avoid duplication
-    highly_correlated = (correlation_matrix > 0.9) & (upper_triangle == 1)  # Find highly correlated pairs
-    columns_to_drop = [column for column in highly_correlated.columns if any(highly_correlated[column])]
-    filtered_data = filtered_data.drop(columns=columns_to_drop)  # Drop highly correlated columns
+    # Step 2: Remove highly correlated drugs
+    correlation_matrix = filtered_data.corr().abs()
+    upper_triangle = np.triu(np.ones(correlation_matrix.shape), k=1)
+    highly_correlated = (correlation_matrix > 0.9) & (upper_triangle == 1)
 
-    # Step 5: Select the most variable drugs and ensure the total is between min_columns and max_columns
-    std_devs_filtered = filtered_data.std()  # Standard deviation of the filtered data
+    # Identify columns to drop due to high correlation
+    columns_to_drop = [
+        column for column in highly_correlated.columns if any(highly_correlated[column])
+    ]
+
+    # Drop redundant columns
+    filtered_data = filtered_data.drop(columns=columns_to_drop)
+
+    # Step 3: Keep the top 15 most variable drugs
+    std_devs_filtered = filtered_data.std()
     std_devs_filtered = std_devs_filtered[~std_devs_filtered.index.str.contains("Cluster")]
+    top_n = 15
+    top_columns = std_devs_filtered.nlargest(top_n).index
 
-    # Step 6: Ensure negative prediction drugs are kept (if remove_negative=False)
-    selected_columns = list(filtered_data_neg.columns)  # Start with the negative prediction drugs
+    # Step 4: Identify columns where all values are negative
+    negative_cols = numeric_data.columns[(numeric_data < 0).all()]
 
-    # Step 7: Calculate how many more columns can be selected (based on top_n)
-    remaining_slots = max_columns - len(selected_columns)
+    # Combine top 15 variable columns with negative-only columns
+    final_columns = list(set(top_columns).union(set(negative_cols)))
 
-    if remaining_slots > 0:
-        top_n = min(top_n, remaining_slots)  # Ensure top_n doesn't exceed the available slots
-        top_variability_columns = std_devs_filtered.nlargest(top_n).index  # Select the most variable drugs
-        selected_columns.extend(top_variability_columns)
+    # Keep only the selected columns in the processed data
+    processed_data = heatmap_df[final_columns].copy()
 
-    # Step 8: If the total columns are still less than min_columns, add more from the most variable ones
-    if len(selected_columns) < min_columns:
-        extra_needed = min_columns - len(selected_columns)
-        additional_columns = std_devs_filtered.drop(selected_columns, errors='ignore').nlargest(extra_needed).index
-        selected_columns.extend(additional_columns)
-
-    # Step 9: Ensure the total number of columns doesn't exceed max_columns
-    selected_columns = selected_columns[:max_columns]
-
-    # Step 10: Prepare the final processed data
-    processed_data = heatmap_df[selected_columns].copy()
-
-    # Reset index and keep the original index
+    # Reset index
     processed_data = processed_data.reset_index()
     processed_data['index'] = heatmap_df['index']
 
-    # Step 11: Set heatmap dimensions
-    height = max(len(heatmap_df) * 20, 500)  # Adjust height based on data
-    width = max(len(processed_data) * 1000, 900)  # Adjust width based on data
+    # Calculate dimensions for the heatmap
+    height = len(heatmap_df) * 20 if len(heatmap_df) * 20 >= 500 else 500
+    width = len(processed_data) * 10 + 200 if len(processed_data) * 10 >= 500 else 500
 
-    # Step 12: Set padding for column names
+    # Find the length of the longest column name
     max_col_name_length = max(len(col) for col in heatmap_df.columns) + 200
-    xpad = max(100, max_col_name_length)
 
-    # Step 13: Set color bar title based on dataset
+    # Set xpad
+    xpad = 100 if max_col_name_length <= 15 else max_col_name_length
+
+    # Set color bar title
     color_bar_title = "LFC " if dataset == "PRISM" else "ln(IC50)"
 
-    # Step 14: Generate the heatmap
+    # Generate heatmap using pt.clustergram (assuming pt is a valid library here)
     return pt.clustergram(processed_data, height=height, width=width, xpad=xpad,
                           color_bar_title=color_bar_title), height
 

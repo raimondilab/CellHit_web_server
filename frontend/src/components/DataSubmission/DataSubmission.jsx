@@ -12,7 +12,7 @@ import JSZip from 'jszip';
 import { ungzip } from 'pako';
 
 
-const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
+const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus, alignOnly, setAlignOnly }) => {
 
   const navigate = useNavigate();
   const [position, setPosition] = useState('center');
@@ -23,6 +23,7 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus }) => {
   const [loading, setIsLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [values, setValues] = useState(["gdsc"]);
+
 
   const show = (position) => {
     setPosition(position);
@@ -42,6 +43,21 @@ const handleFileChange = async (e) => {
   }
 
   setSelectedFile(file);
+};
+
+const handleAlignment = () => {
+  setAlignOnly(prevState => {
+    const newState = prevState === "ON" ? "off" : "ON";
+
+    if (newState === "ON") {
+      Swal.fire({
+        icon: "info",
+        text: "You have chosen the alignment option only; please note that this does not incorporate the inference associated with the CellHit.",
+      });
+    }
+
+    return newState;
+  });
 };
 
 
@@ -93,7 +109,9 @@ const handleFormSubmit = async (e) => {
     await validateFile(fileContent)
 
     setIsSubmit(true);
-    await sendFile(processedFile);
+
+    // Call send file function base on the task type
+    alignOnly ? await sendFileAlignment(processedFile) : await sendFile(processedFile);
 
   } catch (error) {
     setIsSubmit(false);
@@ -105,6 +123,8 @@ const handleFormSubmit = async (e) => {
     });
   }
 };
+
+
 
 async function extractZip(file) {
   const zip = await JSZip.loadAsync(file);
@@ -144,6 +164,56 @@ const handleFormSubmitTask = (e) => {
 };
 
 
+async function sendFileAlignment(file) {
+  try {
+    const formData = new FormData();
+    formData.append("operations", JSON.stringify({
+      query: `
+        mutation run($file: Upload!) {
+          runAlignment(file: $file) {
+            taskId
+            status
+          }
+        }
+      `,
+      variables: {
+        file: null, // Will be filled by the file upload
+      },
+    }));
+
+    formData.append("map", JSON.stringify({ 0: ["variables.file"] }));
+    formData.append("0", file); // Add file to the request
+
+    const apiUrl = 'https://test.bioinfolab.sns.it/graphql';
+    const response = await axios.post(apiUrl, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      }
+    });
+
+    if (response.data.errors) {
+      setIsSubmit(false);
+      setSubmitted(false);
+      Swal.fire({
+        icon: "error",
+        text: "Oops... \n An error has occurred!"
+      });
+    } else {
+      setTaskId(response.data.data.runAnalysis.taskId);
+      setTaskStatus(response.data.data.runAnalysis.status);
+    }
+  } catch (error) {
+    setIsSubmit(false);
+    setSubmitted(false);
+    Swal.fire({
+      icon: "error",
+      text: error.message,
+    });
+  }
+}
+
+
+
 
 // Send file to back-end and get TaskId
 async function sendFile(file) {
@@ -167,7 +237,7 @@ async function sendFile(file) {
     formData.append("map", JSON.stringify({ 0: ["variables.file"] }));
     formData.append("0", file); // Add file to the request
 
-    const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
+    const apiUrl = 'https://test.bioinfolab.sns.it/graphql';
     const response = await axios.post(apiUrl, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -339,6 +409,13 @@ function validateFile(fileContent) {
                       onClick={() => toggleDataset("prism")}
                     >
                       PRISM
+                    </label>
+                    <label
+                      htmlFor="alignment"
+                      className={`label-btn  me-2 ${alignOnly === "ON" ? "hover" : ""}`}
+                      onClick={() => handleAlignment()}
+                    >
+                      ONLY alignment
                     </label>
 
                    <label htmlFor="search" className="label-btn" disabled={submitted}>
