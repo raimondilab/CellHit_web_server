@@ -319,7 +319,7 @@ class QueryResolver:
         if task.result:
             if task.result:
                 task_type = "analysis" if "heatmap" in task.result and "table" in task.result else "align"
-                result = task.result.get(step, "")
+                result = task.result.get(step)
             else:
                 task_type = ""
                 result = ""
