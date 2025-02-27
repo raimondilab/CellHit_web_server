@@ -474,7 +474,7 @@ def draw_heatmap(heatmap_df, dataset):
     top_columns = std_devs_filtered.nlargest(top_n).index
 
     # Step 4: Identify columns where all values are negative
-    negative_cols = numeric_data.columns[(numeric_data < 0).all()]
+    negative_cols = numeric_data.columns[(numeric_data < -1).all()]
 
     # Combine top 15 variable columns with negative-only columns
     final_columns = list(set(top_columns).union(set(negative_cols)))
@@ -488,7 +488,7 @@ def draw_heatmap(heatmap_df, dataset):
 
     # Calculate dimensions for the heatmap
     height = len(heatmap_df) * 20 if len(heatmap_df) * 20 >= 500 else 500
-    width = len(processed_data) * 10 + 200 if len(processed_data) * 10 >= 500 else 500
+    width = len(processed_data) * 15 if len(processed_data) * 15 >= 500 else 700
 
     # Find the length of the longest column name
     max_col_name_length = max(len(col) for col in heatmap_df.columns) + 200
