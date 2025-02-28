@@ -68,11 +68,11 @@ const AboutPage = () => {
                     Building upon the methods introduced in Celligner, our objective was to obtain a robust tool to quickly align transcriptional profiles of tumor samples (TCGA) and established cancer cell lines (CCLE).
                     Initial attempts to integrate Celligner into our pipeline revealed several shortcomings:
                     </p>
-                     <ul class="mb-4 ml-10">
-                        <li class="fs-1 text-justify">In its original form, the code did not serve our purposes since the “train” and “transform” methods of the original method shared some statistics that were completely fine for the original Celligner goals but resulted in data leakage in our predictive machine learning framework; </li>
-                        <li class="fs-1 text-justify">Celligner featured a somewhat opaque implementation approach that included a probably incorrect implementation of contrastive PCA (cPCA) routine and reliance on R-based packages for differential gene expression analysis;</li>
-                        <li class="fs-1 text-justify">Furthermore, the original strategy of Celligner to evaluate the goodness of the obtained outputs relied on measuring the correlation of both obtained tumor samples and cancer cell lines by stratifying by tissue type (where greater correlation means better alignment). However, this metrics disregards the fact that some of the cell lines feature heterogeneous neighborhoods (hyperspheres in  CCLE the transcriptomic space with feature high tissue heterogeneity) even before alignment with TCGA;</li>
-                        <li class="fs-1 text-justify">Celligner presents a lot of hypermeters which are not fixed through a thorough hyper parameter selection procedure;</li>
+                     <ul className="mb-4 ml-10">
+                        <li className="fs-1 text-justify">In its original form, the code did not serve our purposes since the “train” and “transform” methods of the original method shared some statistics that were completely fine for the original Celligner goals but resulted in data leakage in our predictive machine learning framework; </li>
+                        <li className="fs-1 text-justify">Celligner featured a somewhat opaque implementation approach that included a probably incorrect implementation of contrastive PCA (cPCA) routine and reliance on R-based packages for differential gene expression analysis;</li>
+                        <li className="fs-1 text-justify">Furthermore, the original strategy of Celligner to evaluate the goodness of the obtained outputs relied on measuring the correlation of both obtained tumor samples and cancer cell lines by stratifying by tissue type (where greater correlation means better alignment). However, this metrics disregards the fact that some of the cell lines feature heterogeneous neighborhoods (hyperspheres in  CCLE the transcriptomic space with feature high tissue heterogeneity) even before alignment with TCGA;</li>
+                        <li className="fs-1 text-justify">Celligner presents a lot of hypermeters which are not fixed through a thorough hyper parameter selection procedure;</li>
                     </ul>
                     <p className="fs-1 text-justify mb-2">
                     To address these issues, we fundamentally refactored the Celligner pipeline.
@@ -87,25 +87,25 @@ const AboutPage = () => {
                     <p className="fs-1 text-justify mb-2">
                     Heuristic Procedure (Neighborhood Consistency) Steps:
                     </p>
-                    <ol class="mb-3 ml-10">
-                        <li class="fs-1 text-justify">Pre-Alignment Selection:
+                    <ol className="mb-3 ml-10">
+                        <li className="fs-1 text-justify">Pre-Alignment Selection:
                           <ul>
-                          <li class="fs-1 text-justify">Identify “well-behaved” cell lines before alignment by examining their local neighborhoods within CCLE.</li>
-                          <li class="fs-1 text-justify">Perform a 10-nearest-neighbor (10-NN) search for each cell line. Only retain cell lines whose neighborhoods contain at least 50% of neighbors sharing the same tissue label. This step filters out inherently “noisy” or non-representative cell lines.</li>
+                          <li className="fs-1 text-justify">Identify “well-behaved” cell lines before alignment by examining their local neighborhoods within CCLE.</li>
+                          <li className="fs-1 text-justify">Perform a 10-nearest-neighbor (10-NN) search for each cell line. Only retain cell lines whose neighborhoods contain at least 50% of neighbors sharing the same tissue label. This step filters out inherently “noisy” or non-representative cell lines.</li>
                           </ul>
                         </li>
-                        <li class="fs-1 text-justify">Post-Alignment Evaluation:
+                        <li className="fs-1 text-justify">Post-Alignment Evaluation:
                           <ul>
-                             <li class="fs-1 text-justify">After applying Celligner alignment, stratify the analysis by tissue type.</li>
-                             <li class="fs-1 text-justify">For each of the previously identified “well-behaved” cell lines, identify their 10 nearest neighbors in the TCGA-aligned space.</li>
-                             <li class="fs-1 text-justify">Pool and average these neighbors across all selected cell lines within the same tissue, producing a tissue-level alignment quality metric.</li>
+                             <li className="fs-1 text-justify">After applying Celligner alignment, stratify the analysis by tissue type.</li>
+                             <li className="fs-1 text-justify">For each of the previously identified “well-behaved” cell lines, identify their 10 nearest neighbors in the TCGA-aligned space.</li>
+                             <li className="fs-1 text-justify">Pool and average these neighbors across all selected cell lines within the same tissue, producing a tissue-level alignment quality metric.</li>
                           </ul>
                         </li>
-                        <li class="fs-1 text-justify">Metric Derivation:
+                        <li className="fs-1 text-justify">Metric Derivation:
                           <ul>
-                             <li class="fs-1 text-justify">Using OncoTree annotations (available directly for cell lines and recoverable for TCGA samples), ensure consistent tissue definitions across datasets.</li>
-                             <li class="fs-1 text-justify">The resulting metric, which reflects the average neighborhood consistency between CCLE cell lines and corresponding TCGA samples post-alignment, serves as a target for hyperparameter optimization.</li>
-                             <li class="fs-1 text-justify">Minimizing this metric leads to improved alignment outcomes and ensures that the resulting model more accurately represents the biological reality of tissue-specific tumor profiles.</li>
+                             <li className="fs-1 text-justify">Using OncoTree annotations (available directly for cell lines and recoverable for TCGA samples), ensure consistent tissue definitions across datasets.</li>
+                             <li className="fs-1 text-justify">The resulting metric, which reflects the average neighborhood consistency between CCLE cell lines and corresponding TCGA samples post-alignment, serves as a target for hyperparameter optimization.</li>
+                             <li className="fs-1 text-justify">Minimizing this metric leads to improved alignment outcomes and ensures that the resulting model more accurately represents the biological reality of tissue-specific tumor profiles.</li>
                           </ul>
                         </li>
                     </ol>
@@ -127,24 +127,24 @@ const AboutPage = () => {
                     </p>
                     <h5 className="display-6 fw-bold mb-3">CellHit</h5>
                      <p className="fs-1 text-justify mb-3">
-                     The aligned patients data is sent to inference in the models thourghly described in the <Link to="https://doi.org/10.1101/2024.03.28.586783" target="_blank" rel="noopener noreferrer"><b><i> Learning and actioning general principles of cancer cell drug sensitivity</i></b></Link>.
+                     The aligned patients data is sent to inference in the models thourghly described in the <Link to="https://doi.org/10.1038/s41467-025-56827-5" target="_blank" rel="noopener noreferrer"><b><i> Learning and actioning general principles of cancer cell drug sensitivity</i></b></Link>.
                      Code for these model is already available at <Link to="https://github.com/raimondilab/CellHit" target="_blank" rel="noopener noreferrer"><b><i>CellHit.</i></b></Link>
                      </p>
 
                     <h5 className="display-6 fw-bold mb-3">Libraries</h5>
-                    <ul class="mb-1 ml-10">
-                        <li class="fs-1 text-justify">ReactJS (v18.2.0)</li>
-                        <li class="fs-1 text-justify">Plotly.js (v2.6.0)</li>
-                        <li class="fs-1 text-justify">Primereact (v10.5.0)</li>
-                        <li class="fs-1 text-justify">React-bootstrap (v2.10.0)</li>
-                        <li class="fs-1 text-justify">FastAPI (v0.104.1)</li>
-                        <li class="fs-1 text-justify">Strawberry-graphql (v0.217.1)</li>
-                        <li class="fs-1 text-justify">SQLAlchemy (v1.4.51)</li>
-                        <li class="fs-1 text-justify">Celery (v5.4.0)</li>
-                        <li class="fs-1 text-justify mb-4">Redis (v3.5.3)</li>
+                    <ul className="mb-1 ml-10">
+                        <li className="fs-1 text-justify">ReactJS (v18.2.0)</li>
+                        <li className="fs-1 text-justify">Plotly.js (v2.6.0)</li>
+                        <li className="fs-1 text-justify">Primereact (v10.5.0)</li>
+                        <li className="fs-1 text-justify">React-bootstrap (v2.10.0)</li>
+                        <li className="fs-1 text-justify">FastAPI (v0.104.1)</li>
+                        <li className="fs-1 text-justify">Strawberry-graphql (v0.217.1)</li>
+                        <li className="fs-1 text-justify">SQLAlchemy (v1.4.51)</li>
+                        <li className="fs-1 text-justify">Celery (v5.4.0)</li>
+                        <li className="fs-1 text-justify mb-4">Redis (v3.5.3)</li>
                     </ul>
                     <h5 className="display-6 fw-bold mb-3">Contact</h5>
-                    <p class="fs-1 text-justify">Francesco Raimondi - francesco.raimondi@sns.it</p>
+                    <p className="fs-1 text-justify">Francesco Raimondi - francesco.raimondi@sns.it</p>
 
 
           </div>
