@@ -317,12 +317,20 @@ class QueryResolver:
             return schemas.Task(task_id=task.state, status=task.info, result="", type="")
 
         if task.result:
-            if task.result:
-                task_type = "analysis" if "heatmap" in task.result and "table" in task.result else "align"
-                result = task.result.get(step)
-            else:
-                task_type = ""
-                result = ""
+
+            task_type = "analysis" if "heatmap" in task.result and "table" in task.result else "align"
+
+            if task_type == "analysis":
+
+                result = task.result.get(step, "")
+
+            elif task_type == "align":
+
+                result = task.result.get(step) if step == "umap " else {step: ""}
+
+        else:
+            task_type = ""
+            result = ""
 
         return schemas.Task(task_id=task.id, status=task.status, result=result, type=task_type)
 
