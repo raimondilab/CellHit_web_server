@@ -322,11 +322,11 @@ class QueryResolver:
 
             if task_type == "analysis":
 
-                result = task.result.get(step, "")
+                result = task.result.get(step)
 
             elif task_type == "align":
 
-                result = task.result.get(step) if step == "umap " else {step: ""}
+                result = task.result.get(step) if step == "umap" else {step: ""}
 
         else:
             task_type = ""
