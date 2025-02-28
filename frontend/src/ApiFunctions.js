@@ -20,6 +20,8 @@ export async function getTaskResultsStep(task, step) {
         const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
         const taskData = await axios.post(apiUrl, query);
 
+        console.log(taskData)
+
         if (!taskData.data.data || taskData.data.errors) {
             Swal.fire({
                 icon: "error",
@@ -111,7 +113,7 @@ export async function getHeatmap(task, topN, threshold, dataset, removeNegative)
             `
         };
 
-        const apiUrl = 'https://test.bioinfolab.sns.it/graphql';
+        const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
         const taskData = await axios.post(apiUrl, query);
 
         if (!taskData.data.data || taskData.data.errors) {

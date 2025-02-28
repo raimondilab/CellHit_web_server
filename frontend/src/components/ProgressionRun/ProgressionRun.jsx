@@ -55,7 +55,7 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit, alignO
     }));
 
     // Hide "Inference" if alignOnly is true
-    if (alignOnly) {
+    if (alignOnly === "ON") {
         updatedEvents = updatedEvents.filter(e => e.status !== "Inference");
     }
 
@@ -147,7 +147,7 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit, alignO
                 `
             };
 
-            const apiUrl = 'https://test.bioinfolab.sns.it/graphql';
+            const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
             const taskData = await axios.post(apiUrl, query);
 
             if (!taskData.data.data || taskData.data.errors) {
@@ -161,6 +161,7 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit, alignO
                 setIsSubmit(false);
 
             } else if (taskData) {
+
                 const taskID = taskData.data.data.getResults.taskId;
                 const newStatus = taskData.data.data.getResults.status;
                 const result = taskData.data.data.getResults.result;
@@ -200,7 +201,7 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit, alignO
                     const url = new URL(window.location.href);
                     url.searchParams.set('taskId', taskID);
 
-                    const targetRoute = alignOnly ? '/resultAlign/' : '/result/';
+                    const targetRoute = alignOnly === "ON" ? '/resultAlign/' : '/result/';
                     navigate(targetRoute + url.search, { state: { taskID: taskID, data: result } });
                 }
 

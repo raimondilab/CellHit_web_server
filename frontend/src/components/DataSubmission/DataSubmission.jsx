@@ -24,6 +24,7 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus, alignOnly, setA
   const [submitted, setSubmitted] = useState(false);
   const [values, setValues] = useState(["gdsc"]);
 
+  const tcgaCodeMap = require('../../tcga_project_ids.json');
 
   const show = (position) => {
     setPosition(position);
@@ -111,7 +112,7 @@ const handleFormSubmit = async (e) => {
     setIsSubmit(true);
 
     // Call send file function base on the task type
-    alignOnly ? await sendFileAlignment(processedFile) : await sendFile(processedFile);
+    alignOnly === "ON" ? await sendFileAlignment(processedFile) : await sendFile(processedFile);
 
   } catch (error) {
     setIsSubmit(false);
@@ -123,8 +124,6 @@ const handleFormSubmit = async (e) => {
     });
   }
 };
-
-
 
 async function extractZip(file) {
   const zip = await JSZip.loadAsync(file);
@@ -184,7 +183,7 @@ async function sendFileAlignment(file) {
     formData.append("map", JSON.stringify({ 0: ["variables.file"] }));
     formData.append("0", file); // Add file to the request
 
-    const apiUrl = 'https://test.bioinfolab.sns.it/graphql';
+    const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
     const response = await axios.post(apiUrl, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -199,8 +198,8 @@ async function sendFileAlignment(file) {
         text: "Oops... \n An error has occurred!"
       });
     } else {
-      setTaskId(response.data.data.runAnalysis.taskId);
-      setTaskStatus(response.data.data.runAnalysis.status);
+      setTaskId(response.data.data.runAlignment.taskId);
+      setTaskStatus(response.data.data.runAlignment.status);
     }
   } catch (error) {
     setIsSubmit(false);
@@ -237,7 +236,7 @@ async function sendFile(file) {
     formData.append("map", JSON.stringify({ 0: ["variables.file"] }));
     formData.append("0", file); // Add file to the request
 
-    const apiUrl = 'https://test.bioinfolab.sns.it/graphql';
+    const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
     const response = await axios.post(apiUrl, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -280,6 +279,7 @@ async function getTaskResults() {
                         taskId
                         status
                         result
+                        type
                     }
                 }
             `
@@ -300,6 +300,7 @@ async function getTaskResults() {
             const taskID = taskData.data.data.getResults.taskId;
             const newStatus = taskData.data.data.getResults.status;
             const result = taskData.data.data.getResults.result;
+            const type = taskData.data.data.getResults.type;
 
             if (taskID === "PROGRESS" ) {
                 Swal.fire({
@@ -315,8 +316,16 @@ async function getTaskResults() {
                    const url = new URL(window.location.href);
                    url.searchParams.set('taskId', taskID);
 
-                   // Navigate to result page
-                   navigate('/result/' + url.search, { state: { taskID: taskID, data: result } });
+                   console.log(type)
+
+                   if (type === "align") {
+                      navigate('/resultAlign/' + url.search, { state: { taskID: taskID, data: result } })
+
+                   } else {
+                        // Navigate to result page
+                        navigate('/result/' + url.search, { state: { taskID: taskID, data: result } });
+                   }
+
 
           } else if (taskID === "PENDING" ) {
               Swal.fire({
@@ -361,6 +370,13 @@ function validateFile(fileContent) {
 
         const sampleColumns = columns.filter(col => !requiredColumns.includes(col));
         for (let row of data) {
+
+           // Check TCGA_CODE
+          if (!tcgaCodeMap.includes(row.TCGA_CODE.trim())) {
+            reject(new Error(`Invalid TCGA_CODE: ${row.TCGA_CODE} is not recognized.`));
+            return;
+          }
+
           for (let col of sampleColumns) {
             const value = row[col];
             if (value && isNaN(parseFloat(value)) && value !== 'NaN') {
@@ -398,15 +414,16 @@ function validateFile(fileContent) {
                   </label>
                   <label
                       htmlFor="gdsc"
-                      className={`label-btn gdsc-border me-01 ${values.includes("gdsc") ? "hover" : ""}`}
-                      onClick={() => toggleDataset("gdsc")}
+                      className={`label-btn gdsc-border me-01 ${values.includes("gdsc") && alignOnly !== "ON"  ? "hover" : ""} ${values.includes("gdsc") && alignOnly == "ON"  ? "disabled" : ""}`}
+                      onClick={() => toggleDataset("gdsc")} disabled={alignOnly === "ON" ? true : false}
+
                     >
                       GDSC
                     </label>
                     <label
                       htmlFor="prism"
-                      className={`label-btn prism-border me-2 ${values.includes("prism") ? "hover" : ""}`}
-                      onClick={() => toggleDataset("prism")}
+                      className={`label-btn prism-border me-2 ${values.includes("prism") && alignOnly !== "ON"   ? "hover" : ""} ${values.includes("gdsc") && alignOnly == "ON"  ? "disabled" : ""}`  }
+                      onClick={() => toggleDataset("prism")} disabled={alignOnly === "ON" ? true : false}
                     >
                       PRISM
                     </label>
@@ -415,7 +432,7 @@ function validateFile(fileContent) {
                       className={`label-btn  me-2 ${alignOnly === "ON" ? "hover" : ""}`}
                       onClick={() => handleAlignment()}
                     >
-                      ONLY alignment
+                      No CellHit
                     </label>
 
                    <label htmlFor="search" className="label-btn" disabled={submitted}>

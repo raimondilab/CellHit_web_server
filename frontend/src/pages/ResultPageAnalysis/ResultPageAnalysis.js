@@ -47,7 +47,7 @@ async function getTaskResults(taskID) {
             `
         };
 
-        const apiUrl = 'https://test.cellhit.bioinfolab.sns.it/graphql';
+        const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
         const taskData = await axios.post(apiUrl, query);
 
         if (!taskData.data.data || taskData.data.errors) {
@@ -305,6 +305,10 @@ const handleTable = async () => {
 
 const handleClick = () => {
     navigator.clipboard.writeText(window.location.href);
+     Swal.fire({
+        icon: "info",
+        text: "The URL has been copied!",
+      });
   };
 
 const handleHeatmap = async () => {
@@ -317,6 +321,9 @@ const handleHeatmap = async () => {
 
             const heatmapJson = await getTaskResultsStep(task, "heatmap");
             setHeatmapDataJson(heatmapJson);
+
+            console.log(task)
+            console.log(heatmapJson)
 
             if (heatmapJson){
 
