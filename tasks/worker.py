@@ -299,7 +299,6 @@ def analysis(self, file, datasets):
 
         result = {
             "heatmap": combined_heatmap_df,
-            "heatmap_raw": combined_heatmap_df_raw,
             "table": predictions_json,
             "umap": {'oncotree': umap_json, "tissue": umap_json_tissue}
         }

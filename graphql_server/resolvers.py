@@ -326,7 +326,7 @@ class QueryResolver:
 
             elif task_type == "align":
 
-                result = task.result.get(step) if step == "umap" else {step: ""}
+                result = task.result.get(step) if step == "umap" else ""
 
         else:
             task_type = ""
