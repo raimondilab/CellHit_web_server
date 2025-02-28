@@ -486,15 +486,13 @@ def draw_heatmap(heatmap_df, dataset):
     processed_data = processed_data.reset_index()
     processed_data['index'] = heatmap_df['index']
 
-    # Calculate dimensions for the heatmap
-    height = len(heatmap_df) * 20 if len(heatmap_df) * 20 >= 500 else 500
-    width = len(processed_data) * 20 if len(processed_data) * 20 >= 200 else 700
+    # Set heatmap dimensions
+    height = max(len(processed_data) * 20, 600)  # Adjust height based on data
+    width = max(len(processed_data) * 100, 900)  # Adjust width based on data
 
-    # Find the length of the longest column name
+    # Set padding for column names
     max_col_name_length = max(len(col) for col in heatmap_df.columns) + 200
-
-    # Set xpad
-    xpad = 100 if max_col_name_length <= 15 else max_col_name_length
+    xpad = max(100, max_col_name_length)
 
     # Set color bar title
     color_bar_title = "LFC " if dataset == "PRISM" else "ln(IC50)"
