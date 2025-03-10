@@ -18,8 +18,8 @@ const BarPlot = ({ jsonData }) => {
       }
     }
 
-    geneUp.sort((a, b) => a.gene.localeCompare(b.gene)).reverse();
-    geneDown.sort((a, b) => a.gene.localeCompare(b.gene)).reverse();
+    geneUp.sort((a, b) => a.gene.localeCompare(b.value)).reverse();
+    geneDown.sort((a, b) => a.gene.localeCompare(b.value)).reverse();
 
     return {
       geneUp: geneUp.map(item => item.gene),

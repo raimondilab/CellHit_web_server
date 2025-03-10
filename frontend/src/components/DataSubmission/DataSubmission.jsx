@@ -432,7 +432,7 @@ function validateFile(fileContent) {
                       className={`label-btn  me-2 ${alignOnly === "ON" ? "hover" : ""}`}
                       onClick={() => handleAlignment()}
                     >
-                      No CellHit
+                      Align only
                     </label>
 
                    <label htmlFor="search" className="label-btn" disabled={submitted}>
