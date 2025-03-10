@@ -131,7 +131,7 @@ const handleDownload = () => {
                  <div className="col-md-4 text-center">
                   <img
                     tabIndex="1"
-                    src="/assets/images/drug_cell.png"
+                    src="/assets/images/drug_distr.png"
                     data-toggle="tooltip"
                     data-placement="top"
                     title="Click to zoom-in"
@@ -142,7 +142,7 @@ const handleDownload = () => {
                 <div className="col-md-4 text-center">
                   <img
                     tabIndex="1"
-                    src="/assets/images/drug_distr.png"
+                    src="/assets/images/drug_cell.png"
                     data-toggle="tooltip"
                     data-placement="top"
                     title="Click to zoom-in"
