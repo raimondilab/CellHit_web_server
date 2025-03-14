@@ -3,6 +3,8 @@ import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 import { Helmet } from 'react-helmet';
 import { Link } from 'react-router-dom';
+import { Chip } from 'primereact/chip';
+
 
 const HelpPage = () => {
 
@@ -31,11 +33,46 @@ const handleDownload = () => {
                 Additionally, the web server allows users to explore pre-computed predictions and outputs for the entire TCGA dataset.
                 For more information, please refer to the <Link className="" to="/about/" target="_blank" rel="noopener noreferrer"><b><i> about</i></b></Link> page.
               </p>
+               <img
+                    tabIndex="1"
+                    src="/assets/images/cellhit_graphical.png"
+                    data-toggle="tooltip"
+                    data-placement="top"
+                    title="Click to zoom-in"
+                    alt="graphical abstract"
+                    className="center-help shrink img-fluid mb-5"
+                  />
+            <h5 className="display-6 fw-bold mb-4">Explore now</h5>
+            <p className="fs-1 text-justify mb-2">Users can explore pre-computed predictions and outputs for the entire TCGA dataset using two major pharmacogenomic databases: GDSC, which includes data from 686 cell lines tested against 286 drugs, and PRISM, covering 887 cell lines and 6,337 drugs. Users can access the predictions tables for GDSC and PRISM, filter results by drug name, and click the button next to the filter field to apply their selection. Additionally, users have the option to download the predictions.</p>
+            <p className="fs-1 text-justify ">The key columns in the pre-computed predictions dataset are:</p>
+             <ul>
+              <li className="fs-1 text-justify mb-1"><b>Drug Information:</b> Includes <Chip label="drugName" />, <Chip label="drugId" />, and <Chip label="gdscId" />, identifying the tested compounds</li>
+              <li className="fs-1 text-justify mb-1"><b>Sample Identification:</b> <Chip label="sampleIndex" /> represents the transcriptomic sample being analyzed</li>
+              <li className="fs-1 text-justify mb-1"><b>Predictions and Metrics:</b></li>
+              <ul>
+              <li className="fs-1 text-justify mb-1"><Chip label="predictions" />: The estimated drug response score</li>
+              <li className="fs-1 text-justify mb-1"><Chip label="predictionsStd" />: Standard deviation of predictions</li>
+              <li className="fs-1 text-justify mb-1"><Chip label="quantileScore" />: Normalized response score based on prior experimental data</li>
+              <li className="fs-1 text-justify mb-1"><Chip label="experimentalMin" />, <Chip label="experimentalMedian" />, <Chip label="experimentalMax" />: Provide experimental response ranges</li>
+              <li className="fs-1 text-justify mb-1"><Chip label="modelMse" /> and <Chip label="modelCorr" />: Model performance metrics</li>
+              </ul>
+              <li className="fs-1 text-justify mb-1"><b>Similarity-based Information:</b></li>
+              <ul>
+              <li className="fs-1 text-justify mb-1"><Chip label="transcrCcleNeigh" /> and <Chip label="transcrTcgaNeigh" />: Transcriptomic similarity to known cell lines and TCGA samples</li>
+              <li className="fs-1 text-justify mb-1"><Chip label="responseCcleNeigh" /> and <Chip label="responseTcgaNeigh" />: Response similarity to cell lines and TCGA samples</li>
+              </ul>
+              <li className="fs-1 text-justify mb-1"><b>Drug Target and Biomarkers:</b></li>
+              <ul>
+              <li className="fs-1 text-justify mb-1"><Chip label="putativeTarget" />: The predicted molecular target of the drug</li>
+              <li className="fs-1 text-justify mb-1"><Chip label="topLocalShapGenes" />: Key genes influencing the drug response</li>
+              <li className="fs-1 text-justify mb-4"><Chip label="recoveredTarget" />: Validated target information</li>
+              </ul>
+            </ul>
             <h5 className="display-6 fw-bold mb-4">Run CellHit</h5>
             <p className="fs-1 text-justify mb-2">To run CellHit on your data, you need to upload a transcriptomic dataset of your choice. Start by clicking the "Upload Dataset" button, which will take you to the upload window. Next, select the drug dataset by choosing either GDSC or PRISM. Finally, click the submit button to complete the process.
             <br/>Please ensure that you provide a CSV, ZIP, or GZ file containing bulk transcriptomic data from cancer cells, formatted in log2(TPM+1).
             </p>
-             <p className="fs-1 text-justify ">To properly process the input file, it must adhere to the following specific structure:</p>
+             <p className="fs-1 text-justify">To properly process the input file, it must adhere to the following specific structure:</p>
              <ol>
               <li className="fs-1 text-justify">The file must include a column labelled "GENE," which contains gene names.</li>
               <li className="fs-1 text-justify">Each sample should have its corresponding column with numeric values representing the transcriptomic data for each gene. Sample names should be unique and clearly labelled (e.g., GB101-1_S3, GB101-2_S4).</li>
@@ -153,7 +190,7 @@ const handleDownload = () => {
               </div>
                <h5 className="display-6 fw-bold mb-4" id="heatmap">Heatmap</h5>
               <p className="fs-1 text-justify mb-4">
-                Heatmap of CellHit predictions is a graphical heatmap that visualizes sensitivity data or, in other words, the responsiveness profile of the input samples, represented as rows, while drugs are represented in columns. The heatmap values correspond to median-centered IC50/LFC for each sample-drug pair.
+                Heatmap of CellHit predictions is a graphical heatmap that visualizes sensitivity data or, in other words, the responsiveness profile of the input samples, represented as rows, while drugs are represented in columns. The heatmap values correspond to median-centered IC50/LFC for each sample-drug pair or stabilized predictions.
                 Drugs with activity below the median are shown in red, indicating reduced activity, while those above the median are displayed in blue, suggesting increased activity. This visualization provides an at-a-glance summary of drug sensitivities, helping users to quickly identify the most interesting drugs for a given sample. Rows and columns are clustered based on predicted sensitivities, grouping drugs and samples sharing similar response profiles, which might be useful to reveal patient subgroups with distinct sensitivity characteristics.
               </p>
               <img
