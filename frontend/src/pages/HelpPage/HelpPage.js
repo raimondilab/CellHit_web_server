@@ -138,7 +138,8 @@ const handleDownload = () => {
                       className="center-help shrink img-fluid mb-5"
                     />
                <p className="fs-1 text-justify mb-4">
-                Users can click on a specific row to view more detailed information about the prediction, including the SHAP and predicted response distribution plots. These visuals illustrate the importance of the top genes and drugs and the distribution of the predicted responses. The selected row will be highlighted with a blue background. Click the replay icon to reset the selection and hide the SHAP plot and distribution plots.
+                Users can access additional information by clicking on a specific prediction row in the table, including a graph displaying the top 15 genes ranked by their absolute SHAP importance. In this graph, blue bars represent genes that lower the IC50 value (indicating increased drug sensitivity). In contrast, red bars represent genes that raise the IC50 value (indicating decreased sensitivity).
+                <br/>Additionally, we utilize kernel density estimation (KDE) plots to visualize two complementary distributional features of the predictions. The first plot compares a drug's predicted response to that of other drugs tested on the same cell line; a red line on the left side of the distribution indicates higher efficacy. The second plot examines the drug's behaviour across multiple cell lines, helping to identify instances where consistently low IC50 values may suggest general toxicity instead of selective effectiveness. <br/>Click the replay icon to reset the selection and hide the SHAP plot and distribution plots.
               </p>
                 <div className="row">
                 <div className="col-md-12 text-center">

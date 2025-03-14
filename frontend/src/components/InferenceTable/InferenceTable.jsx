@@ -49,6 +49,17 @@ const InferenceTable = ({ inferenceData, setShapData, setDrugKey, setCellKey, se
       .map((drug) => ({ label: drug, value: drug }))
       .sort((a, b) => a.label.localeCompare(b.label)); // Sort by the label property
 
+    // Filter the drugs available only in the selected dataset
+    const filteredDrugs = selectedDatasets.length > 0
+    ? [...new Set(inferenceData
+        .filter((inference) => selectedDatasets.includes(inference.dataset))
+        .map((inference) => inference.DrugName?.trim())
+    )]
+        .filter((drug) => drug)
+        .map((drug) => ({ label: drug, value: drug }))
+        .sort((a, b) => a.label.localeCompare(b.label))
+    : uniqueDrugs;
+
     // Extract unique dataset
     const datasets = [
       ...new Set(inferenceData.map((inference) => inference.dataset?.trim()))
@@ -83,8 +94,19 @@ const InferenceTable = ({ inferenceData, setShapData, setDrugKey, setCellKey, se
 
 
   const dynamicColumns = visibleColumns.map((col) => {
-    return <Column key={col.field} field={col.field} header={col.header} sortable />;
- });
+    return (
+        <Column
+            key={col.field}
+            field={col.field}
+            header={col.header}
+            sortable
+            body={(rowData) => {
+                const value = rowData[col.field];
+                return typeof value === "number" ? value.toFixed(4) : value;
+            }}
+        />
+    );
+  });
 
  const onRowClick = (e) => {
     const clickedRowData = e.data;
@@ -184,7 +206,7 @@ const exportCSV = (tableRef, selectionOnly) => {
             />
           <MultiSelect
                 value={selectedDrugs} // Correctly tied to state
-                options={uniqueDrugs} // Ensure uniqueDrugs has correct structure
+                options={filteredDrugs} // Ensure uniqueDrugs has correct structure
                 onChange={(e) => setSelectedDrugs(e.value)} // Update state
                 optionLabel="label"
                 optionValue="value"
@@ -192,16 +214,7 @@ const exportCSV = (tableRef, selectionOnly) => {
                 placeholder="Filter by drug"
                 style={{ width: '200px', marginRight: '10px' }}
             />
-{/*              <MultiSelect */}
-{/*                 value={selectedTissues} // Correctly tied to state */}
-{/*                 options={uniqueTissue} // Ensure uniqueDrugs has correct structure */}
-{/*                 onChange={(e) => setSelectedTissues(e.value)} // Update state */}
-{/*                 optionLabel="label" */}
-{/*                 optionValue="value" */}
-{/*                 display="chip" */}
-{/*                 placeholder="Filter by tissue" */}
-{/*                 style={{ width: '200px', marginRight: '10px' }} */}
-{/*             /> */}
+
             </div>
       </div>
       <div className="col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
