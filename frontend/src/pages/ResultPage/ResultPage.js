@@ -14,6 +14,8 @@ import 'primeicons/primeicons.css';
 import { MultiSelect } from 'primereact/multiselect';
 import axios from 'axios';
 import { AutoComplete } from "primereact/autocomplete";
+import { Link } from 'react-router-dom';
+import { Dialog } from 'primereact/dialog';
 
 const ResultPage = () => {
 
@@ -51,6 +53,15 @@ const [totalRecordsPrism, setTotalRecordsPrism] = useState(17958038);
 const [selectedDrug, setSelectedDrug] = useState(null);
 const [filteredDrugs, setFilteredDrugs] = useState(null);
 const [filteredDrugsPrism, setFilteredDrugsPrism] = useState(null);
+
+  // Dialog settings
+  const [position, setPosition] = useState('center');
+  const [visible, setVisible] = useState(false);
+
+const show = (position) => {
+    setPosition(position);
+    setVisible(true);
+  };
 
 const [lazyState, setLazyState] = useState({
     first: 0,
@@ -536,7 +547,19 @@ return (
         <div className="container">
         <div className="row mb-4">
             <div className="col-12">
+               {/* Help message */}
+          <Dialog header="Explore" visible={visible} position={position} style={{ width: '50vw' }} onHide={() => setVisible(false)}
+            draggable={false} resizable={false} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
+            <p className="m-0 mb-1 text-justify">
+              Allows users to explore pre-computed predictions and outputs for the entire TCGA dataset.
+            </p>
+            <p className="m-0 mb-1 text-justify">For more information, please refer to the
+              <Link className="" to="/help/#explore" target="_blank"><b> help</b></Link> page.
+            </p>
+          </Dialog>
              <h1 className="display-5 fw-bold mb-3 line">Explore
+             <sup><Button icon="pi pi-info"
+                onClick={() => show('top-right')} text size="small" className="btn-dialog" /></sup>
              </h1>
             </div>
           </div>
