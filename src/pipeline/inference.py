@@ -229,6 +229,7 @@ def run_full_inference(
         ccle_metadata_path: Optional[Union[Path, str]] = None,
         tcga_metadata_path: Optional[Union[Path, str]] = None,
         return_heatmap: bool = False,
+        standardize_predictions: bool = False,
         n_jobs: int = 26,
         add_new_cells: bool = True,
         **kwargs
@@ -302,19 +303,25 @@ def run_full_inference(
     output = {'distrib_cells': quantile_computer.distrib_cells, 'distrib_drugs': quantile_computer.distrib_drugs}
 
     if return_heatmap:
-        # Compute heatmap data
-        drug_stats = pd.read_csv(drug_stats_path or inference_paths.drug_stats)
-        median_mapper = dict(zip(drug_stats['Drug'], drug_stats['median']))
 
+        # Compute heatmap data
         heatmap_data = preds[['index', 'prediction', 'DrugName']].pivot(
             index='index',
             columns='DrugName',
             values='prediction'
         )
+
+        drug_stats = pd.read_csv(drug_stats_path or inference_paths.drug_stats)
+        median_mapper = dict(zip(drug_stats['Drug'], drug_stats['median']))
         for drug in heatmap_data.columns:
             heatmap_data[drug] = heatmap_data[drug] - median_mapper[drug]
 
+        mean_vals = heatmap_data.mean()
+        std_vals = heatmap_data.std()
+        standardized_heatmap = (heatmap_data - mean_vals) / std_vals
+
         output['heatmap_data'] = heatmap_data
+        output['standardized_heatmap'] = standardized_heatmap
 
     # Like merging but faster in case of many samples (can be done in case of one-to-one mapping)
     for col in transcr_neighs_df.columns:
