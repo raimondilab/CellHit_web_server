@@ -42,7 +42,7 @@ const handleDownload = () => {
                     alt="graphical abstract"
                     className="center-help shrink img-fluid mb-5"
                   />
-            <h5 className="display-6 fw-bold mb-4">Explore now</h5>
+            <h5 className="display-6 fw-bold mb-4" id="explore">Explore now</h5>
             <p className="fs-1 text-justify mb-2">Users can explore pre-computed predictions and outputs for the entire TCGA dataset using two major pharmacogenomic databases: GDSC, which includes data from 686 cell lines tested against 286 drugs, and PRISM, covering 887 cell lines and 6,337 drugs. Users can access the predictions tables for GDSC and PRISM, filter results by drug name, and click the button next to the filter field to apply their selection. Additionally, users have the option to download the predictions.</p>
             <p className="fs-1 text-justify ">The key columns in the pre-computed predictions dataset are:</p>
              <ul>
