@@ -126,6 +126,7 @@ useEffect(() => {
   const [umapPlotData, setUmapPlotData] = useState("{}");
   const [umapType, setUmapType] = useState('oncotree');
   const [heatmapDataJson, setHeatmapDataJson] = useState();
+  const [heatmapDataStaJson, setHeatmapDataStaJson] = useState();
 
 
 useEffect(() => {
@@ -181,71 +182,47 @@ const [cellDatabase, setCellDatabase] = useState();
 // set heatmap variable tab
 const [database, setDatabase] = useState(null);
 const [uniqueDatabase, setUniqueDatabase] = useState([]);
-const options = ['ON','OFF'];
-const [value, setValue] = useState(options[0]);
-const [top, setTop] = useState(15);
-const [threshold, setThreshold] = useState(-1);
-const [heatmapInitialized, setHeatmapInitialized] = useState(false);
+const [scaling, setScaling] = useState("median");
 
 const handleDatabase = (e) => {
     const value = e.target.value
     setDatabase(value);
 
-    // Set Heatmap base on database
-    setHeatmapData(heatmapDataJson[value].data ? heatmapDataJson[value].data : "{}");
-    setHeight(heatmapDataJson[value].height? heatmapDataJson[value].height : "500");
-    setValue(options[0]);
-    setThreshold(-1);
-    setTop(15);
-}
+    // Set Heatmap base on scaling
+    if (scaling === "median"){
 
-const handleValue = () => {
-   setHeatmapInitialized(true);
-}
+         // Set Heatmap base on database
+         setHeatmapData(heatmapDataJson[value].data ? heatmapDataJson[value].data : "{}");
+         setHeight(heatmapDataJson[value].height? heatmapDataJson[value].height : "500");
 
-const handleTop = (e) => {
-   setTop(e.target.value);
-   setHeatmapInitialized(true);
-}
+    } else if (scaling === "standardization"){
 
-const handleThreshold = (e) => {
-   setThreshold(e.target.value);
-   setHeatmapInitialized(true);
-}
+        // Set Heatmap base on database
+        setHeatmapData(heatmapDataStaJson[value].data ? heatmapDataStaJson[value].data : "{}");
+        setHeight(heatmapDataStaJson[value].height? heatmapDataStaJson[value].height : "500");
 
-// Get heatmap data
-useEffect(() => {
-
-    if (!heatmapInitialized) return;
-
-    const fetchDataHeatmap = async () => {
-
-        setHeatmapLoadData(true);
-
-        try {
-            const heatmapJson = await getHeatmap(task, top, threshold, database, value);
-            console.log(task, top, threshold, database, value)
-            setHeatmapDataJson(heatmapJson);
-
-            if (heatmapJson) {
-                    setHeatmapData(heatmapJson[database].data ? heatmapJson[database].data : "{}");
-                    setHeight(heatmapJson[database].height ? heatmapJson[database].height : "500");
-
-            } else {
-                setHeatmapData("{}");
-            }
-        } catch (error) {
-            console.error("Error fetching heatmap data:", error);
-        } finally {
-            setHeatmapLoadData(false);
-        }
-    };
-
-    if (value && top && threshold && database && heatmapInitialized) {
-        fetchDataHeatmap();
     }
-}, [value, top, threshold, database, heatmapInitialized]);
+}
 
+const handleScaling = (e) => {
+    const value = e.target.value
+    setScaling(value);
+
+     // Set Heatmap base on scaling
+    if (value === "median"){
+
+         // Set Heatmap base on database
+         setHeatmapData(heatmapDataJson[database].data ? heatmapDataJson[database].data : "{}");
+         setHeight(heatmapDataJson[database].height? heatmapDataJson[database].height : "500");
+
+    } else if (value === "standardization"){
+
+        // Set Heatmap base on database
+        setHeatmapData(heatmapDataStaJson[database].data ? heatmapDataStaJson[database].data : "{}");
+        setHeight(heatmapDataStaJson[database].height? heatmapDataStaJson[database].height : "500");
+
+    }
+}
 
 
 // Get distribution data
@@ -322,8 +299,8 @@ const handleHeatmap = async () => {
             const heatmapJson = await getTaskResultsStep(task, "heatmap");
             setHeatmapDataJson(heatmapJson);
 
-            console.log(task)
-            console.log(heatmapJson)
+            const heatmapStaJson = await getTaskResultsStep(task, "standardized_heatmap");
+            setHeatmapDataStaJson(heatmapStaJson);
 
             if (heatmapJson){
 
@@ -516,6 +493,13 @@ useEffect(() => {
                             {uniqueDatabase.map(database => (
                               <option key={database} value={database.toUpperCase().trim()}>{database.toUpperCase().trim()}</option>
                             ))}
+                          </select>
+                        </div>
+                        <div className="mb-2">
+                        <label htmlFor="color" className="form-label">Scaling&nbsp;</label>
+                        <select className="form-select mb-3" name="scaling" value={scaling} onChange={handleScaling}>
+                              <option value="median">Median</option>
+                              <option value="standardization">Standardization</option>
                           </select>
                         </div>
                       </div>
