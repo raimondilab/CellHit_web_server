@@ -229,7 +229,6 @@ def run_full_inference(
         ccle_metadata_path: Optional[Union[Path, str]] = None,
         tcga_metadata_path: Optional[Union[Path, str]] = None,
         return_heatmap: bool = False,
-        standardize_predictions: bool = False,
         n_jobs: int = 26,
         add_new_cells: bool = True,
         **kwargs
@@ -317,7 +316,7 @@ def run_full_inference(
             heatmap_data[drug] = heatmap_data[drug] - median_mapper[drug]
 
         mean_vals = heatmap_data.mean()
-        std_vals = heatmap_data.std()
+        std_vals = heatmap_data.std().replace(0, 1)  # Prevent division by zero
         standardized_heatmap = (heatmap_data - mean_vals) / std_vals
 
         output['heatmap_data'] = heatmap_data
