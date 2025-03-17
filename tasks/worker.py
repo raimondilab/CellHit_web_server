@@ -486,7 +486,7 @@ def draw_heatmap(heatmap_df, dataset, top=15, negative=True):
 
     # Set heatmap dimensions
     height = max(len(processed_data) * 20, 600)  # Adjust height based on data
-    width = max(len(processed_data) * 20, 900)  # Adjust width based on data
+    width = max(len(processed_data) * 10, 600)  # Adjust width based on data
 
     # Set padding for column names
     max_col_name_length = max(len(col) for col in heatmap_df.columns) + 200
