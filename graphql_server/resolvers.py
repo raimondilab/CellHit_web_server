@@ -316,9 +316,9 @@ class QueryResolver:
         heatmap_df = processed_data['heatmap_data'].reset_index()
         heatmap_standardized_df = processed_data['standardized_heatmap'].reset_index()
 
-        heatmap_json, heatmap_height = worker.draw_heatmap(heatmap_df, dataset_upper, top, negative)
+        heatmap_json, heatmap_height = worker.draw_heatmap(heatmap_df, dataset_upper, top)
         heatmap_standardized_json, heatmap_standardized_height = worker.draw_heatmap(
-            heatmap_standardized_df, dataset_upper, top, negative
+            heatmap_standardized_df, dataset_upper, top
         )
 
         result = {
