@@ -306,7 +306,7 @@ class QueryResolver:
 
         dataset_upper = dataset.upper()
 
-        result = task.result.get("table").get("result")
+        result = task.result.get("table")
 
         heatmap_df = pd.DataFrame(result)
         heatmap_df = heatmap_df[heatmap_df['dataset'] == dataset]
