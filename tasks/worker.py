@@ -475,10 +475,7 @@ def draw_heatmap(heatmap_df, dataset, top=15, negative=True):
     negative_cols = numeric_data.columns[(numeric_data < -1).all()]
 
     # Combine top variable columns with negative-only columns
-    if negative:
-        final_columns = list(set(top_columns).union(set(negative_cols)))
-    else:
-        final_columns = top_columns
+    final_columns = list(set(top_columns).union(set(negative_cols)))
 
     # Keep only the selected columns in the processed data
     processed_data = heatmap_df[final_columns].copy()

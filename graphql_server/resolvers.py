@@ -297,7 +297,7 @@ class QueryResolver:
         return schemas.Task(task_id=task_id, status="SUCCESS", result=task, type="analysis")
 
     @staticmethod
-    def get_heatmap(task_id: str, top: int, negative: bool, dataset: str) -> schemas.Task:
+    def get_heatmap(task_id: str, top: int, dataset: str) -> schemas.Task:
 
         task = worker.get_task(task_id)
 
