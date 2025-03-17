@@ -305,7 +305,8 @@ class QueryResolver:
             return schemas.Task(task_id=task_id, status="SUCCESS", result="", type="analysis")
 
         data_table = task.result.get("table")
-        result_df = worker.preprocess_heatmap_data(data_table, dataset)
+        data_df = pd.DataFrame(data_table)
+        result_df = worker.preprocess_heatmap_data(data_df, dataset)
 
         heatmap_df = result_df['heatmap_data'].reset_index()
         heatmap_standardized_df = result_df['standardized_heatmap'].reset_index()
