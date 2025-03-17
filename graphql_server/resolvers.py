@@ -306,7 +306,7 @@ class QueryResolver:
 
         dataset_upper = dataset.upper()
 
-        heatmap_df = pd.DataFrame(task.results)
+        heatmap_df = pd.DataFrame(task.result)
         heatmap_df = heatmap_df[heatmap_df['dataset'] == dataset]
 
         result_df = worker.preprocess_heatmap_data(heatmap_df, dataset)
