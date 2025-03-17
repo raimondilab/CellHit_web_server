@@ -306,13 +306,15 @@ class QueryResolver:
 
         dataset_upper = dataset.upper()
 
-        heatmap_df = pd.DataFrame(task.result)
+        result = task.result.get("table").get("result")
+
+        heatmap_df = pd.DataFrame(result)
         heatmap_df = heatmap_df[heatmap_df['dataset'] == dataset]
 
-        result_df = worker.preprocess_heatmap_data(heatmap_df, dataset)
+        processed_data = worker.preprocess_heatmap_data(heatmap_df, dataset)
 
-        heatmap_df = result_df['heatmap_data'].reset_index()
-        heatmap_standardized_df = result_df['standardized_heatmap'].reset_index()
+        heatmap_df = processed_data['heatmap_data'].reset_index()
+        heatmap_standardized_df = processed_data['standardized_heatmap'].reset_index()
 
         heatmap_json, heatmap_height = worker.draw_heatmap(heatmap_df, dataset_upper, top, negative)
         heatmap_standardized_json, heatmap_standardized_height = worker.draw_heatmap(
