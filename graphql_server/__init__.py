@@ -15,6 +15,7 @@ class Query:
     get_task: Task = strawberry.field(resolver=QueryResolver.get_task)
     get_results: Task = strawberry.field(resolver=QueryResolver.get_results)
     get_distribution: Task = strawberry.field(resolver=QueryResolver.get_distribution)
+    get_heatmap: Task = strawberry.field(resolver=QueryResolver.get_heatmap)
 
 
 @strawberry.type
