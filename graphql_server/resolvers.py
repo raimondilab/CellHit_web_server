@@ -297,6 +297,35 @@ class QueryResolver:
         return schemas.Task(task_id=task_id, status="SUCCESS", result=task, type="analysis")
 
     @staticmethod
+    def get_heatmap(task_id: str, top: int, negative: bool, dataset: str) -> schemas.Task:
+
+        task = worker.get_task(task_id)
+
+        if not task.result:
+            return schemas.Task(task_id=task_id, status="SUCCESS", result="", type="analysis")
+
+        data_table = task.result.get("table")
+        result_df = worker.preprocess_heatmap_data(data_table, dataset)
+
+        heatmap_df = result_df['heatmap_data'].reset_index()
+        heatmap_standardized_df = result_df['standardized_heatmap'].reset_index()
+
+        dataset_upper = dataset.upper()
+
+        heatmap_json, heatmap_height = worker.draw_heatmap(heatmap_df, dataset_upper, top, negative)
+        heatmap_standardized_json, heatmap_standardized_height = worker.draw_heatmap(
+            heatmap_standardized_df, dataset_upper, top, negative
+        )
+
+        result = {
+            "heatmap": {dataset_upper: {"data": heatmap_json, "height": heatmap_height}},
+            "standardized_heatmap": {
+                dataset_upper: {"data": heatmap_standardized_json, "height": heatmap_standardized_height}},
+        }
+
+        return schemas.Task(task_id=task_id, status="SUCCESS", result=result, type="analysis")
+
+    @staticmethod
     def get_task(task_id: str) -> schemas.Task:
 
         task = worker.get_task(task_id)

@@ -438,7 +438,7 @@ def preprocess_data(data, code):
 
 
 # Draw IC50 heatmap
-def draw_heatmap(heatmap_df, dataset):
+def draw_heatmap(heatmap_df, dataset, top=15, negative=True):
 
     # Exclude non-numeric columns
     numeric_data = heatmap_df.select_dtypes(include='number')
@@ -468,14 +468,17 @@ def draw_heatmap(heatmap_df, dataset):
     # Step 3: Keep the top 15 most variable drugs
     std_devs_filtered = filtered_data.std()
     std_devs_filtered = std_devs_filtered[~std_devs_filtered.index.str.contains("Cluster")]
-    top_n = 15
+    top_n = top
     top_columns = std_devs_filtered.nlargest(top_n).index
 
     # Step 4: Identify columns where all values are negative
     negative_cols = numeric_data.columns[(numeric_data < -1).all()]
 
-    # Combine top 15 variable columns with negative-only columns
-    final_columns = list(set(top_columns).union(set(negative_cols)))
+    # Combine top variable columns with negative-only columns
+    if negative:
+        final_columns = list(set(top_columns).union(set(negative_cols)))
+    else:
+        final_columns = top_columns
 
     # Keep only the selected columns in the processed data
     processed_data = heatmap_df[final_columns].copy()
@@ -656,3 +659,30 @@ def load_numpy_key(task_id, dic_type, dataset, key):
         if key in data:
             # Convert numpy array to list before returning
             return data[key].tolist()  # Convert the numpy array to a list
+
+
+def preprocess_heatmap_data(predictions, dataset):
+    """
+    Processes prediction data into a heatmap format and standardizes it.
+    """
+    if dataset not in ["GDSC", "PRISM"]:
+        raise ValueError("Invalid dataset. Choose 'GDSC' or 'PRISM'.")
+
+    heatmap_data = predictions.pivot(index='index', columns='DrugName', values='prediction')
+
+    inference_paths = Path(PARENT_DIR / 'src/gdsc_drug_stats.csv') if dataset == "GDSC" else Path(
+        PARENT_DIR / 'src/prism_drug_stats.csv')
+    drug_stats = pd.read_csv(inference_paths)
+
+    # Map median values
+    median_mapper = dict(zip(drug_stats['Drug'], drug_stats['median']))
+    for drug in heatmap_data.columns:
+        heatmap_data.loc[:, drug] -= median_mapper.get(drug, 0)  # Default to 0 if drug not found
+
+    # Standardization
+    mean_vals = heatmap_data.mean()
+    std_vals = heatmap_data.std().replace(0, 1)  # Prevent division by zero
+    standardized_heatmap = (heatmap_data - mean_vals) / std_vals
+
+    return {'heatmap_data': heatmap_data, 'standardized_heatmap': standardized_heatmap}
+
