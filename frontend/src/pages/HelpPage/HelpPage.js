@@ -191,18 +191,36 @@ const handleDownload = () => {
               </div>
                <h5 className="display-6 fw-bold mb-4" id="heatmap">Heatmap</h5>
               <p className="fs-1 text-justify mb-4">
-                Heatmap of CellHit predictions is a graphical heatmap that visualizes sensitivity data or, in other words, the responsiveness profile of the input samples, represented as rows, while drugs are represented in columns. The heatmap values correspond to median-centered IC50/LFC for each sample-drug pair or stabilized predictions.
-                Drugs with activity below the median are shown in red, indicating reduced activity, while those above the median are displayed in blue, suggesting increased activity. This visualization provides an at-a-glance summary of drug sensitivities, helping users to quickly identify the most interesting drugs for a given sample. Rows and columns are clustered based on predicted sensitivities, grouping drugs and samples sharing similar response profiles, which might be useful to reveal patient subgroups with distinct sensitivity characteristics.
+               A heatmap of CellHit predictions visually represents sensitivity data, showing the responsiveness profiles of input samples as rows and drugs as columns. The values in the heatmap correspond to the median-centered IC50 (half-maximal inhibitory concentration) or LFC (log fold change) for each sample-drug pair, or they may represent standardized predictions.
+               In this visualization, drugs with activity below the median are displayed in red, indicating reduced activity, while those above the median are shown in blue, indicating increased activity. This format provides a quick and clear overview of drug sensitivities, allowing users to identify the most interesting drugs for a specific sample at a glance.
+               Additionally, rows and columns are clustered based on predicted sensitivities, grouping together drugs and samples that share similar response profiles. This clustering can be useful for revealing subgroups of patients with distinct sensitivity characteristics.
+              To manage the large number of drugs in both the GDSC (Genomics of Drug Sensitivity in Cancer) and PRISM datasets, we focus on retaining the 15 to 50 most variable columns and those where all responses fall below -1.
               </p>
-              <img
-                      tabIndex="1"
-                      src="/assets/images/heatmap.png"
-                      data-toggle="tooltip"
-                      data-placement="top"
-                      title="Click to zoom-in"
-                      alt="Learning Workflow"
-                      className="center-help shrink img-fluid mb-5"
-                    />
+               <div className="row">
+                <div className="col-md-6 text-center">
+                  <img
+                    tabIndex="1"
+                    src="/assets/images/heatmap.png"
+                    data-toggle="tooltip"
+                    data-placement="top"
+                    title="Click to zoom-in"
+                    alt="Learning Workflow"
+                    className="shrink img-fluid mb-5"
+                  />
+                </div>
+                <div className="col-md-6 text-center">
+                  <img
+                    tabIndex="1"
+                    src="/assets/images/heatmap2.png"
+                    data-toggle="tooltip"
+                    data-placement="top"
+                    title="Click to zoom-in"
+                    alt="Learning Workflow"
+                    className="shrink img-fluid mb-5"
+                  />
+                </div>
+              </div>
+
             </div>
           </div>
         </div>

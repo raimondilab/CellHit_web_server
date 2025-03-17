@@ -183,46 +183,63 @@ const [cellDatabase, setCellDatabase] = useState();
 const [database, setDatabase] = useState(null);
 const [uniqueDatabase, setUniqueDatabase] = useState([]);
 const [scaling, setScaling] = useState("median");
+const [top, setTop] = useState("15");
 
 const handleDatabase = (e) => {
     const value = e.target.value
     setDatabase(value);
-
-    // Set Heatmap base on scaling
-    if (scaling === "median"){
-
-         // Set Heatmap base on database
-         setHeatmapData(heatmapDataJson[value].data ? heatmapDataJson[value].data : "{}");
-         setHeight(heatmapDataJson[value].height? heatmapDataJson[value].height : "500");
-
-    } else if (scaling === "standardization"){
-
-        // Set Heatmap base on database
-        setHeatmapData(heatmapDataStaJson[value].data ? heatmapDataStaJson[value].data : "{}");
-        setHeight(heatmapDataStaJson[value].height? heatmapDataStaJson[value].height : "500");
-
-    }
 }
 
 const handleScaling = (e) => {
     const value = e.target.value
     setScaling(value);
-
-     // Set Heatmap base on scaling
-    if (value === "median"){
-
-         // Set Heatmap base on database
-         setHeatmapData(heatmapDataJson[database].data ? heatmapDataJson[database].data : "{}");
-         setHeight(heatmapDataJson[database].height? heatmapDataJson[database].height : "500");
-
-    } else if (value === "standardization"){
-
-        // Set Heatmap base on database
-        setHeatmapData(heatmapDataStaJson[database].data ? heatmapDataStaJson[database].data : "{}");
-        setHeight(heatmapDataStaJson[database].height? heatmapDataStaJson[database].height : "500");
-
-    }
 }
+
+const handleTop  = async(e) => {
+const value = parseInt(e.target.value, 10)
+setTop(parseInt(e.target.value, 10));
+}
+
+// Dynamic draw heatmap
+useEffect(() => {
+    const fetchData = async () => {
+        try {
+
+            setHeatmapLoadData(true);
+
+            const heatmapTopJson = await getHeatmap(task, top, database);
+
+            const heatmapJson = heatmapTopJson.heatmap;
+            const heatmapStaJson = heatmapTopJson.standardized_heatmap;
+
+            // Set Heatmap base on scaling
+            if (scaling === "median"){
+
+                 // Set Heatmap base on database
+                 setHeatmapData(heatmapJson[database].data ? heatmapJson[database].data : "{}");
+                 setHeight(heatmapJson[database].height? heatmapJson[database].height : "500");
+
+            } else if (scaling === "standardization"){
+
+                // Set Heatmap base on database
+                setHeatmapData(heatmapStaJson[database].data ? heatmapStaJson[database].data : "{}");
+                setHeight(heatmapStaJson[database].height? heatmapStaJson[database].height : "500");
+
+            }
+
+            setHeatmapLoadData(false);
+
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
+    if (database && top && scaling && callNumberHeatmap > 1 ){
+        fetchData();
+    }
+
+}, [database, top, scaling]);
+
 
 
 // Get distribution data
@@ -308,8 +325,8 @@ const handleHeatmap = async () => {
                 const firstKey = heatmapJson && typeof heatmapJson === "object" ? Object.keys(heatmapJson)[0] : null;
                 setUniqueDatabase(Object.keys(heatmapJson));
                 setDatabase(firstKey);
-                setHeatmapData(heatmapJson[firstKey].data ? heatmapJson[firstKey].data : "{}");
-                setHeight(heatmapJson[firstKey].height? heatmapJson[firstKey].height : "500");
+                //setHeatmapData(heatmapJson[firstKey].data ? heatmapJson[firstKey].data : "{}");
+                //setHeight(heatmapJson[firstKey].height? heatmapJson[firstKey].height : "500");
 
             } else {
                 // No heatmap data available
@@ -317,11 +334,9 @@ const handleHeatmap = async () => {
             }
         } catch (error) {
             console.error("Error fetching table data:", error);
-        } finally {
-            setHeatmapLoadData(false);
         }
 
-        setCallNumberHeatmap(callNumberHeatmap + 1);
+        setCallNumberHeatmap(2);
     }
 }
 
@@ -501,6 +516,17 @@ useEffect(() => {
                               <option value="median">Median</option>
                               <option value="standardization">Standardization</option>
                           </select>
+                        </div>
+                        <div className="mb-2">
+                        <label htmlFor="color" className="form-label">Top&nbsp;</label>
+                        <select className="form-select mb-3" name="top" value={top} onChange={handleTop}>
+                            <option value={15}>15</option>
+                            <option value={20}>20</option>
+                            <option value={25}>25</option>
+                            <option value={30}>30</option>
+                            <option value={40}>40</option>
+                            <option value={50}>50</option>
+                        </select>
                         </div>
                       </div>
                      </div>

@@ -92,3 +92,50 @@ export async function getDistribution(task, dicType, dataset, key) {
 
     return null;
 }
+
+
+
+// Get task results - Heatmap base on top number
+export async function getHeatmap(task, top, dataset) {
+
+    try {
+        const query = {
+            query: `
+                query getHeatmap {
+                    getHeatmap (taskId: "${task}", top: ${top}, dataset: "${dataset}") {
+                        taskId
+                        status
+                        result
+                    }
+                }
+            `
+        };
+
+        const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
+        const taskData = await axios.post(apiUrl, query);
+
+        if (!taskData.data.data || taskData.data.errors) {
+            Swal.fire({
+                icon: "error",
+                text: "Oops... An error has occurred!"
+            });
+        } else if (taskData) {
+
+            const taskID = taskData.data.data.getHeatmap.taskId;
+            const newStatus = taskData.data.data.getHeatmap.status;
+            const result = taskData.data.data.getHeatmap.result;
+
+
+            if (newStatus === "SUCCESS" && task === taskID && result) {
+                return result;
+            }
+        }
+    } catch (error) {
+        Swal.fire({
+            icon: "error",
+            text: error.message
+        });
+    }
+
+    return null;
+}
