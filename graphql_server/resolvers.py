@@ -304,14 +304,15 @@ class QueryResolver:
         if not task.result:
             return schemas.Task(task_id=task_id, status="SUCCESS", result="", type="analysis")
 
-        data_table = task.result.get("table")
-        data_df = pd.DataFrame(data_table)
-        result_df = worker.preprocess_heatmap_data(data_df, dataset)
+        dataset_upper = dataset.upper()
+
+        heatmap_df = pd.DataFrame(task.results)
+        heatmap_df = heatmap_df[heatmap_df['dataset'] == dataset]
+
+        result_df = worker.preprocess_heatmap_data(heatmap_df, dataset)
 
         heatmap_df = result_df['heatmap_data'].reset_index()
         heatmap_standardized_df = result_df['standardized_heatmap'].reset_index()
-
-        dataset_upper = dataset.upper()
 
         heatmap_json, heatmap_height = worker.draw_heatmap(heatmap_df, dataset_upper, top, negative)
         heatmap_standardized_json, heatmap_standardized_height = worker.draw_heatmap(
