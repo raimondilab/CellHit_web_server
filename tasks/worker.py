@@ -668,11 +668,15 @@ def preprocess_heatmap_data(predictions, dataset):
     if dataset not in ["GDSC", "PRISM"]:
         raise ValueError("Invalid dataset. Choose 'GDSC' or 'PRISM'.")
 
-    heatmap_data = predictions.pivot(index='index', columns='DrugName', values='prediction')
+    heatmap_data = predictions[['index', 'prediction', 'DrugName']].pivot(
+        index='index',
+        columns='DrugName',
+        values='prediction'
+    )
 
-    inference_paths = Path(PARENT_DIR / 'src/gdsc_drug_stats.csv') if dataset == "GDSC" else Path(
-        PARENT_DIR / 'src/prism_drug_stats.csv')
-    drug_stats = pd.read_csv(inference_paths)
+    inference_paths = inference_paths_gdsc if dataset == "GDSC" else inference_paths_prism
+
+    drug_stats = pd.read_csv(inference_paths.drug_stats)
 
     # Map median values
     median_mapper = dict(zip(drug_stats['Drug'], drug_stats['median']))
