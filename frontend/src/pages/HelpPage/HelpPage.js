@@ -190,12 +190,16 @@ const handleDownload = () => {
                 </div>
               </div>
                <h5 className="display-6 fw-bold mb-4" id="heatmap">Heatmap</h5>
-              <p className="fs-1 text-justify mb-4">
-               A heatmap of CellHit predictions visually represents sensitivity data, showing the responsiveness profiles of input samples as rows and drugs as columns. The values in the heatmap correspond to the median-centered IC50 (half-maximal inhibitory concentration) or LFC (log fold change) for each sample-drug pair, or they may represent standardized predictions.
-               In this visualization, drugs with activity below the median are displayed in red, indicating reduced activity, while those above the median are shown in blue, indicating increased activity. This format provides a quick and clear overview of drug sensitivities, allowing users to identify the most interesting drugs for a specific sample at a glance.
-               Additionally, rows and columns are clustered based on predicted sensitivities, grouping together drugs and samples that share similar response profiles. This clustering can be useful for revealing subgroups of patients with distinct sensitivity characteristics.
-              To manage the large number of drugs in both the GDSC (Genomics of Drug Sensitivity in Cancer) and PRISM datasets, we focus on retaining the 15 to 50 most variable columns and those where all responses fall below -1.
+              <p className="fs-1 text-justify">
+                A heatmap provides an overview of drug sensitivity profiles, with samples represented as rows and drugs as columns. Responses are calculated using two normalization methods: Median Subtraction and Standardization.
+               </p>
+               <ul>
+                <li  class="fs-1 text-justify">Median Subtraction: This method adjusts predictions by subtracting the median value for each drug (from either GDSC or PRISM). It indicates whether a sample shows higher sensitivity (highlighted in blue, below the median) or lower sensitivity (indicated in red, above the median). This approach is useful for assessing drug specificity.</li>
+                <li  class="fs-1 text-justify">Standardization: This method normalizes values by subtracting the mean and dividing by the standard deviation of the processed samples. It emphasizes the relative differences between samples, making it particularly useful for identifying distinct tumor subtypes and potential applications in precision medicine.</li>
+             </ul>
+             <p className="fs-1 text-justify">By incorporating response information and applying hierarchical clustering to the rows, we can simplify the grouping of patients with similar response patterns. Both rows and columns are clustered based on predicted sensitivities, which helps group drugs and samples with identical response profiles. This clustering aids in identifying subgroups of patients with unique sensitivity characteristics.
               </p>
+             <p className="fs-1 text-justify mb-4">To refine the extensive drug set from GDSC and PRISM, users can select from a dropdown menu to choose between 15 and 50 top medications based on the highest variance across predicted samples. Additionally, any drug with an average ln(IC50) value lower than -1 is included in the selection.</p>
                <div className="row">
                 <div className="col-md-6 text-center">
                   <img
