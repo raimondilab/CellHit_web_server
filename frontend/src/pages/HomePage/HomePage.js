@@ -153,7 +153,7 @@ const HomePage = () => {
                                 <img alt="logo" src="/assets/images/nanomedicine.png" className="img-fluid btn-img"></img>
                             </Button>
                             <p className="mb-2 fs--1 fst-italic">
-                                This website is free, open to all users, there is no login requirement and doesn't use cookies
+                                This website is free and open to all users for non-commercial use. No login is required, and it does not use cookies
                             </p>
                             <p className="mb-4 fs--1 fst-italic">
     This work is licensed under CC BY-NC 4.0 &nbsp;
