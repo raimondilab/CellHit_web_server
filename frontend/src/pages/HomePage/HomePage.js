@@ -153,12 +153,12 @@ const HomePage = () => {
                                 <img alt="logo" src="/assets/images/nanomedicine.png" className="img-fluid btn-img"></img>
                             </Button>
                             <p className="mb-2 fs--1 fst-italic">
-                                This website is free and open to all users for non-commercial use. No login is required, and it does not use cookies
+                                This website is free and open to all users. No login is required, and it does not use cookies
                             </p>
                             <p className="mb-4 fs--1 fst-italic">
-    This work is licensed under CC BY-NC 4.0 &nbsp;
+                             This work is licensed under CC BY 4.0 &nbsp;
     <a
-        href="http://creativecommons.org/licenses/by-nc/4.0/?ref=chooser-v1"
+        href="https://creativecommons.org/licenses/by/4.0/ "
         target="_blank"
         rel="license noopener noreferrer"
     >
@@ -172,11 +172,7 @@ const HomePage = () => {
             src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"
             alt="BY"
         />
-        <img
-            style={{ height: '22px', marginLeft: '3px', verticalAlign: 'text-bottom' }}
-            src="https://mirrors.creativecommons.org/presskit/icons/nc.svg?ref=chooser-v1"
-            alt="NC"
-        />
+
     </a>
 </p>
 
