@@ -349,7 +349,7 @@ class QueryResolver:
         while not task.ready():
             return schemas.Task(task_id=task.state, status=task.info, result="", type="")
 
-        if task.result:
+        if isinstance(task.result, dict) and task.state != "FAILURE":
 
             task_type = "analysis" if "table" in task.result else "align"
 
