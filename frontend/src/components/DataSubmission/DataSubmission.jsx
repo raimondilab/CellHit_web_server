@@ -25,6 +25,7 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus, alignOnly, setA
   const [values, setValues] = useState(["gdsc"]);
 
   const tcgaCodeMap = require('../../tcga_project_ids.json');
+  const tissue = require('../../tissue.json');
 
   const show = (position) => {
     setPosition(position);
@@ -371,11 +372,15 @@ function validateFile(fileContent) {
         const sampleColumns = columns.filter(col => !requiredColumns.includes(col));
         for (let row of data) {
 
-           // Check TCGA_CODE
-          if (!tcgaCodeMap.includes(row.TCGA_CODE.trim())) {
-            reject(new Error(`Invalid TCGA_CODE: ${row.TCGA_CODE} is not recognized.`));
-            return;
-          }
+          // Check TCGA_CODE
+          if (!row.TCGA_CODE || !row.TCGA_CODE.trim() || !tcgaCodeMap.includes(row.TCGA_CODE.trim())) {
+              reject(new Error(`Invalid TCGA_CODE: ${row.TCGA_CODE} is not recognized.`));
+              return;
+                        }
+            if (!row.TISSUE || !tissue.includes(row.TISSUE.trim()) || !row.TISSUE.trim()) {
+                reject(new Error(`Invalid TISSUE: ${row.TISSUE} is not recognized.`));
+                return;
+            }
 
           for (let col of sampleColumns) {
             const value = row[col];

@@ -38,7 +38,8 @@ CREATE TABLE gdsc (
    response_TCGA_neigh_diagnosis VARCHAR(100),
    response_TCGA_neigh_site VARCHAR(100),
    PutativeTarget VARCHAR(100),
-   TopLocalShapGenes,RecoveredTarget TEXT(3000)
+   TopLocalShapGenes TEXT(3000),
+   RecoveredTarget TEXT(3000),
    PRIMARY KEY (GdscID)
 );
 
@@ -69,7 +70,8 @@ CREATE TABLE prism (
    response_TCGA_neigh_diagnosis VARCHAR(100),
    response_TCGA_neigh_site VARCHAR(100),
    PutativeTarget VARCHAR(100),
-   TopLocalShapGenes,RecoveredTarget TEXT(3000)
+   TopLocalShapGenes TEXT(3000),
+   RecoveredTarget TEXT(3000),
    PRIMARY KEY (prism_id)
 );
 

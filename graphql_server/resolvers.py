@@ -337,7 +337,7 @@ class QueryResolver:
         while not task.ready():
             return schemas.Task(task_id=task.state, status=task.info, result="", type="")
 
-        task_type = "analysis" if "heatmap" in task.result and "table" in task.result else "align"
+        task_type = "analysis" if "table" in task.result else "align"
 
         return schemas.Task(task_id=task.id, status=task.status, result=task.result, type=task_type)
 
@@ -351,7 +351,7 @@ class QueryResolver:
 
         if task.result:
 
-            task_type = "analysis" if "heatmap" in task.result and "table" in task.result else "align"
+            task_type = "analysis" if "table" in task.result else "align"
 
             if task_type == "analysis":
 

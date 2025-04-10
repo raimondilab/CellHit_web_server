@@ -241,25 +241,25 @@ def analysis(self, file, datasets):
         combined_predictions_df = pd.DataFrame()
 
         # Initialize an empty dict to combine results from all datasets
-        combined_heatmap_df, combined_heatmap_df_standardized = {}, {}
+        #combined_heatmap_df, combined_heatmap_df_standardized = {}, {}
 
         for dataset in datasets:
 
-            result_df = combined_results[dataset.upper()]
-
-            heatmap_df = result_df['heatmap_data']
-            heatmap_df = heatmap_df.reset_index()
-
-            heatmap_df_standardized = result_df['standardized_heatmap']
-            heatmap_df_standardized = heatmap_df_standardized.reset_index()
-
-            # Draw heatmap and get heatmap's height
-            heatmap_json = draw_heatmap(heatmap_df, dataset.upper())
-            heatmap_standardized_json = draw_heatmap(heatmap_df_standardized, dataset.upper())
-
-            # combined heatmap results
-            combined_heatmap_df[dataset.upper()] = {'data': heatmap_json[0], "height": heatmap_json[1]}
-            combined_heatmap_df_standardized[dataset.upper()] = {'data': heatmap_standardized_json[0], "height": heatmap_standardized_json[1]}
+            # result_df = combined_results[dataset.upper()]
+            #
+            # heatmap_df = result_df['heatmap_data']
+            # heatmap_df = heatmap_df.reset_index()
+            #
+            # heatmap_df_standardized = result_df['standardized_heatmap']
+            # heatmap_df_standardized = heatmap_df_standardized.reset_index()
+            #
+            # # Draw heatmap and get heatmap's height
+            # heatmap_json = draw_heatmap(heatmap_df, dataset.upper())
+            # heatmap_standardized_json = draw_heatmap(heatmap_df_standardized, dataset.upper())
+            #
+            # # combined heatmap results
+            # combined_heatmap_df[dataset.upper()] = {'data': heatmap_json[0], "height": heatmap_json[1]}
+            # combined_heatmap_df_standardized[dataset.upper()] = {'data': heatmap_standardized_json[0], "height": heatmap_standardized_json[1]}
 
             # Set up predictions dataframe
             predictions_df = result_df['predictions']
@@ -296,8 +296,6 @@ def analysis(self, file, datasets):
         predictions_json = combined_predictions_df.fillna("").to_dict(orient='records')
 
         result = {
-            "heatmap": combined_heatmap_df,
-            "standardized_heatmap": combined_heatmap_df_standardized,
             "table": predictions_json,
             "umap": {'oncotree': umap_json, "tissue": umap_json_tissue}
         }
@@ -438,7 +436,7 @@ def preprocess_data(data, code):
 
 
 # Draw IC50 heatmap
-def draw_heatmap(heatmap_df, dataset, top=15, negative=True):
+def draw_heatmap(heatmap_df, dataset, top=15):
 
     # Exclude non-numeric columns
     numeric_data = heatmap_df.select_dtypes(include='number')
