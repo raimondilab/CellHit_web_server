@@ -234,60 +234,60 @@ def analysis(self, file, datasets):
 
             combined_results[dataset.upper()] = result_df
 
-        # Step 6: Result elaboration
-        self.update_state(state='PROGRESS', meta='Results elaboration')
+            # Step 6: Result elaboration
+            self.update_state(state='PROGRESS', meta='Results elaboration')
 
-        # Initialize an empty DataFrame to combine results from all datasets
-        combined_predictions_df = pd.DataFrame()
+            # Initialize an empty DataFrame to combine results from all datasets
+            combined_predictions_df = pd.DataFrame()
 
-        # Initialize an empty dict to combine results from all datasets
-        #combined_heatmap_df, combined_heatmap_df_standardized = {}, {}
+            # Initialize an empty dict to combine results from all datasets
+            combined_heatmap_df, combined_heatmap_df_standardized = {}, {}
 
-        for dataset in datasets:
+            for dataset in datasets:
+                result_df = combined_results[dataset.upper()]
 
-            # result_df = combined_results[dataset.upper()]
-            #
-            # heatmap_df = result_df['heatmap_data']
-            # heatmap_df = heatmap_df.reset_index()
-            #
-            # heatmap_df_standardized = result_df['standardized_heatmap']
-            # heatmap_df_standardized = heatmap_df_standardized.reset_index()
-            #
-            # # Draw heatmap and get heatmap's height
-            # heatmap_json = draw_heatmap(heatmap_df, dataset.upper())
-            # heatmap_standardized_json = draw_heatmap(heatmap_df_standardized, dataset.upper())
-            #
-            # # combined heatmap results
-            # combined_heatmap_df[dataset.upper()] = {'data': heatmap_json[0], "height": heatmap_json[1]}
-            # combined_heatmap_df_standardized[dataset.upper()] = {'data': heatmap_standardized_json[0], "height": heatmap_standardized_json[1]}
+                heatmap_df = result_df['heatmap_data']
+                heatmap_df = heatmap_df.reset_index()
 
-            # Set up predictions dataframe
-            predictions_df = result_df['predictions']
+                heatmap_df_standardized = result_df['standardized_heatmap']
+                heatmap_df_standardized = heatmap_df_standardized.reset_index()
 
-            predictions_df['RecoveredTargets'] = predictions_df['RecoveredTargets'].fillna("No recovered targets")
-            predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].fillna("No putative target")
-            predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].astype(str)
-            predictions_df['TopGenes'] = predictions_df['TopGenes'].astype(str)
-            predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].fillna(
-                "No tissue")
-            predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].astype(str)
+                # Draw heatmap and get heatmap's height
+                heatmap_json = draw_heatmap(heatmap_df, dataset.upper())
+                heatmap_standardized_json = draw_heatmap(heatmap_df_standardized, dataset.upper())
 
-            # Add the dataset identifier
-            predictions_df['dataset'] = dataset.upper()
+                # combined heatmap results
+                combined_heatmap_df[dataset.upper()] = {'data': heatmap_json[0], "height": heatmap_json[1]}
+                combined_heatmap_df_standardized[dataset.upper()] = {'data': heatmap_standardized_json[0],
+                                                                     "height": heatmap_standardized_json[1]}
 
-            predictions_df = predictions_df.reset_index(drop=True)
+                # Set up predictions dataframe
+                predictions_df = result_df['predictions']
 
-            predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].astype(str)
-            predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].apply(preprocess_shap_dict)
+                predictions_df['RecoveredTargets'] = predictions_df['RecoveredTargets'].fillna("No recovered targets")
+                predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].fillna("No putative target")
+                predictions_df['PutativeTarget'] = predictions_df['PutativeTarget'].astype(str)
+                predictions_df['TopGenes'] = predictions_df['TopGenes'].astype(str)
+                predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].fillna(
+                    "No tissue")
+                predictions_df['tcga_response_neigh_tissue'] = predictions_df['tcga_response_neigh_tissue'].astype(str)
 
-            # Save drug distributions for later visualization purposes
-            save_numpy_dict(task_id, 'distrib_drugs', dataset, result_df['distrib_drugs'])
+                # Add the dataset identifier
+                predictions_df['dataset'] = dataset.upper()
 
-            # Save cell distributions for later visualization purposes
-            save_numpy_dict(task_id, 'distrib_cells', dataset, result_df['distrib_cells'])
+                predictions_df = predictions_df.reset_index(drop=True)
 
-            # Append to the combined dataframe
-            combined_predictions_df = pd.concat([combined_predictions_df, predictions_df], ignore_index=True)
+                predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].astype(str)
+                predictions_df['ShapDictionary'] = predictions_df['ShapDictionary'].apply(preprocess_shap_dict)
+
+                # Save drug distributions for later visualization purposes
+                save_numpy_dict(task_id, 'distrib_drugs', dataset, result_df['distrib_drugs'])
+
+                # Save cell distributions for later visualization purposes
+                save_numpy_dict(task_id, 'distrib_cells', dataset, result_df['distrib_cells'])
+
+                # Append to the combined dataframe
+                combined_predictions_df = pd.concat([combined_predictions_df, predictions_df], ignore_index=True)
 
         # Reset index of the combined dataframe
         combined_predictions_df = combined_predictions_df.reset_index(drop=True)
@@ -296,8 +296,10 @@ def analysis(self, file, datasets):
         predictions_json = combined_predictions_df.fillna("").to_dict(orient='records')
 
         result = {
-            "table": predictions_json,
-            "umap": {'oncotree': umap_json, "tissue": umap_json_tissue}
+                "heatmap": combined_heatmap_df,
+                "standardized_heatmap": combined_heatmap_df_standardized,
+                "table": predictions_json,
+                "umap": {'oncotree': umap_json, "tissue": umap_json_tissue}
         }
 
         return result
