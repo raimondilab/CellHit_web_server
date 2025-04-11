@@ -314,10 +314,8 @@ const handleHeatmap = async () => {
         try {
 
             const heatmapJson = await getTaskResultsStep(task, "heatmap");
-            setHeatmapDataJson(heatmapJson);
-
-            const heatmapStaJson = await getTaskResultsStep(task, "standardized_heatmap");
-            setHeatmapDataStaJson(heatmapStaJson);
+            //setHeatmapDataJson(heatmapJson);
+            //setHeatmapDataStaJson("{}");
 
             if (heatmapJson){
 
@@ -325,8 +323,6 @@ const handleHeatmap = async () => {
                 const firstKey = heatmapJson && typeof heatmapJson === "object" ? Object.keys(heatmapJson)[0] : null;
                 setUniqueDatabase(Object.keys(heatmapJson));
                 setDatabase(firstKey);
-                //setHeatmapData(heatmapJson[firstKey].data ? heatmapJson[firstKey].data : "{}");
-                //setHeight(heatmapJson[firstKey].height? heatmapJson[firstKey].height : "500");
 
             } else {
                 // No heatmap data available

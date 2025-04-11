@@ -378,12 +378,10 @@ function validateFile(fileContent) {
         console.log(originalFields)
         originalFields.forEach((field, index) => {
             // Identify headers that are null, undefined, empty string, or whitespace only
-            if (field == null || String(field).trim() === '' || !field || field.toUpperCase() === 'NAN') {
+            if (field === null || String(field).trim() === '' || !field || field.toUpperCase() === 'NAN') {
                 emptyHeaderIndices.push(index); // Store the index of the empty header
             }
         });
-
-        console.log(emptyHeaderIndices)
 
         // If any empty headers were found, check if there's data beneath them
         if (emptyHeaderIndices.length > 0) {
@@ -504,7 +502,7 @@ function validateFile(fileContent) {
                   </label>
                   <label
                       htmlFor="gdsc"
-                      className={`label-btn gdsc-border me-01 ${values.includes("gdsc") && alignOnly !== "ON"  ? "hover" : ""} ${values.includes("gdsc") && alignOnly == "ON"  ? "disabled" : ""}`}
+                      className={`label-btn gdsc-border me-01 ${values.includes("gdsc") && alignOnly !== "ON"  ? "hover" : ""} ${values.includes("gdsc") && alignOnly === "ON"  ? "disabled" : ""}`}
                       onClick={() => toggleDataset("gdsc")} disabled={alignOnly === "ON" ? true : false}
 
                     >
@@ -512,7 +510,7 @@ function validateFile(fileContent) {
                     </label>
                     <label
                       htmlFor="prism"
-                      className={`label-btn prism-border me-2 ${values.includes("prism") && alignOnly !== "ON"   ? "hover" : ""} ${values.includes("gdsc") && alignOnly == "ON"  ? "disabled" : ""}`  }
+                      className={`label-btn prism-border me-2 ${values.includes("prism") && alignOnly !== "ON"   ? "hover" : ""} ${values.includes("gdsc") && alignOnly === "ON"  ? "disabled" : ""}`  }
                       onClick={() => toggleDataset("prism")} disabled={alignOnly === "ON" ? true : false}
                     >
                       PRISM
