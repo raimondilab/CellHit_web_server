@@ -244,7 +244,6 @@ def analysis(self, file, datasets):
         combined_heatmap_df, combined_heatmap_df_standardized = {}, {}
 
         for dataset in datasets:
-
             result_df = combined_results[dataset.upper()]
 
             heatmap_df = result_df['heatmap_data']
@@ -259,7 +258,8 @@ def analysis(self, file, datasets):
 
             # combined heatmap results
             combined_heatmap_df[dataset.upper()] = {'data': heatmap_json[0], "height": heatmap_json[1]}
-            combined_heatmap_df_standardized[dataset.upper()] = {'data': heatmap_standardized_json[0], "height": heatmap_standardized_json[1]}
+            combined_heatmap_df_standardized[dataset.upper()] = {'data': heatmap_standardized_json[0],
+                                                                 "height": heatmap_standardized_json[1]}
 
             # Set up predictions dataframe
             predictions_df = result_df['predictions']
@@ -307,6 +307,8 @@ def analysis(self, file, datasets):
     except Exception as e:
         print(f"Error during analysis: {e}")
         raise  # Re-raise the exception for further handling
+
+
 @celery.task(bind=True)
 def alignment(self, file):
     try:
@@ -398,7 +400,6 @@ def alignment(self, file):
 
 # Preprocess user data
 def preprocess_data(data, code):
-
     # Transpose data
     data = data.transpose()
 
@@ -437,7 +438,6 @@ def preprocess_data(data, code):
 
 # Draw IC50 heatmap
 def draw_heatmap(heatmap_df, dataset, top=15):
-
     # Exclude non-numeric columns
     numeric_data = heatmap_df.select_dtypes(include='number')
 
@@ -684,4 +684,3 @@ def preprocess_heatmap_data(predictions, dataset):
     standardized_heatmap = (heatmap_data - mean_vals) / std_vals
 
     return {'heatmap_data': heatmap_data, 'standardized_heatmap': standardized_heatmap}
-
