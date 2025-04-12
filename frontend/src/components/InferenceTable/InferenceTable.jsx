@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';
@@ -64,17 +64,26 @@ const InferenceTable = ({
     const [selectedDatasets, setSelectedDatasets] = useState([]);
     const [selectedDrugs, setSelectedDrugs] = useState([]);
 
-    const uniqueDrugs = [
-        ...new Set(inferenceData.map(inf => inf.DrugName?.trim()))
-    ].filter(drug => drug)
+    const uniqueDrugs = useMemo(() => {
+    const filteredByDataset = selectedDatasets.length > 0
+        ? inferenceData.filter(item => selectedDatasets.includes(item.dataset))
+        : inferenceData;
+
+    return [
+        ...new Set(filteredByDataset.map(inf => inf.DrugName?.trim()))
+    ]
+        .filter(drug => drug)
         .map(drug => ({ label: drug.toUpperCase(), value: drug }))
         .sort((a, b) => a.label.localeCompare(b.label));
+    }, [selectedDatasets, inferenceData]);
 
     const datasets = [
         ...new Set(inferenceData.map((inf) => inf.dataset?.trim()))
     ].filter(dataset => dataset)
         .map(dataset => ({ label: dataset, value: dataset }))
         .sort((a, b) => a.label.localeCompare(b.label));
+
+
 
     const [filteredData, setFilteredData] = useState(inferenceData);
 
