@@ -36,6 +36,12 @@ celery = Celery(__name__)
 celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
 celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
 
+# Set time limits to 4 hours
+celery.conf.update(
+    task_time_limit=14400,
+    task_soft_time_limit=13800,
+)
+
 celery.conf.update(
     task_serializer='json',
     accept_content=['json'],  # Ensure workers can deserialize messages
