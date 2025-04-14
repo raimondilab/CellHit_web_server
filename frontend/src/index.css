@@ -7609,6 +7609,9 @@ transition-property: border-color,box-shadow,color;
   width: 30% !important;
 }
 
+.w-32 {
+  width: 32% !important;
+}
 
 .w-40 {
   width: 40% !important;

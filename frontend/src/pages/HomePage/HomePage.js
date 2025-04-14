@@ -140,17 +140,17 @@ const HomePage = () => {
                 <div className="container d-flex align-items-center justify-content-center min-vh-100 text-center">
                     <div className="row align-items-center">
                         <div className="col">
-                            <img src="/assets/images/1.svg" alt="Database" className="img-fluid w-75" />
+                            <img src="/assets/images/1.webp" alt="Database" className="img-fluid w-30" />
                             <h1 className="display-2 fw-semi-bold lh-sm fs-4 fs-lg-6 fs-xxl-8">Discover CellHit</h1>
                             <p className="mb-4 fs-1 fs-lg-1 fs-xxl-2">
                                 Interpretable models for drug-response prediction
                             </p>
                             <div className="mb-4">
                             <Button className="btn-example shadow-none me-3 mb-5"  loading={loading} onClick={load} label="Explore now&nbsp;">
-                                <img alt="logo" src="/assets/images/resistance.png" className="img-fluid btn-img"></img>
+                                <img alt="logo" src="/assets/images/resistance.webp" className="img-fluid btn-img"></img>
                             </Button>
                             <Button className="btn-run shadow-none mb-5"  label="Run CellHit&nbsp;" onClick={runPage}>
-                                <img alt="logo" src="/assets/images/nanomedicine.png" className="img-fluid btn-img"></img>
+                                <img alt="logo" src="/assets/images/nanomedicine.webp" className="img-fluid btn-img"></img>
                             </Button>
                             <p className="mb-2 fs--1 fst-italic">
                                 This website is free and open to all users. No login is required, and it does not use cookies

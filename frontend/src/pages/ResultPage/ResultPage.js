@@ -108,12 +108,44 @@ const dtPrism = useRef(null);
     setVisibleColumnsPrism(updatedVisibleColumnsPrism);
    };
 
-   const dynamicColumns = visibleColumns.map((col) => {
-    return <Column key={col} field={col} header={col}  />;
-   });
+   const dynamicColumns = visibleColumns.map((col) => (
+   <Column
+          key={col}
+          field={col}
+          header={col}
+          body={(rowData) => {
+            const value = rowData[col];
+
+            if (col === "DrugName" && typeof value === "string") {
+              return value.toUpperCase();
+            }
+
+            if (col === "gdscId" || col === "drugId" ) {
+              return value;
+            }
+
+            return typeof value === "number" ? value.toExponential(2) : value;
+          }}
+        />
+    ));
 
    const dynamicColumnsPrism = visibleColumnsPrism.map((col) => {
-    return <Column key={col} field={col} header={col}  />;
+    return <Column key={col} field={col} header={col}
+        body={(rowData) => {
+            const value = rowData[col];
+
+            if (col === "DrugName" && typeof value === "string") {
+              return value.toUpperCase();
+            }
+
+            if (col === "prismId" || col === "drugId" ) {
+              return value;
+            }
+
+            return typeof value === "number" ? value.toExponential(2) : value;
+          }}
+
+     />;
    });
 
    const exportCSV = (tableRef, selectionOnly) => {
@@ -122,41 +154,48 @@ const dtPrism = useRef(null);
 
 
 async function sendExploreData(value) {
-    const query = {
-        query: `
-            query getGDSCDrug{
-                gdscDrug(drug: "${value}") {
-                    gdscId
-                    drugName
-                    drugId
-                    source
-                    sampleIndex
-                    predictions
-                    predictionsStd
-                    quantileScore
-                    experimentalMin
-                    experimentalMedian
-                    experimentalMax
-                    modelMse
-                    modelCorr
-                    transcrCcleNeigh
-                    transcrCcleNeighCelllinename
-                    transcrCcleNeighOncotree
-                    responseCcleNeigh
-                    responseCcleNeighCelllinename
-                    responseCcleNeighOncotree
-                    transcrTcgaNeigh
-                    transcrTcgaNeighDiagnosis
-                    transcrTcgaNeighSite
-                    responseTcgaNeigh
-                    responseTcgaNeighDiagnosis
-                    responseTcgaNeighSite
-                    putativeTarget
-                    topLocalShapGenes
-                    recoveredTarget
-                }
-            }
-        `
+
+  const query = {
+    query: `
+    query getGDSC($offset: Int!, $limit: Int!, $drug: String) {
+        gdsc(pagination: {offset: $offset, limit: $limit, drug: $drug}) {
+            gdscId
+            drugName
+            drugId
+            source
+            sampleIndex
+            predictions
+            predictionsStd
+            quantileScore
+            experimentalMin
+            experimentalMedian
+            experimentalMax
+            modelMse
+            modelCorr
+            transcrCcleNeigh
+            transcrCcleNeighCelllinename
+            transcrCcleNeighOncotree
+            responseCcleNeigh
+            responseCcleNeighCelllinename
+            responseCcleNeighOncotree
+            transcrTcgaNeigh
+            transcrTcgaNeighDiagnosis
+            transcrTcgaNeighSite
+            responseTcgaNeigh
+            responseTcgaNeighDiagnosis
+            responseTcgaNeighSite
+            putativeTarget
+            topLocalShapGenes
+            recoveredTarget
+        }
+    }
+    `,
+    variables: {
+        offset: 0,
+        limit: 10,
+        drug: selectedDrug ? selectedDrug.name : null,
+    }
+
     };
     try {
 
@@ -164,11 +203,9 @@ async function sendExploreData(value) {
         let navigateData = null;
         navigateData = await axios.post(apiUrl, query);
 
-        if (navigateData.data.data.gdscDrug){
-
-            setGdscData(navigateData.data.data.gdscDrug );
-            setTotalRecords(navigateData.data.data.gdscDrug.length)
-
+        if (navigateData.data.data.gdsc){
+            setGdscData(navigateData.data.data.gdsc );
+            setTotalRecords(14197);
         }
 
          setLoading(false);
@@ -307,12 +344,13 @@ const handleDrugSelection = (event) => {
 
 async function getDataDrugPrism(value) {
 
+
     const query = {
         query: `
-            query getPRISMDrug{
-                prismDrug(drug: "${value}") {
+            query getPrism($offset: Int!, $limit: Int!, $drug: String) {
+                 prism(pagination: {offset: $offset, limit: $limit, drug: $drug}) {
                     prismId
-                    drugName
+                   drugName
                     drugId
                     source
                     sampleIndex
@@ -341,17 +379,23 @@ async function getDataDrugPrism(value) {
                     recoveredTarget
                 }
             }
-        `
-    };
+            `,
+            variables: {
+                offset: 0,
+                limit: 10,
+                drug: value ? value : null,
+            }
+        };
     try {
 
         setLoadingPrism(true);
         let navigateData = null;
         navigateData = await axios.post(apiUrl, query);
 
-        if (navigateData.data.data.prismDrug){
-            setPrismData(navigateData.data.data.prismDrug );
-            setTotalRecordsPrism(navigateData.data.data.prismDrug.length);
+
+        if (navigateData.data.data.prism){
+            setPrismData(navigateData.data.data.prism );
+            setTotalRecordsPrism(14197);
 
         }
 
