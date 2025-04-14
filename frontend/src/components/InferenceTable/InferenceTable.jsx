@@ -242,6 +242,7 @@ const InferenceTable = ({
             header={header}
             rowClassName={getRowClass}
             onRowClick={onRowClick}
+            className="inference"
             tableStyle={{ minWidth: '50rem' }}
         >
             {dynamicColumns}
