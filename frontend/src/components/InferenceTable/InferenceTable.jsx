@@ -30,8 +30,8 @@ const InferenceTable = ({
             const negKeys = [];
             for (const [key, value] of Object.entries(obj.ShapDictionary)) {
                 if (typeof value === 'number') {
-                    if (value > 0) posKeys.push(`${key}:${value.toFixed(4)}`);
-                    else if (value < 0) negKeys.push(`${key}:${value.toFixed(4)}`);
+                    if (value > 0) posKeys.push(`${key}:${value.toExponential(2)}`);
+                    else if (value < 0) negKeys.push(`${key}:${value.toExponential(2)}`);
                 }
             }
             obj.ShapPos = posKeys.join(',');
@@ -169,20 +169,21 @@ const InferenceTable = ({
     };
 
     const dynamicColumns = visibleColumns.map((col) => (
-        <Column
-            key={col.field}
-            field={col.field}
-            header={col.header}
-            sortable
-            body={(rowData) => {
-                const value = rowData[col.field];
-                if (col.field === "DrugName" && typeof value === "string") {
-                    return value.toUpperCase();
-                }
-                return typeof value === "number" ? value.toFixed(4) : value;
+    <Column
+        key={col.field}
+        field={col.field}
+        header={col.header}
+        sortable
+        body={(rowData) => {
+            const value = rowData[col.field];
+            if (col.field === "DrugName" && typeof value === "string") {
+                return value.toUpperCase();
+            }
+            return typeof value === "number" ? value.toExponential(2) : value;
             }}
         />
     ));
+
 
     const header = (
         <div className="row align-items-center">
