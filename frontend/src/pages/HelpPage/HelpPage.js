@@ -5,7 +5,6 @@ import { Helmet } from 'react-helmet';
 import { Link } from 'react-router-dom';
 import { Chip } from 'primereact/chip';
 
-
 const HelpPage = () => {
 
 const handleDownload = () => {
@@ -54,15 +53,15 @@ const handleDownloadTissue = () => {
                   />
             <h5 className="display-6 fw-bold mb-4" id="explore">Explore now</h5>
             <p className="fs-1 text-justify mb-2">We provide precomputed predictions for all TCGA samples across both GDSC and PRISM
-drugs, totaling 4.060.342 and 17.958.038 predictions, respectively, along with a comprehensive
-set of contextual information. These predictions include ln(IC50) values for GDSC, LFC values
-for PRISM, standard deviation-based uncertainty estimates, and the Quantile Score, a quantitative metric introduced in <Link to="https://doi.org/10.1101/2024.03.28.586783" target="_blank" rel="noopener noreferrer"><b><i> Learning and actioning general principles of cancer cell drug sensitivity</i></b></Link> to balance specificity and efficacy in drug response predictions.
-Additionally, empirical drug statistics such as minimum, median, and maximum values are
-available. We include transcriptomic neighbors from CCLE and TCGA, response-matched
-samples, and relevant metadata, including OncoTree classifications and tissue of origin, to
-facilitate interpretation. Furthermore, we report the 15 most important genes identified via
-SHAP analysis and putative drug-associated genes where applicable.</p>
-            <p className="fs-1 text-justify ">Users can access the predictions tables for GDSC and PRISM and filter the results by drug name. They should click the button next to the filter field to apply their selection. Once the filter is applied, a statistical visualization of the selected drug will be displayed. A description of this visualization is provided below. Additionally, users have the option to download the predictions.</p>
+            drugs, totaling 4.060.342 and 17.958.038 predictions, respectively, along with a comprehensive
+            set of contextual information. These predictions include ln(IC50) values for GDSC, LFC values
+            for PRISM, standard deviation-based uncertainty estimates, and the Quantile Score, a quantitative metric introduced in <Link to="https://doi.org/10.1101/2024.03.28.586783" target="_blank" rel="noopener noreferrer"><b><i> Learning and actioning general principles of cancer cell drug sensitivity</i></b></Link> to balance specificity and efficacy in drug response predictions.
+            Additionally, empirical drug statistics such as minimum, median, and maximum values are
+            available. We include transcriptomic neighbors from CCLE and TCGA, response-matched
+            samples, and relevant metadata, including OncoTree classifications and tissue of origin, to
+            facilitate interpretation. Furthermore, we report the 15 most important genes identified via
+            SHAP analysis and putative drug-associated genes where applicable.</p>
+            <p className="fs-1 text-justify">Users can access the predictions tables for GDSC and PRISM and filter the results by drug name. They should click the button next to the filter field to apply their selection. Once the filter is applied, a statistical visualization of the selected drug will be displayed. A description of this visualization is provided below. Additionally, users have the option to download the predictions.</p>
 
             <h6 className="fs-1 text-justify mb-4"><b>Model Predictions Overview</b></h6>
             <p className="fs-1 text-justify mb-3">Investigate how the model predictions compare to experimental data and evaluate the performance of drug sensitivity predictions. Additionally, conduct a residual analysis to assess the model’s fit to the data by examining the residuals, which represent the differences between predicted and observed sensitivities.</p>
@@ -165,17 +164,80 @@ SHAP analysis and putative drug-associated genes where applicable.</p>
               <p className="fs-1 text-justify mb-1">
                 The inference table  is a comprehensive tabular dataset that includes detailed predictions and metadata for each sample and selected assay. </p>
              <p className="fs-1 text-justify">Specifically, it contains:</p>
-             <ul>
-                <li  class="fs-1 text-justify">Predictions for each sample, including ln(IC50) values for GDSC and LFC values for PRISM;</li>
-                <li  class="fs-1 text-justify">Uncertainty estimates for predictions, represented as standard deviations derived from the ensemble model;</li>
-                <li  class="fs-1 text-justify">Quantile Scores, a quantitative metric introduced in <Link to="https://doi.org/10.1101/2024.03.28.586783" target="_blank" rel="noopener noreferrer"><b><i> Learning and actioning general principles of cancer cell drug sensitivity</i></b></Link> to balance specificity and efficacy in drug response predictions;</li>
-                <li  class="fs-1 text-justify">Empirical statistics for each drug (derived from experimental data), including minimum, median, and maximum values;</li>
-                <li  class="fs-1 text-justify">Transcriptomic neighbors identified in both CCLE and TCGA datasets, representing the closest matching cell lines and cancer samples in transcriptomic space;</li>
-                <li  class="fs-1 text-justify">Response neighbors, identifying CCLE or TCGA samples with predicted responses most similar to the given data;</li>
-                <li  class="fs-1 text-justify">Annotation of neighbors with metadata, including Oncotree classifications and tissue of origin;</li>
-                <li  class="fs-1 text-justify">The top 15 genes ranked by SHAP importance, offering interpretability for the trained models;</li>
-                <li  class="fs-1 text-justify">Putative gene annotations for each drug, providing insights into potential drug-gene associations;</li>
-             </ul>
+                <ul>
+                  <li className="fs-1 text-justify mb-1">
+                    <b>General Drug Information:</b>
+                  </li>
+                   <ul>
+                    <li className="fs-1 text-justify mb-1"><Chip label="DrugID" />: Internal identifier assigned to the drug. This ID originates from one of the two primary drug screening datasets: GDSC (Genomics of Drug Sensitivity in Cancer) or PRISM (Profiling Relative Inhibition Simultaneously in Mixtures).</li>
+                    <li className="fs-1 text-justify mb-1"><Chip label="DrugName" />: The common or official pharmaceutical name of the drug being studied.</li>
+                    <li className="fs-1 text-justify mb-1"><Chip label="PutativeTarget" />: Officially declared primary biological targets (proteins) of the drug. These targets are often derived from literature or known pharmacological databases.</li>
+                  </ul>
+
+                  <li className="fs-1 text-justify mb-1">
+                    <b>Sample Information:</b>
+                     <ul>
+                      <li className="fs-1 text-justify mb-1">
+                         <Chip label="index" /> Identifier of the biological sample or cell line used for the prediction. This is typically a standardized cell line accession code or sample name.
+                      </li>
+                      </ul>
+                  </li>
+
+                  <li className="fs-1 text-justify mb-1"><b>Prediction and Uncertainty:</b></li>
+                  <ul>
+                    <li className="fs-1 text-justify mb-1"><Chip label="prediction" />: Numerical prediction output of the machine learning model, given in terms of the natural logarithm of the IC50 (ln(IC50)) expressed in micromolar (µM). IC50 represents the concentration of the drug required to inhibit a given biological process (e.g., cell proliferation) by 50%; lower values indicate higher drug sensitivity, higher values indicate resistance.</li>
+                    <li className="fs-1 text-justify mb-1"><Chip label="std" />: Standard deviation representing uncertainty estimation around the prediction. Computed from the ensemble of multiple machine learning models, this value provides an indication of predictive consistency (lower std indicates higher confidence in the prediction).</li>
+                  </ul>
+
+                  <li className="fs-1 text-justify mb-1"><b>Experimental Reference Values:</b></li>
+                  <p className="fs-1 text-justify mb-1"> These metrics represent historical or previously recorded experimental drug sensitivity measurements, useful for contextualizing the current prediction:</p>
+                  <ul>
+                    <li className="fs-1 text-justify mb-1"><Chip label="DrugMin" />: Minimum experimentally observed ln(IC50) value for this drug across available datasets, indicating the highest sensitivity (lowest resistance).</li>
+                    <li className="fs-1 text-justify mb-1"><Chip label="DrugMedian" />: Median experimentally observed ln(IC50) across cell lines or samples, representing typical or average sensitivity.</li>
+                     <li className="fs-1 text-justify mb-1"><Chip label="DrugMax" />: Maximum experimentally observed ln(IC50), indicating the least sensitive or most resistant cases recorded experimentally.</li>
+                  </ul>
+
+                  <li className="fs-1 text-justify mb-1"><b>Feature Importance and Interpretation:</b></li>
+                  <ul>
+                    <li className="fs-1 text-justify mb-1"><Chip label="TopGenes" />: List of the 15 most influential genes (ranked by absolute importance) that significantly contributed to the model's prediction. These genes were identified using feature attribution methods (e.g., SHAP values).</li>
+                    <li className="fs-1 text-justify mb-1"><Chip label="Recovered targets" />: Subset of genes from the <i>TopGenes</i> list that are also the officially documented putative targets of the drug, highlighting cases where biological knowledge aligns with model-derived importance scores.</li>
+                  </ul>
+
+                   <li className="fs-1 text-justify mb-1"><b>SHAP-based Explanation Details:</b></li>
+                   <p className="fs-1 text-justify mb-2">SHAP (SHapley Additive exPlanations) values quantitatively represent the impact of gene expression on model predictions:</p>
+                   <ul>
+                         <li className="fs-1 text-justify mb-1"><Chip label="ShapPos" /> Dictionary listing genes with the strongest positive SHAP values. A higher gene expression at the recorded level for these genes is associated with an increased predicted ln(IC50), implying greater drug resistance.</li>
+                         <li className="fs-1 text-justify mb-1"><Chip label="ShapNeg" /> Dictionary of genes with the strongest negative SHAP values. Increased gene expression for these genes at the observed level decreases predicted ln(IC50), indicating higher drug sensitivity.</li>
+                  </ul>
+
+                  <li className="fs-1 text-justify mb-1"><b>Quantitative Assessment of Prediction Quality:</b></li>
+                     <ul>
+                         <li className="fs-1 text-justify mb-1"><Chip label="Quantile score" /> A normalized score (ranging from 0 to 1) designed to balance sensitivity (true positives) and specificity (true negatives) of drug predictions for a given sample. A score closer to 1 indicates a higher confidence or quality of prediction and more reliable sensitivity profiling.  </li>
+                      </ul>
+
+                     <li className="fs-1 text-justify mb-1"><b>Transcriptomic Nearest Neighbors:</b></li>
+                     <p className="fs-1 text-justify ">These entries provide context by identifying the most similar transcriptomic profiles from known large-scale datasets:</p>
+                     <ul>
+                         <li className="fs-1 text-justify mb-1"><Chip label="ccle_transcriptomic_neigh" /> Accession identifier for the Cancer Cell Line Encyclopedia (CCLE) cell line with the transcriptome most similar to the sample of interest, measured by Euclidean distance.</li>
+                         <li className="fs-1 text-justify mb-1"><Chip label="ccle_transcriptomic_neigh_name" /> Commercial or commonly known name of this CCLE cell line neighbor.</li>
+                         <li className="fs-1 text-justify mb-1"><Chip label="ccle_transcriptomic_neigh_tissue" /> Tissue origin of the closest CCLE transcriptomic neighbor.</li>
+                         <li className="fs-1 text-justify mb-1"><Chip label="tcga_transcriptomic_neigh" /> Accession identifier for the TCGA (The Cancer Genome Atlas) sample transcriptomically closest to the sample of interest.</li>
+                         <li className="fs-1 text-justify mb-1"><Chip label="tcga_transcriptomic_neigh_tissue" /> Tissue origin of the closest TCGA transcriptomic neighbor.</li>
+                      </ul>
+
+                  <li className="fs-1 text-justify mb-1"><b>Response-based Nearest Neighbors:</b></li>
+                   <ul>
+                         <li className="fs-1 text-justify mb-1"><Chip label="ccle_response_neigh" /> Accession identifier of the CCLE cell line whose predicted drug response profile is closest to the current sample, as determined by Euclidean distance across all predicted drug responses.</li>
+                         <li className="fs-1 text-justify mb-1"><Chip label="ccle_response_neigh_name" /> Commercial or commonly known name of this response-based CCLE neighbor.</li>
+                         <li className="fs-1 text-justify mb-1"><Chip label="ccle_response_neigh_tissue" /> Tissue origin of the response-based CCLE neighbor.</li>
+                         <li className="fs-1 text-justify mb-1"><Chip label="tcga_response_neigh" /> Accession identifier of the TCGA sample with the most similar drug response profile.</li>
+                         <li className="fs-1 text-justify mb-1"><Chip label="tcga_response_neigh_tissue" /> Tissue of origin of this TCGA response-based neighbor.</li>
+                  </ul>
+                   <li className="fs-1 text-justify mb-1"><b>Dataset Origin:</b></li>
+                     <ul>
+                         <li className="fs-1 text-justify mb-1"><Chip label="dataset" /> Name or identifier of the dataset (GDSC, PRISM, or another experimental source) to which the specific drug-cell line pair belongs.</li>
+                      </ul>
+                </ul>
               <p className="fs-1 text-justify mb-4">
                 Users can filter the results by drugs or datasets. Furthermore, users can select the columns to visualize, export the data in various formats, and copy the URL of the results to share them.
               </p>
