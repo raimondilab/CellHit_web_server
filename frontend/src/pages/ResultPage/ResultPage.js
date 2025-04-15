@@ -16,6 +16,13 @@ import axios from 'axios';
 import { AutoComplete } from "primereact/autocomplete";
 import { Link } from 'react-router-dom';
 import { Dialog } from 'primereact/dialog';
+import { TabView, TabPanel } from 'primereact/tabview';
+
+import DensityPlotDrug from '../../components/DensityPlotDrug/DensityPlotDrug';
+import BoxPlot from '../../components/BoxPlot/BoxPlot';
+import Histogram from '../../components/Histogram/Histogram';
+import ResidualPlot from '../../components/ResidualPlot/ResidualPlot';
+
 
 const ResultPage = () => {
 
@@ -44,15 +51,19 @@ const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
 const [gdscData, setGdscData] = useState(filteredData || []);
 const [prismData, setPrismData] = useState(filteredDataPrism || []);
 const [loading, setLoading] = useState(false);
+const [loadingSta, setLoadingSta] = useState(false);
 const [loadingPrism, setLoadingPrism] = useState(false);
+const [loadingPrismSta, setLoadingPrismSta] = useState(false);
 const [value, setValue] = useState('');
 const [totalRecords, setTotalRecords] = useState(4060342);
 const [totalRecordsPrism, setTotalRecordsPrism] = useState(17958038);
-
+const [gdscDataSta, setGdscDataSta] = useState([]);
+const [prismDataSta, setPrismDataSta] = useState([]);
 
 const [selectedDrug, setSelectedDrug] = useState(null);
 const [filteredDrugs, setFilteredDrugs] = useState(null);
 const [filteredDrugsPrism, setFilteredDrugsPrism] = useState(null);
+const [activeTabIndex, setActiveTabIndex] = useState(0);
 
   // Dialog settings
   const [position, setPosition] = useState('center');
@@ -322,11 +333,17 @@ const onFilter = (event) => {
 
 };
 
+// Get drug data by drug - filter button
 const handleDrugSelection = (event) => {
 
    if (selectedDrug){
 
+      // Get drug specific data for table
       sendExploreData(selectedDrug.name.toString());
+
+      // Get drug specific data for statistical visualization
+      setGdscDataSta([]);
+      getGDSCDataToSta(selectedDrug.name.toString());
 
       setLazyState({
         first: 0,
@@ -339,7 +356,77 @@ const handleDrugSelection = (event) => {
    }
 };
 
+// Get specif drug data for statical visualization
+async function getGDSCDataToSta(value) {
 
+const query = {
+        query: `
+            query getGDSCDrug{
+                gdscDrug(drug: "${value}") {
+                    drugName
+                    source
+                    sampleIndex
+                    predictions
+                    quantileScore
+                    experimentalMedian
+                }
+            }
+        `
+    };
+    try {
+        setLoadingSta(true);
+
+        let navigateData = null;
+        navigateData = await axios.post(apiUrl, query);
+
+        if (navigateData.data.data.gdscDrug){
+            setGdscDataSta(navigateData.data.data.gdscDrug );
+        }
+
+        setLoadingSta(false);
+
+    } catch (error) {
+        setLoadingSta(false);
+    }
+
+}
+
+// Get specif drug data for statical visualization
+async function getPRISMDataToSta (value) {
+
+   const query = {
+        query: `
+            query getPRISMDrug{
+                prismDrug(drug: "${value}") {
+                    drugName
+                    source
+                    sampleIndex
+                    predictions
+                    quantileScore
+                    experimentalMedian
+                }
+            }
+        `
+    };
+    try {
+
+        setLoadingPrismSta(true);
+
+        let navigateData = null;
+        navigateData = await axios.post(apiUrl, query);
+        console.log(navigateData)
+
+        if (navigateData.data.data.prismDrug){
+            setPrismDataSta(navigateData.data.data.prismDrug);
+        }
+
+         setLoadingPrismSta(false);
+
+    } catch (error) {
+        setLoadingPrismSta(false);
+    }
+
+}
 
 
 async function getDataDrugPrism(value) {
@@ -410,7 +497,12 @@ const handleDrugSelectionPrism = (event) => {
 
    if (value){
 
+      // Get specific drug table
       getDataDrugPrism(value.name.toString());
+
+      // Get specific drug statical visualization
+      setPrismDataSta([]);
+      getPRISMDataToSta(value.name.toString());
 
       setLazyStatePrism({
         first: 0,
@@ -607,9 +699,10 @@ return (
              </h1>
             </div>
           </div>
-          <div className="row mb-5">
+           <TabView scrollable activeIndex={activeTabIndex} onTabChange={(e) => setActiveTabIndex(e.index)}>
+          <TabPanel header="GDSC">
+           <div className="row mb-5">
             <div className="col-12">
-               <h2 className="display-6 fw-bold mb-5">GDSC</h2>
                <Tooltip target=".export-buttons>button" position="bottom" />
                <DataTable stripedRows lazy ref={dt} value={gdscData} paginator first={lazyState.first}
                rows={lazyState.rows}  rowsPerPageOptions={[10, 25, 50, 100]} totalRecords={totalRecords}  header={header}
@@ -619,21 +712,119 @@ return (
                     loading={loading} tableStyle={{ minWidth: '50rem' }}>
                     {dynamicColumns}
                 </DataTable>
+               </div>
             </div>
-        </div>
-          <div className="row mb-4">
-            <div className="col-12">
-               <h2 className="display-6 fw-bold mb-5">PRISM</h2>
-               <Tooltip target=".export-buttons>button" position="bottom" />
-                 <DataTable stripedRows lazy ref={dtPrism} value={prismData} paginator first={lazyStatePrism.first}  rows={lazyStatePrism.rows}
-                 dataKey="prismId" onPage={onPagePrism}
-                  paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-                    currentPageReportTemplate="{first} to {last} of {totalRecords}" rowsPerPageOptions={[10, 25, 50, 100]}
-                 totalRecords={totalRecordsPrism}  header={headerPrism}  loading={loadingPrism}  tableStyle={{ minWidth: '50rem' }}>
-                    {dynamicColumnsPrism}
-                </DataTable>
-            </div>
-        </div>
+           {loadingSta && (
+                      <div className="row mb-5">
+                        <h4 className="display-6 fw-bold mb-3">{selectedDrug?.name}</h4>
+                        <div className="col-md-12">
+                          <div className="alert alert-info" role="alert">
+                            <strong>Hold tight!</strong> We're generating visual insights for <em>{selectedDrug?.name}</em>.
+                            This may take a few seconds depending on the data size.
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedDrug && gdscDataSta.length > 0 && !loadingSta && (
+                      <>
+                        <div className="row mb-4">
+                          <div className="col-12">
+                            <h4 className="display-6 fw-bold mb-3">
+                              {selectedDrug.name} – Model Predictions Overview
+                            </h4>
+                            <p className="text-muted">
+                              Explore how the model predictions compare to experimental data and quantify the performance of the drug sensitivity prediction.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="row g-4 mb-5">
+                          {[BoxPlot, Histogram, DensityPlotDrug].map((Component, idx) => (
+                            <div key={idx} className="col-12 col-md-6 col-lg-4">
+                              <div className="p-3 rounded-3 shadow bg-white h-100">
+                                <Component data={gdscDataSta} selectedDrug={selectedDrug} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="row mb-5">
+                          <div className="col-12">
+                            <h5 className="fw-semibold mb-2">Residual Analysis</h5>
+                            <p className="text-muted small mb-3">
+                              Assess how well the model fits the data by inspecting the residuals (difference between predicted and observed sensitivity).
+                            </p>
+                            <div className="p-3 rounded-3 shadow bg-white">
+                              <ResidualPlot data={gdscDataSta} />
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+             </TabPanel>
+             <TabPanel header="PRISM">
+                <div className="row mb-4">
+                <div className="col-12">
+                   <Tooltip target=".export-buttons>button" position="bottom" />
+                     <DataTable stripedRows lazy ref={dtPrism} value={prismData} paginator first={lazyStatePrism.first}  rows={lazyStatePrism.rows}
+                     dataKey="prismId" onPage={onPagePrism}
+                      paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                        currentPageReportTemplate="{first} to {last} of {totalRecords}" rowsPerPageOptions={[10, 25, 50, 100]}
+                     totalRecords={totalRecordsPrism}  header={headerPrism}  loading={loadingPrism}  tableStyle={{ minWidth: '50rem' }}>
+                        {dynamicColumnsPrism}
+                    </DataTable>
+                    </div>
+                  </div>
+                  {loadingPrismSta && (
+                      <div className="row mb-5">
+                        <h4 className="display-6 fw-bold mb-3">{value?.name}</h4>
+                        <div className="col-md-12">
+                          <div className="alert alert-info" role="alert">
+                            <strong>Hold tight!</strong> We're generating visual insights for <em>{value?.name}</em>.
+                            This may take a few seconds depending on the data size.
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {value && prismDataSta.length > 0 && !loadingPrismSta && (
+                      <>
+                        <div className="row mb-4">
+                          <div className="col-12">
+                            <h4 className="display-6 fw-bold mb-3">
+                              {value.name} – Model Predictions Overview
+                            </h4>
+                            <p className="text-muted">
+                              Explore how the model predictions compare to experimental data and quantify the performance of the drug sensitivity prediction.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row g-4 mb-5">
+                          {[BoxPlot, Histogram, DensityPlotDrug].map((Component, idx) => (
+                            <div key={idx + "prism"} className="col-12 col-md-6 col-lg-4">
+                              <div className="p-3 rounded-3 shadow bg-white h-100">
+                                <Component data={prismDataSta} selectedDrug={value} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="row mb-5">
+                          <div className="col-12">
+                            <h5 className="fw-semibold mb-2">Residual Analysis</h5>
+                            <p className="text-muted small mb-3">
+                              Assess how well the model fits the data by inspecting the residuals (difference between predicted and observed sensitivity).
+                            </p>
+                            <div className="p-3 rounded-3 shadow bg-white">
+                              <ResidualPlot data={prismDataSta} />
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+              </TabPanel>
+           </TabView>
         </div>
       </section>
       <Footer />
