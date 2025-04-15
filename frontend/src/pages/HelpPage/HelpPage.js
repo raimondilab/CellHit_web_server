@@ -53,32 +53,17 @@ const handleDownloadTissue = () => {
                     className="center-help shrink img-fluid mb-5"
                   />
             <h5 className="display-6 fw-bold mb-4" id="explore">Explore now</h5>
-            <p className="fs-1 text-justify mb-2">Users can explore pre-computed predictions and outputs for the entire TCGA dataset through two major pharmacogenomic databases: GDSC, which includes data from 686 cell lines tested against 286 drugs, and PRISM, which covers 887 cell lines and 6,337 drugs. </p>
+            <p className="fs-1 text-justify mb-2">We provide precomputed predictions for all TCGA samples across both GDSC and PRISM
+drugs, totaling 4.060.342 and 17.958.038 predictions, respectively, along with a comprehensive
+set of contextual information. These predictions include ln(IC50) values for GDSC, LFC values
+for PRISM, standard deviation-based uncertainty estimates, and the Quantile Score, a quantitative metric introduced in <Link to="https://doi.org/10.1101/2024.03.28.586783" target="_blank" rel="noopener noreferrer"><b><i> Learning and actioning general principles of cancer cell drug sensitivity</i></b></Link> to balance specificity and efficacy in drug response predictions.
+Additionally, empirical drug statistics such as minimum, median, and maximum values are
+available. We include transcriptomic neighbors from CCLE and TCGA, response-matched
+samples, and relevant metadata, including OncoTree classifications and tissue of origin, to
+facilitate interpretation. Furthermore, we report the 15 most important genes identified via
+SHAP analysis and putative drug-associated genes where applicable.</p>
             <p className="fs-1 text-justify ">Users can access the predictions tables for GDSC and PRISM and filter the results by drug name. They should click the button next to the filter field to apply their selection. Once the filter is applied, a statistical visualization of the selected drug will be displayed. A description of this visualization is provided below. Additionally, users have the option to download the predictions.</p>
-            <p className="fs-1 text-justify ">The key columns in the pre-computed predictions dataset are:</p>
-             <ul>
-              <li className="fs-1 text-justify mb-1"><b>Drug Information:</b> Includes <Chip label="drugName" />, <Chip label="drugId" />, and <Chip label="gdscId" />, identifying the tested compounds</li>
-              <li className="fs-1 text-justify mb-1"><b>Sample Identification:</b> <Chip label="sampleIndex" /> represents the transcriptomic sample being analyzed</li>
-              <li className="fs-1 text-justify mb-1"><b>Predictions and Metrics:</b></li>
-              <ul>
-              <li className="fs-1 text-justify mb-1"><Chip label="predictions" />: The estimated drug response score</li>
-              <li className="fs-1 text-justify mb-1"><Chip label="predictionsStd" />: Standard deviation of predictions</li>
-              <li className="fs-1 text-justify mb-1"><Chip label="quantileScore" />: Normalized response score based on prior experimental data</li>
-              <li className="fs-1 text-justify mb-1"><Chip label="experimentalMin" />, <Chip label="experimentalMedian" />, <Chip label="experimentalMax" />: Provide experimental response ranges</li>
-              <li className="fs-1 text-justify mb-1"><Chip label="modelMse" /> and <Chip label="modelCorr" />: Model performance metrics</li>
-              </ul>
-              <li className="fs-1 text-justify mb-1"><b>Similarity-based Information:</b></li>
-              <ul>
-              <li className="fs-1 text-justify mb-1"><Chip label="transcrCcleNeigh" /> and <Chip label="transcrTcgaNeigh" />: Transcriptomic similarity to known cell lines and TCGA samples</li>
-              <li className="fs-1 text-justify mb-1"><Chip label="responseCcleNeigh" /> and <Chip label="responseTcgaNeigh" />: Response similarity to cell lines and TCGA samples</li>
-              </ul>
-              <li className="fs-1 text-justify mb-1"><b>Drug Target and Biomarkers:</b></li>
-              <ul>
-              <li className="fs-1 text-justify mb-1"><Chip label="putativeTarget" />: The predicted molecular target of the drug</li>
-              <li className="fs-1 text-justify mb-1"><Chip label="topLocalShapGenes" />: Key genes influencing the drug response</li>
-              <li className="fs-1 text-justify mb-4"><Chip label="recoveredTarget" />: Validated target information</li>
-              </ul>
-            </ul>
+
             <h6 className="fs-1 text-justify mb-4"><b>Model Predictions Overview</b></h6>
             <p className="fs-1 text-justify mb-3">Investigate how the model predictions compare to experimental data and evaluate the performance of drug sensitivity predictions. Additionally, conduct a residual analysis to assess the model’s fit to the data by examining the residuals, which represent the differences between predicted and observed sensitivities.</p>
             <p className="fs-1 text-justify mb-2"><Chip label="Predictions by Source" />: The box plot summarizes and compares the statistical distributions of predictions across different sources (TCGA and CCLE) as defined in the data. Analyze the consistency of model predictions across these various datasets or sources.</p>
