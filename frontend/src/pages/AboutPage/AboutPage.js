@@ -28,7 +28,7 @@ const AboutPage = () => {
                      <h5 className="display-6 fw-bold mb-5">Details on the computational workflow</h5>
                      <img
                       tabIndex="1"
-                      src="/assets/images/web.png"
+                      src="/assets/images/web.webp"
                       data-toggle="tooltip"
                       data-placement="top"
                       title="Click to zoom-in"

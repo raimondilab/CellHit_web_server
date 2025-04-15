@@ -579,7 +579,7 @@ function validateFile(fileContent) {
           <div className="col-md-12">
             <img
               tabIndex="1"
-              src="/assets/images/web.png"
+              src="/assets/images/web.webp"
               className="img-fluid center-help mb-5"
               data-toggle="tooltip"
               data-placement="top"

@@ -45,7 +45,7 @@ const handleDownloadTissue = () => {
               </p>
                <img
                     tabIndex="1"
-                    src="/assets/images/cellhit_graphical.png"
+                    src="/assets/images/cellhit_graphical.webp"
                     data-toggle="tooltip"
                     data-placement="top"
                     title="Click to zoom-in"
@@ -74,7 +74,7 @@ SHAP analysis and putative drug-associated genes where applicable.</p>
               <div className="col-md-4 text-center">
                 <img
                   tabIndex="1"
-                  src="/assets/images/boxplot.png"
+                  src="/assets/images/boxplot.webp"
                   data-toggle="tooltip"
                   data-placement="top"
                   title="Click to zoom-in"
@@ -85,7 +85,7 @@ SHAP analysis and putative drug-associated genes where applicable.</p>
               <div className="col-md-4 text-center">
                 <img
                   tabIndex="1"
-                  src="/assets/images/histogram.png"
+                  src="/assets/images/histogram.webp"
                   data-toggle="tooltip"
                   data-placement="top"
                   title="Click to zoom-in"
@@ -96,7 +96,7 @@ SHAP analysis and putative drug-associated genes where applicable.</p>
               <div className="col-md-4 text-center">
                 <img
                   tabIndex="1"
-                  src="/assets/images/density.png"
+                  src="/assets/images/density.webp"
                   data-toggle="tooltip"
                   data-placement="top"
                   title="Click to zoom-in"
@@ -109,7 +109,7 @@ SHAP analysis and putative drug-associated genes where applicable.</p>
               <div className="col-md-12 text-center">
                 <img
                   tabIndex="1"
-                  src="/assets/images/residue.png"
+                  src="/assets/images/residue.webp"
                   data-toggle="tooltip"
                   data-placement="top"
                   title="Click to zoom-in"
@@ -141,7 +141,7 @@ SHAP analysis and putative drug-associated genes where applicable.</p>
                 <div className="col-md-6 text-center">
                   <img
                     tabIndex="1"
-                    src="/assets/images/oncotree_plot.png"
+                    src="/assets/images/oncotree_plot.webp"
                     data-toggle="tooltip"
                     data-placement="top"
                     title="Click to zoom-in"
@@ -152,7 +152,7 @@ SHAP analysis and putative drug-associated genes where applicable.</p>
                 <div className="col-md-6 text-center">
                   <img
                     tabIndex="1"
-                    src="/assets/images/tissue_plot.png"
+                    src="/assets/images/tissue_plot.webp"
                     data-toggle="tooltip"
                     data-placement="top"
                     title="Click to zoom-in"
@@ -181,7 +181,7 @@ SHAP analysis and putative drug-associated genes where applicable.</p>
               </p>
               <img
                       tabIndex="1"
-                      src="/assets/images/tablei.png"
+                      src="/assets/images/tablei.webp"
                       data-toggle="tooltip"
                       data-placement="top"
                       title="Click to zoom-in"
@@ -196,11 +196,11 @@ SHAP analysis and putative drug-associated genes where applicable.</p>
                 <div className="col-md-12 text-center">
                   <img
                     tabIndex="1"
-                    src="/assets/images/table.png"
+                    src="/assets/images/table.webp"
                     data-toggle="tooltip"
                     data-placement="top"
                     title="Click to zoom-in"
-                    alt="Learning Workflow"
+                    alt="table"
                     className="center-help shrink img-fluid mb-5"
                   />
                 </div>
@@ -209,7 +209,7 @@ SHAP analysis and putative drug-associated genes where applicable.</p>
                 <div className="col-md-4 text-center">
                   <img
                     tabIndex="1"
-                    src="/assets/images/gene_importance.png"
+                    src="/assets/images/gene_importance.webp"
                     data-toggle="tooltip"
                     data-placement="top"
                     title="Click to zoom-in"
@@ -220,7 +220,7 @@ SHAP analysis and putative drug-associated genes where applicable.</p>
                  <div className="col-md-4 text-center">
                   <img
                     tabIndex="1"
-                    src="/assets/images/drug_distr.png"
+                    src="/assets/images/drug_distr.webp"
                     data-toggle="tooltip"
                     data-placement="top"
                     title="Click to zoom-in"
@@ -231,7 +231,7 @@ SHAP analysis and putative drug-associated genes where applicable.</p>
                 <div className="col-md-4 text-center">
                   <img
                     tabIndex="1"
-                    src="/assets/images/drug_cell.png"
+                    src="/assets/images/drug_cell.webp"
                     data-toggle="tooltip"
                     data-placement="top"
                     title="Click to zoom-in"
@@ -255,7 +255,7 @@ SHAP analysis and putative drug-associated genes where applicable.</p>
                 <div className="col-md-6 text-center">
                   <img
                     tabIndex="1"
-                    src="/assets/images/heatmap.png"
+                    src="/assets/images/heatmap.webp"
                     data-toggle="tooltip"
                     data-placement="top"
                     title="Click to zoom-in"
@@ -266,7 +266,7 @@ SHAP analysis and putative drug-associated genes where applicable.</p>
                 <div className="col-md-6 text-center">
                   <img
                     tabIndex="1"
-                    src="/assets/images/heatmap2.png"
+                    src="/assets/images/heatmap2.webp"
                     data-toggle="tooltip"
                     data-placement="top"
                     title="Click to zoom-in"
