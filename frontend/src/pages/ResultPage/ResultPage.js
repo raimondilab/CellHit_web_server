@@ -687,7 +687,9 @@ return (
           <Dialog header="Explore" visible={visible} position={position} style={{ width: '50vw' }} onHide={() => setVisible(false)}
             draggable={false} resizable={false} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
             <p className="m-0 mb-1 text-justify">
-              Allows users to explore pre-computed predictions and outputs for the entire TCGA dataset.
+              This page provides access to pre-computed pharmacogenomic predictions for the entire TCGA dataset, using data from two major databases: GDSC, which includes 686 cell lines and 286 drugs, and PRISM, which features 887 cell lines and 6,337 drugs.
+            </p>
+            <p className="m-0 mb-1 text-justify">   You can view the prediction tables for both GDSC and PRISM. To find results for a specific drug, enter its name in the filter field and click the adjacent button to apply the filter. Once you apply the filter, a statistical visualization for the selected drug will appear, along with a description of the visualization. Additionally, you have the option to download either the complete or filtered prediction tables.
             </p>
             <p className="m-0 mb-1 text-justify">For more information, please refer to the
               <Link className="" to="/help/#explore" target="_blank"><b> help</b></Link> page.

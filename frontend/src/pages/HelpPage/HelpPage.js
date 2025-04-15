@@ -13,6 +13,16 @@ const handleDownload = () => {
         window.open(downloadUrl, '_blank');
 };
 
+const handleDownloadTissue = () => {
+  const downloadUrl = '/assets/data/tissue.csv';
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  link.setAttribute('download', 'tissue.csv');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
   return (
     <>
       <Helmet>
@@ -43,7 +53,8 @@ const handleDownload = () => {
                     className="center-help shrink img-fluid mb-5"
                   />
             <h5 className="display-6 fw-bold mb-4" id="explore">Explore now</h5>
-            <p className="fs-1 text-justify mb-2">Users can explore pre-computed predictions and outputs for the entire TCGA dataset using two major pharmacogenomic databases: GDSC, which includes data from 686 cell lines tested against 286 drugs, and PRISM, covering 887 cell lines and 6,337 drugs. Users can access the predictions tables for GDSC and PRISM, filter results by drug name, and click the button next to the filter field to apply their selection. Additionally, users have the option to download the predictions.</p>
+            <p className="fs-1 text-justify mb-2">Users can explore pre-computed predictions and outputs for the entire TCGA dataset through two major pharmacogenomic databases: GDSC, which includes data from 686 cell lines tested against 286 drugs, and PRISM, which covers 887 cell lines and 6,337 drugs. </p>
+            <p className="fs-1 text-justify ">Users can access the predictions tables for GDSC and PRISM and filter the results by drug name. They should click the button next to the filter field to apply their selection. Once the filter is applied, a statistical visualization of the selected drug will be displayed. A description of this visualization is provided below. Additionally, users have the option to download the predictions.</p>
             <p className="fs-1 text-justify ">The key columns in the pre-computed predictions dataset are:</p>
              <ul>
               <li className="fs-1 text-justify mb-1"><b>Drug Information:</b> Includes <Chip label="drugName" />, <Chip label="drugId" />, and <Chip label="gdscId" />, identifying the tested compounds</li>
@@ -68,6 +79,61 @@ const handleDownload = () => {
               <li className="fs-1 text-justify mb-4"><Chip label="recoveredTarget" />: Validated target information</li>
               </ul>
             </ul>
+            <h6 className="fs-1 text-justify mb-4"><b>Model Predictions Overview</b></h6>
+            <p className="fs-1 text-justify mb-3">Investigate how the model predictions compare to experimental data and evaluate the performance of drug sensitivity predictions. Additionally, conduct a residual analysis to assess the model’s fit to the data by examining the residuals, which represent the differences between predicted and observed sensitivities.</p>
+            <p className="fs-1 text-justify mb-2"><Chip label="Predictions by Source" />: The box plot summarizes and compares the statistical distributions of predictions across different sources (TCGA and CCLE) as defined in the data. Analyze the consistency of model predictions across these various datasets or sources.</p>
+            <p className="fs-1 text-justify mb-2"><Chip label="Quantile Score Distribution" />: The histogram illustrates the distribution of predicted relative sensitivity values (Quantile Scores) for the selected drug. It shows how many indicators are predicted to be very sensitive (low QS), have median sensitivity (QS around 0.5), or be very resistant (high QS) in the context of the overall model predictions. This provides valuable insight into the expected sensitivity profile for the drug.</p>
+            <p className="fs-1 text-justify mb-2"><Chip label="Predicted vs Experimental Density" />: The density plot examines and compares the overall shape of the distributions of predicted and experimental values for the drug. Evaluate whether the model accurately captures the central tendency and variability observed in the experimental data.</p>
+            <p className="fs-1 text-justify mb-4"><Chip label="Residuals (Prediction - Experimental)" />: The residue plot shows the difference between prediction and experimental value for each cell line grouped by source for a specific drug.</p>
+            <div className="row">
+              <div className="col-md-4 text-center">
+                <img
+                  tabIndex="1"
+                  src="/assets/images/boxplot.png"
+                  data-toggle="tooltip"
+                  data-placement="top"
+                  title="Click to zoom-in"
+                  alt="boxplot"
+                  className="shrink img-fluid mb-2"
+                />
+              </div>
+              <div className="col-md-4 text-center">
+                <img
+                  tabIndex="1"
+                  src="/assets/images/histogram.png"
+                  data-toggle="tooltip"
+                  data-placement="top"
+                  title="Click to zoom-in"
+                  alt="histogram"
+                  className="shrink img-fluid mb-2"
+                />
+              </div>
+              <div className="col-md-4 text-center">
+                <img
+                  tabIndex="1"
+                  src="/assets/images/density.png"
+                  data-toggle="tooltip"
+                  data-placement="top"
+                  title="Click to zoom-in"
+                  alt="density"
+                  className="shrink img-fluid mb-2"
+                />
+              </div>
+             </div>
+             <div className="row">
+              <div className="col-md-12 text-center">
+                <img
+                  tabIndex="1"
+                  src="/assets/images/residue.png"
+                  data-toggle="tooltip"
+                  data-placement="top"
+                  title="Click to zoom-in"
+                  alt="residue"
+                  className="shrink img-fluid mb-5"
+                />
+              </div>
+            </div>
+
             <h5 className="display-6 fw-bold mb-4">Run CellHit</h5>
             <p className="fs-1 text-justify mb-2">To run CellHit on your data, you need to upload a transcriptomic dataset of your choice. Start by clicking the "Upload Dataset" button, which will take you to the upload window. Next, select the drug dataset by choosing either GDSC or PRISM. Finally, click the submit button to complete the process.
             <br/>Please ensure that you provide a CSV, ZIP, or GZ file containing bulk transcriptomic data from cancer cells, formatted in log2(TPM+1).
@@ -76,8 +142,8 @@ const handleDownload = () => {
              <ol>
               <li className="fs-1 text-justify">The file must include a column labelled "GENE," which contains gene names.</li>
               <li className="fs-1 text-justify">Each sample should have its corresponding column with numeric values representing the transcriptomic data for each gene. Sample names should be unique and clearly labelled (e.g., GB101-1_S3, GB101-2_S4).</li>
-              <li className="fs-1 text-justify">Include a column titled "TCGA_CODE" to specify the cancer type associated with each sample in that row (for example, "GBM" for Glioblastoma Multiforme).</li>
-              <li className="fs-1 text-justify">Add a column labelled "TISSUE" to indicate the tissue type for each sample in that row (for example, "CNS/Brain").</li>
+              <li className="fs-1 text-justify">Include a column titled "TCGA_CODE" to specify the cancer type associated with each sample in that row (for example, "GBM" for Glioblastoma Multiforme). The complete list of TCGA acronyms is available at <Link to="https://gdc.cancer.gov/resources-tcga-users/tcga-code-tables/tcga-study-abbreviations" target="_blank" rel="noopener noreferrer"><b><i>here.</i></b></Link></li>
+              <li className="fs-1 text-justify">Add a column labelled "TISSUE" to indicate the tissue type for each sample in that row (for example, "CNS/Brain"). The complete list of tissue names is available at <b><i><span style={{ cursor: 'pointer' }} onClick={handleDownloadTissue}>here.</span></i></b></li>
             </ol>
             <p className="fs-1 m-0 mb-4 text-justify"> Please click <b><Link onClick={handleDownload}>here</Link></b> for an example input file.
             </p>
