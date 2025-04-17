@@ -459,7 +459,7 @@ useEffect(() => {
                        <div className="row mb-4">
                         <div className="col-12 nopadding">
                           <InferenceTable inferenceData={inferenceData}  setShapData={setShapData}  setTitleDrug={setTitleDrug}
-                          setDrugKey={setDrugKey} setCellKey={setCellKey} setPredictedValue={setPredictedValue} setCellDatabase={setCellDatabase}  taskID={task}/>
+                          setDrugKey={setDrugKey} setCellKey={setCellKey} setPredictedValue={setPredictedValue} setCellDatabase={setCellDatabase}/>
                          </div>
                        </div>
                      )}

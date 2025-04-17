@@ -14,8 +14,7 @@ const InferenceTable = ({
     setCellKey,
     setPredictedValue,
     setTitleDrug,
-    setCellDatabase,
-    taskID
+    setCellDatabase
 }) => {
 
     const dt = useRef(null);
@@ -126,25 +125,39 @@ const InferenceTable = ({
         return rowData === selectedRow ? 'highlighted-row' : '';
     };
 
-    const API_BASE_URL = 'https://api.cellhit.bioinfolab.sns.it';
-
-    const downloadFileFromAPI = async (taskId, format) => {
-       const downloadUrl = `${API_BASE_URL}/api/export/${taskId}?format=${format}`;
-       window.open(downloadUrl, '_blank');
+    const exportCSV = (tableRef, selectionOnly) => {
+        tableRef.current.exportCSV({ selectionOnly });
     };
 
-    const exportCSV = (taskId) => {
-        downloadFileFromAPI(taskId, 'csv');
+    const exportExcel = async (dataToExport) => {
+        const xlsx = await import('xlsx');
+        const worksheet = xlsx.utils.json_to_sheet(dataToExport);
+        const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
+        const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
+        saveAsExcelFile(excelBuffer, 'data');
     };
 
-    const exportExcel = (taskId) => {
-        downloadFileFromAPI(taskId, 'excel');
+    const saveAsExcelFile = (buffer, fileName) => {
+        import('file-saver').then((module) => {
+            if (module && module.default) {
+                let EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+                let EXCEL_EXTENSION = '.xlsx';
+                const data = new Blob([buffer], { type: EXCEL_TYPE });
+                module.default.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
+            }
+        });
     };
 
-    const exportPdf = (taskId) => {
-        downloadFileFromAPI(taskId, 'pdf');
+    const exportPdf = (dataToExport, columns) => {
+        import('jspdf').then((jsPDF) => {
+            import('jspdf-autotable').then(() => {
+                const doc = new jsPDF.default('landscape');
+                const formattedColumns = columns.map(col => ({ title: col.header, dataKey: col.field }));
+                doc.autoTable(formattedColumns, dataToExport);
+                doc.save('data.pdf');
+            });
+        });
     };
-
 
     const handleClick = () => {
         navigator.clipboard.writeText(window.location.href);
@@ -210,9 +223,7 @@ const InferenceTable = ({
                     display="chip"
                     style={{ width: '200px', marginRight: '10px' }}
                 />
-                <Button icon="pi pi-file" className="p-button-rounded p-mr-2" onClick={() => exportCSV(taskID)} />
-                <Button icon="pi pi-file-excel" className="p-button-success p-button-rounded p-mr-2" onClick={() => exportExcel(taskID)} />
-                <Button icon="pi pi-file-pdf" className="p-button-warning p-button-rounded" onClick={() => exportPdf(taskID)} />
+                <Button icon="pi pi-file" className="p-button-rounded p-mr-2" onClick={() => exportCSV(dt, false)} />
                 <Button icon="pi pi-link" severity="help" className="p-button-rounded p-mr-2" onClick={handleClick} />
             </div>
         </div>
