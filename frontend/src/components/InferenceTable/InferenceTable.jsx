@@ -126,7 +126,7 @@ const InferenceTable = ({
         return rowData === selectedRow ? 'highlighted-row' : '';
     };
 
-    const API_BASE_URL = 'http://127.0.0.1:8003';
+    const API_BASE_URL = 'https://api.cellhit.bioinfolab.sns.it';
 
     const downloadFileFromAPI = async (taskId, format) => {
        const downloadUrl = `${API_BASE_URL}/api/export/${taskId}?format=${format}`;
