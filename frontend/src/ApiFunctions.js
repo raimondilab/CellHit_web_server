@@ -20,8 +20,6 @@ export async function getTaskResultsStep(task, step) {
         const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
         const taskData = await axios.post(apiUrl, query);
 
-        console.log(taskData)
-
         if (!taskData.data.data || taskData.data.errors) {
             Swal.fire({
                 icon: "error",
