@@ -224,6 +224,8 @@ const InferenceTable = ({
                     style={{ width: '200px', marginRight: '10px' }}
                 />
                 <Button icon="pi pi-file" className="p-button-rounded p-mr-2" onClick={() => exportCSV(dt, false)} />
+                <Button icon="pi pi-file-excel" className="p-button-success p-button-rounded p-mr-2" onClick={() => exportExcel(inferenceData)} />
+                <Button icon="pi pi-file-pdf" className="p-button-warning p-button-rounded" onClick={() => exportPdf(inferenceData, columns)} />
                 <Button icon="pi pi-link" severity="help" className="p-button-rounded p-mr-2" onClick={handleClick} />
             </div>
         </div>
