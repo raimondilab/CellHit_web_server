@@ -535,8 +535,6 @@ async function getPRISMData(page, elementForPage, value) {
             experimentalMin
             experimentalMedian
             experimentalMax
-            modelMse
-            modelCorr
             transcrCcleNeigh
             transcrCcleNeighCelllinename
             transcrCcleNeighOncotree

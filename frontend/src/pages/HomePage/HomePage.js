@@ -34,8 +34,6 @@ const HomePage = () => {
                                 experimentalMin
                                 experimentalMedian
                                 experimentalMax
-                                modelMse
-                                modelCorr
                                 transcrCcleNeigh
                                 transcrCcleNeighCelllinename
                                 transcrCcleNeighOncotree
@@ -65,8 +63,6 @@ const HomePage = () => {
                                 experimentalMin
                                 experimentalMedian
                                 experimentalMax
-                                modelMse
-                                modelCorr
                                 transcrCcleNeigh
                                 transcrCcleNeighCelllinename
                                 transcrCcleNeighOncotree
