@@ -3,9 +3,11 @@ import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { FilterMatchMode, FilterOperator } from 'primereact/api';
 import { MultiSelect } from 'primereact/multiselect';
 import 'primeicons/primeicons.css';
+import Swal from 'sweetalert2';
+import { saveAs } from 'file-saver';
+import { utils, write } from 'xlsx';
 
 const InferenceTable = ({
     inferenceData,
@@ -83,8 +85,6 @@ const InferenceTable = ({
         .map(dataset => ({ label: dataset, value: dataset }))
         .sort((a, b) => a.label.localeCompare(b.label));
 
-
-
     const [filteredData, setFilteredData] = useState(inferenceData);
 
     useEffect(() => {
@@ -129,33 +129,78 @@ const InferenceTable = ({
         tableRef.current.exportCSV({ selectionOnly });
     };
 
-    const exportExcel = async (dataToExport) => {
-        const xlsx = await import('xlsx');
-        const worksheet = xlsx.utils.json_to_sheet(dataToExport);
-        const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
-        const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
-        saveAsExcelFile(excelBuffer, 'data');
-    };
-
-    const saveAsExcelFile = (buffer, fileName) => {
-        import('file-saver').then((module) => {
-            if (module && module.default) {
-                let EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-                let EXCEL_EXTENSION = '.xlsx';
-                const data = new Blob([buffer], { type: EXCEL_TYPE });
-                module.default.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
-            }
+    // Function to prepare data for export
+    const prepareDataForExport = (data) => {
+        return data.map(item => {
+            return visibleColumns.map(col => item[col.field]); // Only export visible columns
         });
     };
 
+    const exportExcel = async (dataToExport) => {
+    const xlsx = await import('xlsx');
+
+    const uniquePatients = getUniquePatients(dataToExport);
+
+    const visibleDrugNames = [
+        ...new Set(dataToExport.map(item => item.DrugName))
+    ].filter(Boolean);
+
+    const firstVisibleDrug = visibleDrugNames[0] || 'Unknown';
+
+    Swal.fire({
+        icon: 'info',
+        title: 'Excel Export Notice',
+        html: `
+            <p>A total of <strong>${uniquePatients.length}</strong> patient rows (based on <code>index</code>) for <strong>${firstVisibleDrug}</strong> will be exported. </p>
+            <p>If you want to export data for another drug, please apply the <strong>Drug</strong> filter first.</p>
+        `,
+        confirmButtonText: 'OK'
+    }).then(() => {
+
+        const worksheet = xlsx.utils.json_to_sheet(uniquePatients);
+
+
+        const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
+
+
+        const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
+
+
+        const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+
+        saveAs(blob, 'data_export.xlsx');
+    });
+};
+
+
     const exportPdf = (dataToExport, columns) => {
-        import('jspdf').then((jsPDF) => {
-            import('jspdf-autotable').then(() => {
-                const doc = new jsPDF.default('landscape');
-                const formattedColumns = columns.map(col => ({ title: col.header, dataKey: col.field }));
-                doc.autoTable(formattedColumns, dataToExport);
-                doc.save('data.pdf');
+        setTimeout(() => {
+            import('jspdf').then((jsPDF) => {
+                import('jspdf-autotable').then(() => {
+                    const doc = new jsPDF.default('landscape', 'pt');
+                    const formattedColumns = columns.map(col => ({
+                        title: col.header,
+                        dataKey: col.field
+                    }));
+                    doc.autoTable({
+                        columns: formattedColumns,
+                        body: dataToExport,
+                        styles: { fontSize: 8 }, // reduce font size
+                        margin: { top: 50 }
+                    });
+                    doc.save('data.pdf');
+                });
             });
+        }, 100); // Defer execution
+    };
+
+    const getUniquePatients = (data) => {
+        const seen = new Set();
+        return data.filter(item => {
+            if (seen.has(item.index)) return false;
+            seen.add(item.index);
+            return true;
         });
     };
 
@@ -169,21 +214,20 @@ const InferenceTable = ({
     };
 
     const dynamicColumns = visibleColumns.map((col) => (
-    <Column
-        key={col.field}
-        field={col.field}
-        header={col.header}
-        sortable
-        body={(rowData) => {
-            const value = rowData[col.field];
-            if (col.field === "DrugName" && typeof value === "string") {
-                return value.toUpperCase();
-            }
-            return typeof value === "number" ? value.toExponential(2) : value;
+        <Column
+            key={col.field}
+            field={col.field}
+            header={col.header}
+            sortable
+            body={(rowData) => {
+                const value = rowData[col.field];
+                if (col.field === "DrugName" && typeof value === "string") {
+                    return value.toUpperCase();
+                }
+                return typeof value === "number" ? value.toExponential(2) : value;
             }}
         />
     ));
-
 
     const header = (
         <div className="row align-items-center">
@@ -201,7 +245,7 @@ const InferenceTable = ({
                     />
                     <MultiSelect
                         value={selectedDrugs}
-                        options={uniqueDrugs} // <-- always shows all drugs
+                        options={uniqueDrugs}
                         onChange={(e) => setSelectedDrugs(e.value)}
                         optionLabel="label"
                         optionValue="value"
@@ -224,8 +268,31 @@ const InferenceTable = ({
                     style={{ width: '200px', marginRight: '10px' }}
                 />
                 <Button icon="pi pi-file" className="p-button-rounded p-mr-2" onClick={() => exportCSV(dt, false)} />
-                <Button icon="pi pi-file-excel" className="p-button-success p-button-rounded p-mr-2" onClick={() => exportExcel(inferenceData)} />
-                <Button icon="pi pi-file-pdf" className="p-button-warning p-button-rounded" onClick={() => exportPdf(inferenceData, columns)} />
+                <Button icon="pi pi-file-excel" className="p-button-success p-button-rounded p-mr-2" onClick={() => exportExcel(filteredData)} />
+                <Button
+                    icon="pi pi-file-pdf"
+                    className="p-button-warning p-button-rounded"
+                    onClick={() => {
+                        const uniquePatients = getUniquePatients(filteredData);
+                        const visibleDrugNames = [
+                            ...new Set(filteredData.map(item => item.DrugName))
+                        ].filter(Boolean);
+
+                        const firstVisibleDrug = filteredData.find(item => item.DrugName)?.DrugName || 'Unknown';
+
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'PDF Export Notice',
+                            html: `
+                                <p>A total of <strong>${uniquePatients.length}</strong> patient rows (based on <code>index</code>) for <strong>${firstVisibleDrug}</strong> will be exported. </p>
+                                <p>If you want to export data for another drug, please apply the <strong>Drug</strong> filter first.</p>
+                            `,
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            exportPdf(uniquePatients, visibleColumns);
+                        });
+                    }}
+                />
                 <Button icon="pi pi-link" severity="help" className="p-button-rounded p-mr-2" onClick={handleClick} />
             </div>
         </div>
