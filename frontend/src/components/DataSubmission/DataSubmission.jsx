@@ -317,8 +317,6 @@ async function getTaskResults() {
                    const url = new URL(window.location.href);
                    url.searchParams.set('taskId', taskID);
 
-                   console.log(type)
-
                    if (type === "align") {
                       navigate('/resultAlign/' + url.search, { state: { taskID: taskID, data: result } })
 
@@ -375,7 +373,6 @@ function validateFile(fileContent) {
         // 2. Detect data under empty/missing headers
         const originalFields = meta.fields; // Get all headers detected by PapaParse
         const emptyHeaderIndices = [];      // Array to store indices of columns with empty headers
-        console.log(originalFields)
         originalFields.forEach((field, index) => {
             // Identify headers that are null, undefined, empty string, or whitespace only
             if (field === null || String(field).trim() === '' || !field || field.toUpperCase() === 'NAN') {
