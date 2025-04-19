@@ -78,16 +78,18 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit, alignO
         );
     };
 
-    const customizedContent = (item) => {
-        return (
-            <div>
-                <p className="mb-1">{item.status}</p>
-                {item.status === 'Results elaboration' && completionMessage && (
-                    <p style={{ fontStyle: 'italic', color: '#757575', marginTop: '0px' }}>{completionMessage}</p>
-                )}
-            </div>
-        );
-    };
+     const customizedContent = (item) => {
+    return (
+        <div>
+            <p className="mt-2 mb-1">{item.status}</p> {/* Removida margem inferior */}
+            {item.status === 'Results elaboration' && completionMessage && (
+                <sub style={{ fontStyle: 'italic', color: '#757575', display: 'block' }}>
+                    {completionMessage}
+                </sub>
+            )}
+        </div>
+    );
+   };
 
     const handleEnableNotifications = () => {
     if (notificationsEnabled) {
@@ -188,9 +190,8 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit, alignO
                     setTaskStatusState('Queueing');
                     setTaskStatus('Queueing');
                 }
-                    console.log(newStatus)
+
                  if (newStatus === 'Processing') {
-                   console.log(formattedDate, newStatus)
                    setCompletionMessage(`Results will be stored until ${formattedDate}.`);
                  }
 
