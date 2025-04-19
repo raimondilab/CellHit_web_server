@@ -49,23 +49,25 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit, alignO
 
    useEffect(() => {
     const indexOfCurrentTask = baseEvents.findIndex(event => event.status === statusTask);
+
     let updatedEvents = baseEvents.map((event, index) => ({
         ...event,
         color: index <= indexOfCurrentTask ? currentEventColor : event.color,
     }));
 
-    // Hide "Inference" if alignOnly is true
-    if (alignOnly === "ON") {
-        updatedEvents = updatedEvents.filter(e => e.status !== "Inference");
-    }
+    // Apply conditional removals
+    const shouldHideInference = alignOnly === "ON";
+    const shouldHideQueueing = statusTask !== "Queueing";
 
-    // Dynamically hide "Queueing" if not applicable
-    if (statusTask !== "Queueing" && updatedEvents.some(e => e.status === "Queueing")) {
-        updatedEvents = updatedEvents.filter(e => e.status !== "Queueing");
-    }
+    updatedEvents = updatedEvents.filter(event => {
+        if (event.status === "Inference" && shouldHideInference) return false;
+        if (event.status === "Queueing" && shouldHideQueueing) return false;
+        return true;
+    });
 
     setHighlightedEvents(updatedEvents);
 }, [statusTask, alignOnly]);
+
 
 
     const customizedEvents = (item) => {
