@@ -23,6 +23,9 @@ import plotly.express as px
 import numpy as np
 import os
 
+os.environ["PYTHONHASHSEED"] = "0"
+np.random.seed(0)
+
 # Get the base directory of the script
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -340,6 +343,8 @@ def alignment(self, file):
         self.update_state(state='PROGRESS', meta='Batch correction')
         corrected = batch_correct(data, covariate_labels, preprocess_paths)
 
+        corrected.to_csv("corrected.csv")
+
         # Step 3: Imputation
         self.update_state(state='PROGRESS', meta='Imputation')
         imputed = impute_missing(corrected, preprocess_paths, covariate_labels)
@@ -399,40 +404,42 @@ def alignment(self, file):
 
 # Preprocess user data
 def preprocess_data(data, code):
-    # Transpose data
+    # Transpose data to samples as rows, genes as columns
     data = data.transpose()
 
-    # Mapping genes if any value in the first column starts with 'ENSG'
-    if data.columns.str.startswith("ENSG").any():
-        data.columns = ensg_to_hgnc(data.columns)
-        data = data.reset_index()
+    # Sort columns (genes) to ensure consistent order before any operation
+    data = data[sorted(data.columns)]
 
-        # Remove "GENE" from column names
-        data.columns = data.columns.str.replace("GENE", " ", regex=True)
+    # Check if gene names are ENSG identifiers
+    if any(str(col).startswith("ENSG") for col in data.columns):
+        # Map ENSG to HGNC gene names
+        data.columns = map_ensg_to_hgnc(data.columns)
 
-        # Replace "GENE" in values, if necessary
-        data = data.replace("GENE", "", regex=True)
-
-        data = data.set_index('index')
+        # Clean up any leftover 'GENE' text
+        data.columns = pd.Index([str(col).replace("GENE", "").strip() for col in data.columns])
 
         # Remove columns with zero standard deviation
         data = data.loc[:, data.std() != 0]
 
-        # Update column names after filtering
-        genes = data.columns
+        # Ensure all column names are strings and no MultiIndex remains
+        if isinstance(data.columns, pd.MultiIndex):
+            data.columns = ['_'.join(map(str, col)).strip() for col in data.columns.values]
+        data.columns = data.columns.astype(str)
 
-        # Group and calculate the mean for duplicate columns
-        data = data.groupby(genes, axis=1).mean()
+        # Group duplicate columns (e.g. duplicated gene names after mapping)
+        data = data.groupby(data.columns, axis=1).mean()
 
-        # Reset the index and modify it
+        # Reset and format sample index
+        data = data.sort_index()
         data = data.reset_index()
-        data['index'] = data['index'].apply(lambda x: code + '_' + x)
+        data['index'] = data['index'].apply(lambda x: f"{code}_{x}")
         data = data.set_index('index')
 
-        # Add 1 to all values and take the log2
+        # Apply log2 transformation with +1 shift
         data = data.apply(lambda x: np.log2(x + 1))
 
     return data
+
 
 
 # Draw IC50 heatmap
@@ -568,52 +575,46 @@ def draw_scatter_plot(umap, code, color):
     return fig_json
 
 
-def ensg_to_hgnc(df_columns):
+def map_ensg_to_hgnc(df_columns):
     """
     Transforms a list or pandas Index of Ensembl Gene IDs (ENSG format) to HGNC symbols.
-
-    Parameters:
-    df_columns (pd.Index or list): A pandas Index or list containing Ensembl Gene IDs.
-
-    Returns:
-    pd.Index: A pandas Index with corresponding HGNC symbols. Returns the original ENSG ID for unmapped IDs.
+    Unmapped or duplicated genes are preserved or made unique to avoid conflicts.
     """
-
-    # Initialize MyGeneInfo client
     mg = mygene.MyGeneInfo()
 
-    # Convert columns to a list if necessary
-    if isinstance(df_columns, pd.Index):
-        columns = df_columns.tolist()
-    else:
-        columns = df_columns
-
-    # Extract unique ENSG IDs to minimize redundant queries and normalize them
+    columns = df_columns.tolist() if isinstance(df_columns, pd.Index) else df_columns
     unique_ensg = {col.split('.')[0] for col in columns if col.startswith("ENSG")}
 
-    # Split each value by '.' and take the first part
-    unique_ensg = [value.split('.')[0] for value in unique_ensg]
-
     if not unique_ensg:
-        return pd.Index(columns)  # Return original columns if no valid ENSG IDs are present
+        return pd.Index(columns)
 
-    # Query MyGeneInfo for all unique ENSG IDs
     print('Querying MyGeneInfo for all unique ENSG IDs...')
     try:
-        results = mg.querymany(list(unique_ensg), scopes='ensembl.gene', fields='symbol', species='human',
-                               as_dataframe=False)
+        results = mg.querymany(list(unique_ensg), scopes='ensembl.gene', fields='symbol', species='human', as_dataframe=False)
         print('MyGeneInfo query completed.')
     except Exception as e:
         print(f"Error during MyGeneInfo query: {e}")
         return pd.Index(columns)
 
-    # Use a dictionary comprehension to create the mapping (query -> first symbol or fallback to query)
+    # Create mapping dictionary
     ensg_to_symbol = {entry['query']: entry.get('symbol', entry['query']) for entry in results if 'query' in entry}
 
-    # Map the original columns using the dictionary, falling back to the original ID if no match is found
-    mapped_columns = [ensg_to_symbol.get(col.split('.')[0], col) for col in columns]
+    # Build initial mapped list
+    mapped = [ensg_to_symbol.get(col.split('.')[0], col) for col in columns]
 
-    return pd.Index(mapped_columns)
+    # Handle duplicated gene symbols by appending a suffix
+    seen = {}
+    final_mapped = []
+    for gene in mapped:
+        if gene in seen:
+            seen[gene] += 1
+            final_mapped.append(f"{gene}_{seen[gene]}")
+        else:
+            seen[gene] = 1
+            final_mapped.append(gene)
+
+    return pd.Index(final_mapped)
+
 
 
 def save_numpy_dict(task_id, dic_type, dataset, data):
