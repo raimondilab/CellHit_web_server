@@ -183,7 +183,7 @@ const handleDownloadTissue = () => {
 
             <h5 className="display-6 fw-bold mb-4">Run CellHit</h5>
             <p className="fs-1 text-justify mb-2">To run CellHit on your data, you need to upload a transcriptomic dataset of your choice. Start by clicking the "Upload Dataset" button, which will take you to the upload window. Next, select the drug dataset by choosing either GDSC or PRISM. Finally, click the submit button to complete the process.
-            <br/>Please ensure that you provide a CSV, ZIP, or GZ file containing bulk transcriptomic data from cancer cells.
+            <br/>Please ensure that you provide a CSV, ZIP, or GZ file containing bulk transcriptomic data from cancer cells, in raw counts.
             </p>
              <p className="fs-1 text-justify">To properly process the input file, it must adhere to the following specific structure:</p>
              <ol>
