@@ -472,12 +472,12 @@ useEffect(() => {
                           </div>
                           <div className="col-12 col-md-4 nopadding">
                             <div className="rounded-3 shadow img-fluid">
-                              <DensityPlot title={titleDrug} data={drugData} predictionValue={predictedValue} />
+                              <DensityPlot title={titleDrug} data={drugData} predictionValue={predictedValue} dataset={cellDatabase} />
                             </div>
                           </div>
                           <div className="col-12 col-md-4 nopadding">
                             <div className="rounded-3 shadow img-fluid">
-                              <DensityPlot title={titleCell} data={cellData} predictionValue={predictedValue} />
+                              <DensityPlot title={titleCell} data={cellData} predictionValue={predictedValue} dataset={cellDatabase}/>
                             </div>
                           </div>
                         </div>

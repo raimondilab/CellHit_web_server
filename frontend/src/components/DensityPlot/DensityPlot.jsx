@@ -2,8 +2,10 @@ import React, { useMemo } from 'react';
 import Plot from 'react-plotly.js';
 import { kernelDensityEstimation } from 'simple-statistics';
 
-const DensityPlot = ({ data, predictionValue, title, bandwidth = 1 }) => {
+const DensityPlot = ({ data, predictionValue, title, bandwidth = 1, dataset }) => {
   const isValidData = data && Array.isArray(data) && data.length > 0;
+
+  console.log(data)
 
   const gaussianKernel = useMemo(() => {
     return (x) => Math.exp(-0.5 * x ** 2) / Math.sqrt(2 * Math.PI);
@@ -31,7 +33,9 @@ const DensityPlot = ({ data, predictionValue, title, bandwidth = 1 }) => {
   const layout = {
     title: { text: `${title} predicted response distribution` },
     xaxis: {
-      title: { text: 'Prediction (IC50)' },
+       title: {
+          text: dataset === "GDSC" ? 'Prediction (IC50)' : 'Prediction (LFC)'
+       },
       automargin: true,
     },
     yaxis: {
