@@ -34,7 +34,7 @@ with open(PARENT_DIR / 'project_ids.json') as f:
     project_ids = json.load(f)
 
 # read ccle_code_map
-with open(PARENT_DIR / '/tissue_map.json') as f:
+with open(PARENT_DIR / 'tissue_map.json') as f:
     ccle_code_map = json.load(f)
 
 
