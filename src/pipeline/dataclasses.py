@@ -2,10 +2,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Union, Optional
 
+
 @dataclass
 class PreprocessPaths:
     """Container for model and data file paths
-    
+
     Attributes:
         classifier_path: Path to classifier model
         classifier_mapper_path: Path to classifier mapper
@@ -25,6 +26,9 @@ class PreprocessPaths:
     tcga_metadata_path: Union[Path, str] = None
     tcga_code_map_path: Union[Path, str] = None
     tcga_project_ids_path: Union[Path, str] = None
+    ccle_data_path: Union[Path, str] = None
+    ccle_metadata_path: Union[Path, str] = None
+    ccle_code_map_path: Union[Path, str] = None
     umap_path: Optional[Union[Path, str]] = None
 
     def __post_init__(self):
@@ -40,7 +44,10 @@ class PreprocessPaths:
                 self.tcga_metadata_path,
                 self.tcga_code_map_path,
                 self.tcga_project_ids_path,
-                self.umap_path
+                self.umap_path,
+                self.ccle_data_path,
+                self.ccle_metadata_path,
+                self.ccle_code_map_path
             ] if path is not None
         ]
 
@@ -68,7 +75,7 @@ class InferencePaths:
     tcga_transcr_neighs: Union[Path, str] = None
     ccle_response_neighs: Union[Path, str] = None
     tcga_response_neighs: Union[Path, str] = None
-    
+
     # Models paths
     pretrained_models_path: Union[Path, str] = None
 
@@ -107,13 +114,12 @@ class InferencePaths:
         # Convert all string paths to Path objects
         present_paths = []
         for path in paths_to_check:
-            #if not None and string
+            # if not None and string
             if path is not None and isinstance(path, str):
                 path = Path(path)
                 present_paths.append(path)
-        
+
         # Check if paths exist and list all non-existing paths
         non_existing_paths = [path for path in present_paths if not path.exists()]
         if non_existing_paths:
             raise FileNotFoundError(f"Paths {non_existing_paths} do not exist.")
-        

@@ -1,3 +1,11 @@
+import os
+import random
+import numpy as np
+
+os.environ["PYTHONHASHSEED"] = "0"
+np.random.seed(0)
+random.seed(0)
+
 import json
 
 import pandas as pd
@@ -20,11 +28,6 @@ from src.pipeline.align import batch_correct, impute_missing, celligner_transfor
 from src.pipeline import InferencePaths, run_full_inference
 import plotly.express as px
 
-import numpy as np
-import os
-
-os.environ["PYTHONHASHSEED"] = "0"
-np.random.seed(0)
 
 # Get the base directory of the script
 BASE_DIR = Path(__file__).resolve().parent
@@ -36,8 +39,8 @@ PARENT_DIR = BASE_DIR.parent
 RESULTS_DIR = PARENT_DIR / 'distrib_files/'
 
 celery = Celery(__name__)
-celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
-celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/1")
+celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/1")
 
 # Set time limits to 4 hours
 celery.conf.update(
@@ -64,7 +67,7 @@ def start_flower():
         "-A",
         __name__,
         "flower",
-        "--port=5555"
+        "--port=5559"
     ]
     try:
         process = Popen(flower_cmd)
@@ -108,12 +111,19 @@ preprocess_paths = PreprocessPaths(
     tcga_metadata_path=PARENT_DIR / 'src/tcga_oncotree_data.csv',
     tcga_code_map_path=PARENT_DIR / 'src/tcga_code_map.pkl',
     tcga_project_ids_path=PARENT_DIR / 'src/tcga_project_ids.json',
+    ccle_data_path=PARENT_DIR /'src/ccle_raw.feather',
+    ccle_metadata_path=PARENT_DIR /'src/Model.csv',
+    ccle_code_map_path=PARENT_DIR /'src/ccle_code_map.pkl',
     umap_path=PARENT_DIR / 'src/umap.trc'
 )
 
 # read tcga_code_map
 with open(PARENT_DIR / 'src/tcga_to_code_map.json') as f:
     tcga_code_map = json.load(f)
+
+# read ccle_code_map
+with open(PARENT_DIR / 'src/tissue_map.json') as f:
+    ccle_code_map = json.load(f)
 
 # read overall umap
 umap_df = pd.read_csv(PARENT_DIR / 'src/overall_umap_df.csv', index_col=0)
@@ -148,7 +158,7 @@ inference_paths_prism = InferencePaths(
 
 
 @celery.task(bind=True)
-def analysis(self, file, datasets):
+def analysis(self, file, datasets, datatype):
     try:
         results_pipeline = {}
 
@@ -159,17 +169,17 @@ def analysis(self, file, datasets):
 
         df = pd.read_csv(StringIO(file), sep=",", header=0, index_col=0)
 
-        # Get TCGA_CODE code
-        code = str(df['TCGA_CODE'].unique()[0])
-
         # Get Tissue
         tissue = ''.join(df['TISSUE'].unique())
+
+        # Get TCGA_CODE/CCLE code
+        code = str(df['TCGA_CODE'].unique()[0]) if datatype == "patient" else tissue
 
         # Drop TCGA_CODE
         df = df.drop(columns=['TCGA_CODE', 'TISSUE'])
 
         # gbm code
-        gbm_code = tcga_code_map.get(code)
+        gbm_code = tcga_code_map.get(code) if datatype == "patient" else ccle_code_map.get(code)
 
         # Preprocess data
         data = preprocess_data(df, code)
@@ -188,10 +198,11 @@ def analysis(self, file, datasets):
         # Step 4: Transform
         self.update_state(state='PROGRESS', meta='Transform')
 
+        transform_source = 'target' if datatype == "patient" else 'reference'
         transformed = celligner_transform_data(data=imputed,
                                                preprocess_paths=preprocess_paths,
                                                device='cuda:0',
-                                               transform_source='target')
+                                               transform_source=transform_source)
 
         umap_path = preprocess_paths.umap_path
 
@@ -343,8 +354,6 @@ def alignment(self, file):
         self.update_state(state='PROGRESS', meta='Batch correction')
         corrected = batch_correct(data, covariate_labels, preprocess_paths)
 
-        corrected.to_csv("corrected.csv")
-
         # Step 3: Imputation
         self.update_state(state='PROGRESS', meta='Imputation')
         imputed = impute_missing(corrected, preprocess_paths, covariate_labels)
@@ -426,7 +435,7 @@ def preprocess_data(data, code):
             data.columns = ['_'.join(map(str, col)).strip() for col in data.columns.values]
         data.columns = data.columns.astype(str)
 
-        # Group duplicate columns (e.g. duplicated gene names after mapping)
+        # Group columns
         data = data.groupby(data.columns, axis=1).mean()
 
         # Reset and format sample index
@@ -439,7 +448,6 @@ def preprocess_data(data, code):
         data = data.apply(lambda x: np.log2(x + 1))
 
     return data
-
 
 
 # Draw IC50 heatmap
@@ -590,7 +598,8 @@ def map_ensg_to_hgnc(df_columns):
 
     print('Querying MyGeneInfo for all unique ENSG IDs...')
     try:
-        results = mg.querymany(list(unique_ensg), scopes='ensembl.gene', fields='symbol', species='human', as_dataframe=False)
+        results = mg.querymany(list(unique_ensg), scopes='ensembl.gene', fields='symbol', species='human',
+                               as_dataframe=False)
         print('MyGeneInfo query completed.')
     except Exception as e:
         print(f"Error during MyGeneInfo query: {e}")
@@ -614,7 +623,6 @@ def map_ensg_to_hgnc(df_columns):
             final_mapped.append(gene)
 
     return pd.Index(final_mapped)
-
 
 
 def save_numpy_dict(task_id, dic_type, dataset, data):
