@@ -182,7 +182,7 @@ def analysis(self, file, datasets, datatype):
         gbm_code = tcga_code_map.get(code) if datatype == "patient" else ccle_code_map.get(code)
 
         # Preprocess data
-        data = preprocess_data(df, code)
+        data = preprocess_data(df, code) if datatype == "patient" else preprocess_data(df, gbm_code)
 
         # Define covariate labels (TCGA category to which the new sample belong to)
         covariate_labels = [gbm_code] * len(data)
@@ -323,7 +323,7 @@ def analysis(self, file, datasets, datatype):
 
 
 @celery.task(bind=True)
-def alignment(self, file):
+def alignment(self, file, datatype):
     try:
         results_pipeline = {}
 
@@ -332,20 +332,20 @@ def alignment(self, file):
 
         df = pd.read_csv(StringIO(file), sep=",", header=0, index_col=0)
 
-        # Get TCGA_CODE code
-        code = str(df['TCGA_CODE'].unique()[0])
-
         # Get Tissue
         tissue = ''.join(df['TISSUE'].unique())
+
+        # Get TCGA_CODE/CCLE code
+        code = str(df['TCGA_CODE'].unique()[0]) if datatype == "patient" else tissue
 
         # Drop TCGA_CODE
         df = df.drop(columns=['TCGA_CODE', 'TISSUE'])
 
         # gbm code
-        gbm_code = tcga_code_map.get(code)
+        gbm_code = tcga_code_map.get(code) if datatype == "patient" else ccle_code_map.get(code)
 
         # Preprocess data
-        data = preprocess_data(df, code)
+        data = preprocess_data(df, code) if datatype == "patient" else preprocess_data(df, gbm_code)
 
         # Define covariate labels (TCGA category to which the new sample belong to)
         covariate_labels = [gbm_code] * len(data)
@@ -361,10 +361,11 @@ def alignment(self, file):
         # Step 4: Transform
         self.update_state(state='PROGRESS', meta='Transform')
 
+        transform_source = 'target' if datatype == "patient" else 'reference'
         transformed = celligner_transform_data(data=imputed,
                                                preprocess_paths=preprocess_paths,
                                                device='cuda:0',
-                                               transform_source='target')
+                                               transform_source=transform_source)
 
         umap_path = preprocess_paths.umap_path
 

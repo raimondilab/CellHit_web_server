@@ -370,7 +370,7 @@ class QueryResolver:
 
 class MutationResolver:
     @staticmethod
-    async def run_analysis(file: Upload, datasets: List[str]) -> schemas.Task:
+    async def run_analysis(file: Upload, datasets: List[str], datatype: str) -> schemas.Task:
 
         try:
 
@@ -390,7 +390,7 @@ class MutationResolver:
             print(f"Selected datasets for analysis: {selected_datasets}")
 
             # Delay execution of the analysis task using Celery
-            task = worker.analysis.s(csv_data, list(selected_datasets)).delay()
+            task = worker.analysis.s(csv_data, list(selected_datasets), datatype).delay()
 
             # Return task metadata with initial status
             return schemas.Task(task_id=task.id, status='Data sending', result="", type="analysis")
@@ -400,7 +400,7 @@ class MutationResolver:
             raise  # Re-raise the exception for further handling
 
     @staticmethod
-    async def run_alignment(file: Upload) -> schemas.Task:
+    async def run_alignment(file: Upload, datatype: str) -> schemas.Task:
         try:
 
             # Access the file data as a string (UTF-8 encoded)
@@ -410,7 +410,7 @@ class MutationResolver:
             csv_data = contents.decode("utf-8")  # Decode bytes to string
 
             # Delay execution of the analysis task using Celery
-            task = worker.alignment.s(csv_data).delay()
+            task = worker.alignment.s(csv_data, datatype).delay()
 
             # Return task metadata with initial status
             return schemas.Task(task_id=task.id, status='Data sending', result="", type="align")
