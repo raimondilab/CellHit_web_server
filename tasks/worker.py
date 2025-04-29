@@ -39,8 +39,8 @@ PARENT_DIR = BASE_DIR.parent
 RESULTS_DIR = PARENT_DIR / 'distrib_files/'
 
 celery = Celery(__name__)
-celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/1")
-celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/1")
+celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
+celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
 
 # Set time limits to 4 hours
 celery.conf.update(
@@ -67,7 +67,7 @@ def start_flower():
         "-A",
         __name__,
         "flower",
-        "--port=5559"
+        "--port=5555"
     ]
     try:
         process = Popen(flower_cmd)
