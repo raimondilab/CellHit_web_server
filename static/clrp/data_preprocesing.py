@@ -46,8 +46,8 @@ def dataframe_to_mysql_batch(data_file, table):
 
     # Connect to the database
     connection = pymysql.connect(host='localhost',
-                                 user='bionfolab',
-                                 password='Bioinfolab22#@!',
+                                 user='',
+                                 password='',
                                  db='cellhit')
     try:
         # create cursor
