@@ -300,7 +300,7 @@ def impute_missing(
     data_completed['tumor_y'] = data_completed['tumor_y'].map(code_tcga_map)
     # make tumor_y a categorical variable
     data_completed['tumor_y'] = pd.Categorical(data_completed['tumor_y'],
-                                               categories=tcga_code_map.project_ids,
+                                               categories=project_ids,
                                                ordered=False)
 
     # if there are missing genes, impute

@@ -173,16 +173,16 @@ def analysis(self, file, datasets, datatype):
         tissue = ''.join(df['TISSUE'].unique())
 
         # Get TCGA_CODE/CCLE code
-        code = str(df['TCGA_CODE'].unique()[0]) if datatype == "patient" else tissue
+        code = str(df['TCGA_CODE'].unique()[0])
 
         # Drop TCGA_CODE
         df = df.drop(columns=['TCGA_CODE', 'TISSUE'])
 
         # gbm code
-        gbm_code = tcga_code_map.get(code) if datatype == "patient" else ccle_code_map.get(code)
+        gbm_code = tcga_code_map.get(code) if datatype == "patient" else ccle_code_map.get(tissue)
 
         # Preprocess data
-        data = preprocess_data(df, code) if datatype == "patient" else preprocess_data(df, gbm_code)
+        data = preprocess_data(df, code)
 
         # Define covariate labels (TCGA category to which the new sample belong to)
         covariate_labels = [gbm_code] * len(data)
@@ -336,16 +336,16 @@ def alignment(self, file, datatype):
         tissue = ''.join(df['TISSUE'].unique())
 
         # Get TCGA_CODE/CCLE code
-        code = str(df['TCGA_CODE'].unique()[0]) if datatype == "patient" else tissue
+        code = str(df['TCGA_CODE'].unique()[0])
 
         # Drop TCGA_CODE
         df = df.drop(columns=['TCGA_CODE', 'TISSUE'])
 
         # gbm code
-        gbm_code = tcga_code_map.get(code) if datatype == "patient" else ccle_code_map.get(code)
+        gbm_code = tcga_code_map.get(code) if datatype == "patient" else ccle_code_map.get(tissue)
 
         # Preprocess data
-        data = preprocess_data(df, code) if datatype == "patient" else preprocess_data(df, gbm_code)
+        data = preprocess_data(df, code)
 
         # Define covariate labels (TCGA category to which the new sample belong to)
         covariate_labels = [gbm_code] * len(data)

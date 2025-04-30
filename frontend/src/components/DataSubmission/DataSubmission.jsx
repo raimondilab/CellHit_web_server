@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import axios from 'axios';
 import HeaderTitleRunCellHit from '../../components/HeaderTitleRunCellHit/HeaderTitleRunCellHit';
+import DataTypeDialog from '../../components/DataTypeDialog/DataTypeDialog';
 import Swal from 'sweetalert2';
 import { Link } from 'react-router-dom';
 import {useNavigate} from "react-router-dom";
@@ -23,6 +24,9 @@ const DataSubmission = ({ setIsSubmit, setTaskId, setTaskStatus, alignOnly, setA
   const [loading, setIsLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [values, setValues] = useState(["gdsc"]);
+  const [selectedType, setSelectedType] = useState("");
+  const [isDialogVisible, setIsDialogVisible] = useState(false);
+
 
   const tcgaCodeMap = require('../../tcga_project_ids.json');
   const tissue = require('../../tissue.json');
@@ -45,6 +49,7 @@ const handleFileChange = async (e) => {
   }
 
   setSelectedFile(file);
+  setIsDialogVisible(true);
 };
 
 const handleAlignment = () => {
@@ -86,7 +91,7 @@ const handleAlignment = () => {
 const handleFormSubmit = async (e) => {
   e.preventDefault();
 
-  if (submitted) return;
+   if (submitted || !selectedType) return; // Don't submit if no type selected or already submitted
 
   setSubmitted(true);
 
@@ -110,10 +115,17 @@ const handleFormSubmit = async (e) => {
     const fileContent = await processedFile.text();
     await validateFile(fileContent)
 
+    if (!selectedType){
+        setIsSubmit(false);
+        setSubmitted(false);
+        return;
+    }
+
     setIsSubmit(true);
 
+     console.log(selectedType)
     // Call send file function base on the task type
-    alignOnly === "ON" ? await sendFileAlignment(processedFile) : await sendFile(processedFile);
+    alignOnly === "ON" ? await sendFileAlignment(processedFile, selectedType) : await sendFile(processedFile, selectedType);
 
   } catch (error) {
     setIsSubmit(false);
@@ -125,6 +137,7 @@ const handleFormSubmit = async (e) => {
     });
   }
 };
+
 
 async function extractZip(file) {
   const zip = await JSZip.loadAsync(file);
@@ -164,13 +177,13 @@ const handleFormSubmitTask = (e) => {
 };
 
 
-async function sendFileAlignment(file) {
+async function sendFileAlignment(file, dataType) {
   try {
     const formData = new FormData();
     formData.append("operations", JSON.stringify({
       query: `
-        mutation run($file: Upload!) {
-          runAlignment(file: $file) {
+        mutation run($file: Upload!, $datatype: String!) {
+          runAlignment(file: $file, datatype: $datatype) {
             taskId
             status
           }
@@ -178,11 +191,13 @@ async function sendFileAlignment(file) {
       `,
       variables: {
         file: null, // Will be filled by the file upload
+        datatype: dataType
       },
     }));
 
     formData.append("map", JSON.stringify({ 0: ["variables.file"] }));
     formData.append("0", file); // Add file to the request
+    formData.append("dataType", selectedType);
 
     const apiUrl = 'https://api.cellhit.bioinfolab.sns.it/graphql';
     const response = await axios.post(apiUrl, formData, {
@@ -216,13 +231,13 @@ async function sendFileAlignment(file) {
 
 
 // Send file to back-end and get TaskId
-async function sendFile(file) {
+async function sendFile(file, dataType) {
   try {
     const formData = new FormData();
     formData.append("operations", JSON.stringify({
       query: `
-        mutation runAnalysis($file: Upload!, $datasets: [String!]!) {
-          runAnalysis(file: $file, datasets: $datasets) {
+        mutation runAnalysis($file: Upload!, $datasets: [String!]!, $datatype: String!) {
+          runAnalysis(file: $file, datasets: $datasets, datatype: $datatype) {
             taskId
             status
           }
@@ -231,6 +246,7 @@ async function sendFile(file) {
       variables: {
         file: null, // Will be filled by the file upload
         datasets: values,
+        datatype: dataType
       },
     }));
 
@@ -501,7 +517,6 @@ function validateFile(fileContent) {
                       htmlFor="gdsc"
                       className={`label-btn gdsc-border me-01 ${values.includes("gdsc") && alignOnly !== "ON"  ? "hover" : ""} ${values.includes("gdsc") && alignOnly === "ON"  ? "disabled" : ""}`}
                       onClick={() => toggleDataset("gdsc")} disabled={alignOnly === "ON" ? true : false}
-
                     >
                       GDSC
                     </label>
@@ -571,6 +586,10 @@ function validateFile(fileContent) {
           </div>
         </Card>
         </div>
+
+        {isDialogVisible && (
+          <DataTypeDialog setSelectedType={setSelectedType} isDialogVisible={isDialogVisible} setIsDialogVisible={setIsDialogVisible} />
+        )}
 
         <div className="row mt-5">
           <div className="col-md-12">
