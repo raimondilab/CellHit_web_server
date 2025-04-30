@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/645703655.svg)](https://doi.org/10.5281/zenodo.15309741)
+
 <p align="center">
   <img 
     src="https://github.com/raimondilab/CLRP/blob/master/frontend/public/assets/images/1.webp" 
