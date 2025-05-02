@@ -191,7 +191,7 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit, alignO
                     setTaskStatus('Queueing');
                 }
 
-                 if (newStatus === 'Processing') {
+                 if (newStatus === 'Processing' || newStatus === 'Batch correction' ) {
                    setCompletionMessage(`Results will be stored until ${formattedDate}.`);
                  }
 
