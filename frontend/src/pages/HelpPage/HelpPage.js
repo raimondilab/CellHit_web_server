@@ -22,6 +22,19 @@ const handleDownloadTissue = () => {
   document.body.removeChild(link);
 };
 
+
+const handleDownloadTCGA = () => {
+  const downloadUrl = '/assets/data/tcga_study_names.csv';
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  link.setAttribute('download', 'tcga_study_names.csv');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+
+
   return (
     <>
       <Helmet>
@@ -189,7 +202,7 @@ const handleDownloadTissue = () => {
              <ol>
               <li className="fs-1 text-justify">The file must include a column labelled "GENE," which contains gene names.</li>
               <li className="fs-1 text-justify">Each sample should have its corresponding column with numeric values representing the transcriptomic data for each gene. Sample names should be unique and clearly labelled (e.g., GB101-1_S3, GB101-2_S4).</li>
-              <li className="fs-1 text-justify">Include a column titled "TCGA_CODE" to specify the cancer type associated with each sample in that row (for example, "GBM" for Glioblastoma Multiforme). The complete list of TCGA acronyms is available at <Link to="https://gdc.cancer.gov/resources-tcga-users/tcga-code-tables/tcga-study-abbreviations" target="_blank" rel="noopener noreferrer"><b><i>here.</i></b></Link></li>
+              <li className="fs-1 text-justify">Include a column titled "TCGA_CODE" to specify the cancer type associated with each sample in that row (for example, "GBM" for Glioblastoma Multiforme). The complete list of TCGA acronyms is available at <Link  onClick={handleDownloadTCGA}><b><i>here.</i></b></Link></li>
               <li className="fs-1 text-justify">Add a column labelled "TISSUE" to indicate the tissue type for each sample in that row (for example, "CNS/Brain"). The complete list of tissue names is available at <b><i><span style={{ cursor: 'pointer' }} onClick={handleDownloadTissue}>here.</span></i></b></li>
             </ol>
             <p className="fs-1 m-0 mb-4 text-justify"> Please click <b><Link onClick={handleDownload}>here</Link></b> for an example input file.
