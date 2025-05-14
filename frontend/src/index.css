@@ -19107,3 +19107,6 @@ input:checked {
     color: #06b6d4;
 }
 
+.nobreak {
+  white-space: nowrap;
+}
