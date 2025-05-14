@@ -219,6 +219,7 @@ const InferenceTable = ({
             field={col.field}
             header={col.header}
             sortable
+            className="nobreak"
             body={(rowData) => {
                 const value = rowData[col.field];
                 if (col.field === "DrugName" && typeof value === "string") {
