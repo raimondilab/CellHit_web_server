@@ -125,11 +125,16 @@ const AboutPage = () => {
                     inspired by <Link to="https://doi.org/10.1162/neco_a_01434 " target="_blank" rel="noopener noreferrer"><b><i>https://doi.org/10.1162/neco_a_01434</i></b></Link>,
                     is released as an open-source tool at <Link to="https://github.com/mr-fcharles/parametric_umap" target="_blank" rel="noopener noreferrer"><b><i>https://github.com/mr-fcharles/parametric_umap</i></b></Link>
                     </p>
-                    <h5 className="display-6 fw-bold mb-3">CellHit</h5>
+                     <h5 className="display-6 fw-bold mb-3">CellHit</h5>
                      <p className="fs-1 text-justify mb-3">
                      The aligned patients data is sent to inference in the models thourghly described in the <Link to="https://doi.org/10.1038/s41467-025-56827-5" target="_blank" rel="noopener noreferrer"><b><i> Learning and actioning general principles of cancer cell drug sensitivity</i></b></Link>.
                      Code for these model is already available at <Link to="https://github.com/raimondilab/CellHit" target="_blank" rel="noopener noreferrer"><b><i>CellHit.</i></b></Link>
                      </p>
+                      <h5 className="display-6 fw-bold mb-3">How to cite</h5>
+                      <p className="fs-1 text-justify mb-3">
+                       <b>CellHit: a web server to predict and analyze cancer patients’ drug responsiveness.</b> Francesco Carli , Natalia De Oliveira Rosa , Simon Blotas , Pierluigi Di Chiaro , Luisa Bisceglia , Mariangela Morelli , Francesca Lessi , Anna Luisa Di Stefano , Chiara Maria Mazzanti , Gioacchino Natoli , Francesco Raimondi;
+                       <i>Nucleic Acids Research (2025)</i><Link to="https://doi.org/10.1093/nar/gkaf414" target="_blank" rel="noopener noreferrer"><b><i>, gkaf414.</i></b></Link>
+                      </p>
 
                     <h5 className="display-6 fw-bold mb-3">Libraries</h5>
                     <ul className="mb-1 ml-10">
