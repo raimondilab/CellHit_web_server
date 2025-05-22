@@ -132,7 +132,8 @@ const AboutPage = () => {
                      </p>
                       <h5 className="display-6 fw-bold mb-3">How to cite</h5>
                       <p className="fs-1 text-justify mb-3">
-                       <b>CellHit: a web server to predict and analyze cancer patients’ drug responsiveness.</b> Francesco Carli , Natalia De Oliveira Rosa , Simon Blotas , Pierluigi Di Chiaro , Luisa Bisceglia , Mariangela Morelli , Francesca Lessi , Anna Luisa Di Stefano , Chiara Maria Mazzanti , Gioacchino Natoli , Francesco Raimondi;
+                       <b>CellHit: a web server to predict and analyze cancer patients’ drug responsiveness.</b>
+                       Francesco Carli, Natalia De Oliveira Rosa, Simon Blotas, Pierluigi Di Chiaro, Luisa Bisceglia, Mariangela Morelli, Francesca Lessi, Anna Luisa Di Stefano, Chiara Maria Mazzanti, Gioacchino Natoli, Francesco Raimondi;
                        <i>Nucleic Acids Research (2025)</i><Link to="https://doi.org/10.1093/nar/gkaf414" target="_blank" rel="noopener noreferrer"><b><i>, gkaf414.</i></b></Link>
                       </p>
 
