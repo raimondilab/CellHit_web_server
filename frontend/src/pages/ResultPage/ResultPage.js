@@ -163,6 +163,44 @@ const dtPrism = useRef(null);
         tableRef.current.exportCSV({ selectionOnly });
     };
 
+function downloadJSONAsCSV(jsonData, filename = 'data.csv') {
+  if (!Array.isArray(jsonData) || jsonData.length === 0) {
+    console.error('Invalid JSON data');
+    return;
+  }
+
+  // Extract CSV headers from the first object
+  const headers = Object.keys(jsonData[0]);
+  const csvRows = [];
+
+  // Add the headers row
+  csvRows.push(headers.join(','));
+
+  // Convert each object to a CSV row
+  jsonData.forEach(obj => {
+    const values = headers.map(header => {
+      const val = obj[header];
+      // Escape quotes and wrap each value in quotes
+      return `"${String(val).replace(/"/g, '""')}"`;
+    });
+    csvRows.push(values.join(','));
+  });
+
+  // Create a Blob from the CSV string
+  const csvString = csvRows.join('\n');
+  const blob = new Blob([csvString], { type: 'text/csv' });
+
+  // Create a link and trigger the download
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 
 async function sendExploreData(value) {
 
@@ -601,6 +639,7 @@ const handleResetData = (event) => {
    getGDSCData(0, 10);
    setLoading(false);
    setTotalRecords(4060342);
+   setGdscDataSta([]);
 };
 
 const handleResetDataPrism = (event) => {
@@ -617,6 +656,7 @@ const handleResetDataPrism = (event) => {
    getPRISMData(0, 10);
    setLoadingPrism(false);
    setTotalRecordsPrism(17958038);
+   setPrismDataSta([]);
 };
 
 
@@ -639,7 +679,7 @@ const header = (
               display="chip"
               style={{ width: '200px', marginRight: '10px' }}
           />
-          <Button type="button" text icon="pi pi-download" className="p-button-rounded p-mr-2" onClick={() => exportCSV(dt, false)} data-pr-tooltip="CSV" />
+          <Button type="button" text icon="pi pi-download" className="p-button-rounded p-mr-2" onClick={() => gdscDataSta.length > 0 ? downloadJSONAsCSV(gdscDataSta) : exportCSV(dt, false) } data-pr-tooltip="CSV" />
           <Button type="button" icon="pi pi-refresh" text  onClick={handleResetData}/>
       </div>
   </div>
@@ -664,7 +704,7 @@ const header = (
               display="chip"
               style={{ width: '200px', marginRight: '10px' }}
           />
-          <Button type="button" text icon="pi pi-download" className="p-button-rounded p-mr-2" onClick={() => exportCSV(dtPrism, false)} data-pr-tooltip="CSV" />
+          <Button type="button" text icon="pi pi-download" className="p-button-rounded p-mr-2" onClick={() => prismDataSta.length > 0 ? downloadJSONAsCSV(prismDataSta) : exportCSV(dtPrism, false)} data-pr-tooltip="CSV" />
           <Button type="button" icon="pi pi-refresh" text  onClick={handleResetDataPrism}/>
       </div>
   </div>
@@ -689,6 +729,7 @@ return (
             </p>
             <p className="m-0 mb-1 text-justify">   You can view the prediction tables for both GDSC and PRISM. To find results for a specific drug, enter its name in the filter field and click the adjacent button to apply the filter. Once you apply the filter, a statistical visualization for the selected drug will appear, along with a description of the visualization. Additionally, you have the option to download either the complete or filtered prediction tables.
             </p>
+            <p className="m-0 mb-1 text-justify"><i>If you would like to download all the data related to a specific drug for further analysis, use the filter and wait for the static plot to appear. Then, click the download button. Otherwise, you will only download the data visible on the current page.</i></p>
             <p className="m-0 mb-1 text-justify">For more information, please refer to the
               <Link className="" to="/help/#explore" target="_blank"><b> help</b></Link> page.
             </p>
