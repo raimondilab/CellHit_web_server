@@ -402,11 +402,32 @@ const query = {
             query getGDSCDrug{
                 gdscDrug(drug: "${value}") {
                     drugName
-                    source
-                    sampleIndex
-                    predictions
-                    quantileScore
-                    experimentalMedian
+            drugId
+            source
+            sampleIndex
+            predictions
+            predictionsStd
+            quantileScore
+            experimentalMin
+            experimentalMedian
+            experimentalMax
+            modelMse
+            modelCorr
+            transcrCcleNeigh
+            transcrCcleNeighCelllinename
+            transcrCcleNeighOncotree
+            responseCcleNeigh
+            responseCcleNeighCelllinename
+            responseCcleNeighOncotree
+            transcrTcgaNeigh
+            transcrTcgaNeighDiagnosis
+            transcrTcgaNeighSite
+            responseTcgaNeigh
+            responseTcgaNeighDiagnosis
+            responseTcgaNeighSite
+            putativeTarget
+            topLocalShapGenes
+            recoveredTarget
                 }
             }
         `
@@ -437,11 +458,32 @@ async function getPRISMDataToSta (value) {
             query getPRISMDrug{
                 prismDrug(drug: "${value}") {
                     drugName
-                    source
-                    sampleIndex
-                    predictions
-                    quantileScore
-                    experimentalMedian
+            drugId
+            source
+            sampleIndex
+            predictions
+            predictionsStd
+            quantileScore
+            experimentalMin
+            experimentalMedian
+            experimentalMax
+            modelMse
+            modelCorr
+            transcrCcleNeigh
+            transcrCcleNeighCelllinename
+            transcrCcleNeighOncotree
+            responseCcleNeigh
+            responseCcleNeighCelllinename
+            responseCcleNeighOncotree
+            transcrTcgaNeigh
+            transcrTcgaNeighDiagnosis
+            transcrTcgaNeighSite
+            responseTcgaNeigh
+            responseTcgaNeighDiagnosis
+            responseTcgaNeighSite
+            putativeTarget
+            topLocalShapGenes
+            recoveredTarget
                 }
             }
         `
