@@ -364,132 +364,118 @@ async function getTaskResults() {
 function validateFile(fileContent) {
   return new Promise((resolve, reject) => {
 
-    // The required columns
     const requiredColumns = ['TCGA_CODE', 'TISSUE', 'GENE'];
 
     Papa.parse(fileContent, {
-      header: true,           // Continue using the first row as headers
-      skipEmptyLines: true,   // Skip empty lines
+      header: true,
+      skipEmptyLines: true,
       complete: function (result) {
-        // Destructure the result from PapaParse
         const { data, errors, meta } = result;
 
-        // 1. Handle basic PapaParse errors
         if (errors.length > 0) {
           reject(new Error(`Error parsing the file: ${errors.map(err => err.message).join(', ')}`));
           return;
         }
 
-        // Check if any headers were detected at all
         if (!meta.fields || meta.fields.length === 0) {
-            reject(new Error("Could not detect any columns. The file might be empty or not in a valid CSV format."));
-            return;
+          reject(new Error("Could not detect any columns. The file might be empty or not in a valid CSV format."));
+          return;
         }
 
-        // 2. Detect data under empty/missing headers
-        const originalFields = meta.fields; // Get all headers detected by PapaParse
-        const emptyHeaderIndices = [];      // Array to store indices of columns with empty headers
+        const originalFields = meta.fields;
+        const emptyHeaderIndices = [];
         originalFields.forEach((field, index) => {
-            // Identify headers that are null, undefined, empty string, or whitespace only
-            if (field === null || String(field).trim() === '' || !field || field.toUpperCase() === 'NAN') {
-                emptyHeaderIndices.push(index); // Store the index of the empty header
-            }
+          if (field === null || String(field).trim() === '' || !field || field.toUpperCase() === 'NAN') {
+            emptyHeaderIndices.push(index);
+          }
         });
 
-        // If any empty headers were found, check if there's data beneath them
         if (emptyHeaderIndices.length > 0) {
-             reject(new Error(`Data found under a missing header. All columns must have a header.`));
-             return; // Stop validation
+          reject(new Error(`Data found under a missing header. All columns must have a header.`));
+          return;
         }
 
-        // 3. Continue with the original validation logic from your code
-
-        // Keep only columns with valid (non-empty, non-whitespace) headers
         const validColumns = meta.fields.filter(col => col && col.trim());
-
-        // Check for missing required columns (using only the valid headers found)
         const missingColumns = requiredColumns.filter(col => !validColumns.includes(col));
         if (missingColumns.length > 0) {
           reject(new Error(`Missing required columns: ${missingColumns.join(', ')}`));
           return;
         }
 
-        // Identify the sample columns (those that are valid but not required)
         const sampleColumns = validColumns.filter(col => !requiredColumns.includes(col));
 
-        // Clean the data: Create a new array of objects containing only data from valid columns.
         const cleanedData = data.map(row => {
           const cleanedRow = {};
           for (let col of validColumns) {
-             // Only include data from columns that had a valid header.
-             // Check hasOwnProperty for robustness against potential PapaParse quirks with headers.
-             if (row.hasOwnProperty(col)) {
-                cleanedRow[col] = row[col];
-             }
+            if (row.hasOwnProperty(col)) {
+              cleanedRow[col] = row[col];
+            }
           }
           return cleanedRow;
         });
 
+        const geneSampleTracker = new Set();
 
-        // 4. Content validations
         for (let i = 0; i < cleanedData.length; i++) {
           const row = cleanedData[i];
-          const originalRowNum = i + 2; // Original row number in the file (1-based, accounting for header)
+          const originalRowNum = i + 2;
 
-          // Validate TCGA_CODE (uses tcgaCodeMap assumed to be defined externally)
           if (!row.TCGA_CODE || !String(row.TCGA_CODE).trim() || (typeof tcgaCodeMap !== 'undefined' && !tcgaCodeMap.includes(String(row.TCGA_CODE).trim()))) {
             reject(new Error(`Invalid or missing TCGA_CODE in row ${originalRowNum}: '${row.TCGA_CODE}'`));
             return;
           }
 
-          // Validate TISSUE (uses tissue array assumed to be defined externally)
           if (!row.TISSUE || !String(row.TISSUE).trim() || (typeof tissue !== 'undefined' && !tissue.includes(String(row.TISSUE).trim()))) {
             reject(new Error(`Invalid or missing TISSUE in row ${originalRowNum}: '${row.TISSUE}'`));
             return;
           }
 
-        // Validate sample columns (must be strictly numeric)
-        for (let col of sampleColumns) {
-          const value = row[col];
-          let isInvalid = false;
-          let reason = '';
+          const gene = String(row.GENE).trim();
+          if (!gene) {
+            reject(new Error(`Missing or empty GENE in row ${originalRowNum}`));
+            return;
+          }
 
-          if (value == null) { // Check for null or undefined
-            isInvalid = true;
-            reason = 'null or undefined';
-          } else {
-            const stringValue = String(value).trim();
-            if (stringValue === '') { // Check for empty string after trim
+          for (let col of sampleColumns) {
+            const value = row[col];
+            let isInvalid = false;
+            let reason = '';
+
+            if (value == null) {
               isInvalid = true;
-              reason = 'empty string';
-            } else if (stringValue.toUpperCase() === 'NAN') { // Check for 'NaN' string explicitly
-              isInvalid = true;
-              reason = "'NaN' string";
-            } else if (isNaN(parseFloat(stringValue))) { // Check if not parseable as a number
-              isInvalid = true;
-              reason = 'non-numeric';
+              reason = 'null or undefined';
+            } else {
+              const stringValue = String(value).trim();
+              if (stringValue === '') {
+                isInvalid = true;
+                reason = 'empty string';
+              } else if (stringValue.toUpperCase() === 'NAN') {
+                isInvalid = true;
+                reason = "'NaN' string";
+              } else if (isNaN(parseFloat(stringValue))) {
+                isInvalid = true;
+                reason = 'non-numeric';
+              }
             }
-            // Optional: Check for infinite values if they are also invalid
-            // else if (!isFinite(parseFloat(stringValue))) {
-            //   isInvalid = true;
-            //   reason = 'infinite value';
-            // }
-          }
 
-          if (isInvalid) {
-            // Updated error message to be more specific
-            reject(new Error(`Sample columns must contain valid numeric values only. Found invalid value (${reason}) in column '${col}', row ${originalRowNum}: '${value}'`));
-            return; // Stop validation on first error
+            if (isInvalid) {
+              reject(new Error(`Sample columns must contain valid numeric values only. Found invalid value (${reason}) in column '${col}', row ${originalRowNum}: '${value}'`));
+              return;
+            }
+
+            // Check for duplicate TCGA_CODE + GENE + sample
+            const key = `${row.TCGA_CODE}|${gene}|${col}`;
+            if (geneSampleTracker.has(key)) {
+              reject(new Error(`Duplicate entry for GENE '${gene}' under TCGA_CODE '${row.TCGA_CODE}' and sample column '${col}' at row ${originalRowNum}`));
+              return;
+            }
+            geneSampleTracker.add(key);
           }
         }
-        }
 
-        // 5. If all checks passed, resolve the promise with the cleaned data
-        // (data will only include columns that had valid headers)
         resolve(cleanedData);
       },
       error: function (error) {
-        // Handle errors during file reading or parsing by PapaParse
         reject(new Error(`Error reading or parsing the file: ${error.message}`));
       }
     });
