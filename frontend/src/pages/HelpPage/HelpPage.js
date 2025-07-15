@@ -225,10 +225,9 @@ const handleDownloadGdsc = () => {
               <li className="fs-1 text-justify">Add a column labelled "TISSUE" to indicate the tissue type for each sample in that row (for example, "CNS/Brain"). The complete list of tissue names is available at <b><i><span style={{ cursor: 'pointer' }} onClick={handleDownloadTissue}>here.</span></i></b></li>
             </ol>
             <p className="fs-1 text-justify">
-            Due to the moderate and tissue-specific responses of cancer cell lines to the various non-oncological drugs included in
-            the PRISM dataset, we have decided to limit our prediction output to models (drugs) that have a
-            correlation coefficient (ρ) greater than 0.2. This cutoff of ρ > 0.2 aligns with previous modelling efforts
-            based on an earlier release of the PRISM dataset. You can find the complete list of PRISM drug names available
+            Due to the generally low performance of most trained models, likely stemming from the moderate
+            and tissue-specific responses of cancer cell lines to the various non-oncological drugs in the PRISM dataset, we have decided to limit our prediction output to models (drugs) with a correlation coefficient (ρ) greater than 0.2. This cutoff
+            of ρ > 0.2 is consistent with previous modeling efforts using an earlier release of the PRISM dataset. You can find the complete list of PRISM drug names available
             <b><Link onClick={handleDownloadPrism}> here</Link></b>.
             Additionally, the comprehensive list of GDSC drugs is available <b><Link onClick={handleDownloadGdsc}>here</Link></b>.
             </p>
