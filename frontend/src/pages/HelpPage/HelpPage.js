@@ -33,6 +33,25 @@ const handleDownloadTCGA = () => {
   document.body.removeChild(link);
 };
 
+const handleDownloadPrism = () => {
+  const downloadUrl = '/assets/data/prism_drugs.csv';
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  link.setAttribute('download', 'prism_drugs.csv');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+const handleDownloadGdsc = () => {
+  const downloadUrl = '/assets/data/gdsc_drugs.csv';
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  link.setAttribute('download', 'gdsc_drugs.csv');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
 
 
   return (
@@ -205,6 +224,14 @@ const handleDownloadTCGA = () => {
               <li className="fs-1 text-justify">Include a column titled "TCGA_CODE" to specify the cancer type associated with each sample in that row (for example, "GBM" for Glioblastoma Multiforme). The complete list of TCGA acronyms is available at <Link  onClick={handleDownloadTCGA}><b><i>here.</i></b></Link></li>
               <li className="fs-1 text-justify">Add a column labelled "TISSUE" to indicate the tissue type for each sample in that row (for example, "CNS/Brain"). The complete list of tissue names is available at <b><i><span style={{ cursor: 'pointer' }} onClick={handleDownloadTissue}>here.</span></i></b></li>
             </ol>
+            <p className="fs-1 text-justify">
+            Due to the moderate and tissue-specific responses of cancer cell lines to the various non-oncological drugs included in
+            the PRISM dataset, we have decided to limit our prediction output to models (drugs) that have a
+            correlation coefficient (ρ) greater than 0.2. This cutoff of ρ > 0.2 aligns with previous modelling efforts
+            based on an earlier release of the PRISM dataset. You can find the complete list of PRISM drug names available
+            <b><Link onClick={handleDownloadPrism}> here</Link></b>.
+            Additionally, the comprehensive list of GDSC drugs is available <b><Link onClick={handleDownloadGdsc}>here</Link></b>.
+            </p>
             <p className="fs-1 m-0 mb-4 text-justify"> Please click <b><Link onClick={handleDownload}>here</Link></b> for an example input file.
             </p>
               <h5 className="display-6 fw-bold mb-4" id="umap">UMAP</h5>
