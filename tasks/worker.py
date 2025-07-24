@@ -28,7 +28,6 @@ from src.pipeline.align import batch_correct, impute_missing, celligner_transfor
 from src.pipeline import InferencePaths, run_full_inference
 import plotly.express as px
 
-
 # Get the base directory of the script
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -111,9 +110,9 @@ preprocess_paths = PreprocessPaths(
     tcga_metadata_path=PARENT_DIR / 'src/tcga_oncotree_data.csv',
     tcga_code_map_path=PARENT_DIR / 'src/tcga_code_map.pkl',
     tcga_project_ids_path=PARENT_DIR / 'src/tcga_project_ids.json',
-    ccle_data_path=PARENT_DIR /'src/ccle_raw.feather',
-    ccle_metadata_path=PARENT_DIR /'src/Model.csv',
-    ccle_code_map_path=PARENT_DIR /'src/ccle_code_map.pkl',
+    ccle_data_path=PARENT_DIR / 'src/ccle_raw.feather',
+    ccle_metadata_path=PARENT_DIR / 'src/Model.csv',
+    ccle_code_map_path=PARENT_DIR / 'src/ccle_code_map.pkl',
     umap_path=PARENT_DIR / 'src/umap.trc'
 )
 
@@ -425,28 +424,28 @@ def preprocess_data(data, code):
         # Map ENSG to HGNC gene names
         data.columns = map_ensg_to_hgnc(data.columns)
 
-        # Clean up any leftover 'GENE' text
-        data.columns = pd.Index([str(col).replace("GENE", "").strip() for col in data.columns])
+    # Clean up any leftover 'GENE' text
+    data.columns = pd.Index([str(col).replace("GENE", "").strip() for col in data.columns])
 
-        # Remove columns with zero standard deviation
-        data = data.loc[:, data.std() != 0]
+    # Remove columns with zero standard deviation
+    data = data.loc[:, data.std() != 0]
 
-        # Ensure all column names are strings and no MultiIndex remains
-        if isinstance(data.columns, pd.MultiIndex):
-            data.columns = ['_'.join(map(str, col)).strip() for col in data.columns.values]
+    # Ensure all column names are strings and no MultiIndex remains
+    if isinstance(data.columns, pd.MultiIndex):
+        data.columns = ['_'.join(map(str, col)).strip() for col in data.columns.values]
         data.columns = data.columns.astype(str)
 
-        # Group columns
-        data = data.groupby(data.columns, axis=1).mean()
+    # Group columns
+    data = data.groupby(data.columns, axis=1).mean()
 
-        # Reset and format sample index
-        data = data.sort_index()
-        data = data.reset_index()
-        data['index'] = data['index'].apply(lambda x: f"{code}_{x}")
-        data = data.set_index('index')
+    # Reset and format sample index
+    data = data.sort_index()
+    data = data.reset_index()
+    data['index'] = data['index'].apply(lambda x: f"{code}_{x}")
+    data = data.set_index('index')
 
-        # Apply log2 transformation with +1 shift
-        data = data.apply(lambda x: np.log2(x + 1))
+    # Apply log2 transformation with +1 shift
+    data = data.apply(lambda x: np.log2(x + 1))
 
     return data
 
@@ -693,3 +692,11 @@ def preprocess_heatmap_data(predictions, dataset):
     standardized_heatmap = (heatmap_data - mean_vals) / std_vals
 
     return {'heatmap_data': heatmap_data, 'standardized_heatmap': standardized_heatmap}
+
+
+def raw_counts_to_log2_tpm(counts: pd.DataFrame, gene_lengths: pd.Series):
+    """Convert raw counts to TPM"""
+    rpk = counts.div(gene_lengths / 1000, axis=0)
+    scaling_factors = rpk.sum(axis=0) / 1e6
+    tpm = rpk.div(scaling_factors, axis=1)
+    return tpm
