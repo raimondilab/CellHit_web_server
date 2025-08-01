@@ -565,7 +565,7 @@ function validateFile(fileContent) {
                 </div>
               </form>
               <span>
-                e.g. 43e843c6-5322-413f-87cb-6012d44d9ed0
+                e.g. 79dabb92-be51-4e5e-a4ed-843649986d5f
               </span>
             </div>
 
