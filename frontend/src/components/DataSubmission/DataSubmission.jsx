@@ -404,7 +404,7 @@ function validateFile(fileContent) {
 
         const sampleColumns = validColumns.filter(col => !requiredColumns.includes(col));
 
-        if (sampleColumns.length < 2) {
+        if (sampleColumns.length < 3) {
               reject(new Error(`At least two sample columns are required. Only found ${sampleColumns.length}.`));
               return;
             }
