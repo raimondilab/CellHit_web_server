@@ -43,6 +43,17 @@ const handleDownloadPrism = () => {
   document.body.removeChild(link);
 };
 
+const handleDownloadPrismPre = () => {
+  const downloadUrl = '/assets/data/prism_drugs_pre_calculated.csv';
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  link.setAttribute('download', 'prism_drugs.csv');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+
 const handleDownloadGdsc = () => {
   const downloadUrl = '/assets/data/gdsc_drugs.csv';
   const link = document.createElement('a');
@@ -87,6 +98,10 @@ const handleDownloadGdsc = () => {
             <p className="fs-1 text-justify mb-2">We provide precomputed predictions for all TCGA samples across both GDSC and PRISM
             drugs, totaling 4.060.342 and 17.958.038 predictions, respectively, along with a comprehensive
             set of contextual information. </p>
+            <p className="fs-1 text-justify">
+            You can find the complete list of PRISM drug names available <b><Link onClick={handleDownloadPrismPre}> here</Link></b>.
+            Additionally, the comprehensive list of GDSC drugs is available <b><Link onClick={handleDownloadGdsc}>here</Link></b>.
+            </p>
             <p className="fs-1 text-justify">Specifically, it contains:</p>
                 <ul>
                   <li className="fs-1 text-justify mb-1">
