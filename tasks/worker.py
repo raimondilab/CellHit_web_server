@@ -188,7 +188,8 @@ def analysis(self, file, datasets, datatype):
 
         # Step 2: Batch correction
         self.update_state(state='PROGRESS', meta='Batch correction')
-        corrected = batch_correct(data, covariate_labels, preprocess_paths)
+        transform_source = 'target' if datatype == "patient" else 'reference'
+        corrected = batch_correct(data, covariate_labels, preprocess_paths, transform_source)
 
         # Step 3: Imputation
         self.update_state(state='PROGRESS', meta='Imputation')
@@ -197,7 +198,6 @@ def analysis(self, file, datasets, datatype):
         # Step 4: Transform
         self.update_state(state='PROGRESS', meta='Transform')
 
-        transform_source = 'target' if datatype == "patient" else 'reference'
         transformed = celligner_transform_data(data=imputed,
                                                preprocess_paths=preprocess_paths,
                                                device='cuda:0',
@@ -206,7 +206,7 @@ def analysis(self, file, datasets, datatype):
         umap_path = preprocess_paths.umap_path
 
         if umap_path:
-            umap = ParametricUMAP.load(umap_path)
+            umap = ParametricUMAP.load(umap_path, device='cuda:0')
             embedding = umap.transform(transformed.values)
 
             umap_results = pd.DataFrame(
@@ -351,7 +351,8 @@ def alignment(self, file, datatype):
 
         # Step 2: Batch correction
         self.update_state(state='PROGRESS', meta='Batch correction')
-        corrected = batch_correct(data, covariate_labels, preprocess_paths)
+        transform_source = 'target' if datatype == "patient" else 'reference'
+        corrected = batch_correct(data, covariate_labels, preprocess_paths, transform_source)
 
         # Step 3: Imputation
         self.update_state(state='PROGRESS', meta='Imputation')
@@ -359,8 +360,6 @@ def alignment(self, file, datatype):
 
         # Step 4: Transform
         self.update_state(state='PROGRESS', meta='Transform')
-
-        transform_source = 'target' if datatype == "patient" else 'reference'
         transformed = celligner_transform_data(data=imputed,
                                                preprocess_paths=preprocess_paths,
                                                device='cuda:0',
@@ -369,7 +368,7 @@ def alignment(self, file, datatype):
         umap_path = preprocess_paths.umap_path
 
         if umap_path:
-            umap = ParametricUMAP.load(umap_path)
+            umap = ParametricUMAP.load(umap_path, device='cuda:0')
             embedding = umap.transform(transformed.values)
 
             umap_results = pd.DataFrame(
