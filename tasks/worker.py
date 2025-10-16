@@ -100,6 +100,15 @@ def get_task(task_id):
     return res
 
 
+# Set up gene lengths
+gene_lengths_df = pd.read_csv(PARENT_DIR / 'src/exon_lengths.csv', index_col=0)
+
+# Set the 'Gene' column as the index of the DataFrame
+gene_lengths_df = gene_lengths_df.set_index('Gene')
+
+# Create the final Series object from the 'Length' column
+gene_lengths_series = gene_lengths_df['Length']
+
 # Setup preprocess_paths
 preprocess_paths = PreprocessPaths(
     classifier_path=PARENT_DIR / 'src/tumor_classifier_tcga_final_model_revised.json',
@@ -181,7 +190,7 @@ def analysis(self, file, datasets, datatype):
         gbm_code = tcga_code_map.get(code) if datatype == "patient" else ccle_code_map.get(tissue)
 
         # Preprocess data
-        data = preprocess_data(df, code)
+        data = preprocess_data(df, code, gene_lengths_series)
 
         # Define covariate labels (TCGA category to which the new sample belong to)
         covariate_labels = [gbm_code] * len(data)
@@ -189,7 +198,7 @@ def analysis(self, file, datasets, datatype):
         # Step 2: Batch correction
         self.update_state(state='PROGRESS', meta='Batch correction')
         transform_source = 'target' if datatype == "patient" else 'reference'
-        corrected = batch_correct(data, covariate_labels, preprocess_paths)
+        corrected = batch_correct(data, covariate_labels, preprocess_paths, transform_source=transform_source)
 
         # Step 3: Imputation
         self.update_state(state='PROGRESS', meta='Imputation')
@@ -344,7 +353,7 @@ def alignment(self, file, datatype):
         gbm_code = tcga_code_map.get(code) if datatype == "patient" else ccle_code_map.get(tissue)
 
         # Preprocess data
-        data = preprocess_data(df, code)
+        data = preprocess_data(df, code, gene_lengths_series)
 
         # Define covariate labels (TCGA category to which the new sample belong to)
         covariate_labels = [gbm_code] * len(data)
@@ -352,7 +361,7 @@ def alignment(self, file, datatype):
         # Step 2: Batch correction
         self.update_state(state='PROGRESS', meta='Batch correction')
         transform_source = 'target' if datatype == "patient" else 'reference'
-        corrected = batch_correct(data, covariate_labels, preprocess_paths)
+        corrected = batch_correct(data, covariate_labels, preprocess_paths, transform_source=transform_source)
 
         # Step 3: Imputation
         self.update_state(state='PROGRESS', meta='Imputation')
@@ -411,11 +420,11 @@ def alignment(self, file, datatype):
 
 
 # Preprocess user data
-def preprocess_data(data, code):
-    # Transpose data to samples as rows, genes as columns
+def preprocess_data(data, code, gene_lengths):
+    # Transpose to samples as rows
     data = data.transpose()
 
-    # Sort columns (genes) to ensure consistent order before any operation
+    # Sort columns (genes)
     data = data[sorted(data.columns)]
 
     # Check if gene names are ENSG identifiers
@@ -443,8 +452,22 @@ def preprocess_data(data, code):
     data['index'] = data['index'].apply(lambda x: f"{code}_{x}")
     data = data.set_index('index')
 
-    # Apply log2 transformation with +1 shift
-    data = data.apply(lambda x: np.log2(x + 1))
+    # Align gene lengths
+    common_genes = data.columns.intersection(gene_lengths.index)
+    data = data[common_genes]
+    gene_lengths = gene_lengths.loc[common_genes]
+
+    # Convert raw counts -> TPM
+    tpm = raw_counts_to_log2_tpm(data, gene_lengths)
+
+    # Log2 transform
+    data = np.log2(tpm + 1)
+
+    # Standardize sample names
+    data = data.sort_index()
+    data = data.reset_index()
+    data['index'] = data['index'].apply(lambda x: f"{code}_{x}")
+    data = data.set_index('index')
 
     return data
 
@@ -694,8 +717,17 @@ def preprocess_heatmap_data(predictions, dataset):
 
 
 def raw_counts_to_log2_tpm(counts: pd.DataFrame, gene_lengths: pd.Series):
-    """Convert raw counts to TPM"""
-    rpk = counts.div(gene_lengths / 1000, axis=0)
-    scaling_factors = rpk.sum(axis=0) / 1e6
-    tpm = rpk.div(scaling_factors, axis=1)
-    return tpm
+    lengths = gene_lengths.values / 1000  # kb
+    counts_np = counts.to_numpy()
+
+    # RPK
+    rpk = counts_np / lengths[None, :]
+
+    # Scaling factor por amostra
+    scaling_factors = rpk.sum(axis=1) / 1e6
+
+    # TPM
+    tpm = rpk / scaling_factors[:, None]
+
+    return pd.DataFrame(tpm, index=counts.index, columns=counts.columns)
+
