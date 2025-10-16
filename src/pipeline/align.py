@@ -123,7 +123,7 @@ def batch_correct_ccle(
     ccle_metadata = pd.read_csv(ccle_metadata_path or preprocess_paths.ccle_metadata_path).sort_values(by='ModelID')
     ccle_metadata_mapper = dict(zip(ccle_metadata['ModelID'], ccle_metadata['OncotreeCode']))
 
-    ccle['ccle_cancer_acronym'] = ccle.index.map(ccle_metadata_mapper).map(ccle_code_map.lookup_tissue)
+    ccle['ccle_cancer_acronym'] = ccle.index.map(ccle_metadata_mapper).map(ccle_code_map)
     ccle = ccle.dropna(subset=['ccle_cancer_acronym'])
 
     ccle_covariates = ccle.pop('ccle_cancer_acronym')
