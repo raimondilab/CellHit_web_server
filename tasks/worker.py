@@ -189,7 +189,7 @@ def analysis(self, file, datasets, datatype):
         # Step 2: Batch correction
         self.update_state(state='PROGRESS', meta='Batch correction')
         transform_source = 'target' if datatype == "patient" else 'reference'
-        corrected = batch_correct(data, covariate_labels, preprocess_paths,transform_source=transform_source)
+        corrected = batch_correct(data, covariate_labels, preprocess_paths, transform_source=transform_source)
 
         # Step 3: Imputation
         self.update_state(state='PROGRESS', meta='Imputation')
