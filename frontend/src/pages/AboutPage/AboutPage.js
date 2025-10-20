@@ -50,7 +50,7 @@ const AboutPage = () => {
                     Notably, if the user assigns a TCGA tumor label (e.g., BRCA, LAML, LUAD;) to the samples in a
                     dedicated column along with transcriptomics data, this metadata is utilized to achieve improved harmonization with
                     TCGA (through the “mod” argument of pyComBat). It is important to note that the input data is expected to originate
-                    from bulk transcriptomics of patient tissue (in log2(TPM+1) format) rather than from commercial cell lines.
+                    from bulk transcriptomics of patient tissue raw count format rather than from commercial cell lines.
                     This step ensures the harmonization of new patient bulk RNA-seq data with TCGA bulk RNA-seq data.
                     </p>
                     <h4 className="fw-bold mb-3">Gene imputer</h4>
