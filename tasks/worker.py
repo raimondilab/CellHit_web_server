@@ -38,8 +38,8 @@ PARENT_DIR = BASE_DIR.parent
 RESULTS_DIR = PARENT_DIR / 'distrib_files/'
 
 celery = Celery(__name__)
-celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
-celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/1")
+celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/1")
 
 # Set time limits to 4 hours
 celery.conf.update(
@@ -66,7 +66,7 @@ def start_flower():
         "-A",
         __name__,
         "flower",
-        "--port=5555"
+        "--port=5556"
     ]
     try:
         process = Popen(flower_cmd)
@@ -84,7 +84,7 @@ def start_celery(worker_name):
         "worker",
         "--pool=solo",
         "--loglevel=info",
-        "-n", f"{worker_name}@%h"
+        "-n", f"{worker_name}_test@%h"
     ]
     try:
         process = Popen(celery_cmd)
@@ -177,23 +177,20 @@ def analysis(self, file, datasets, datatype):
 
         df = pd.read_csv(StringIO(file), sep=",", header=0, index_col=0)
 
-        # Get Tissue
-        tissue = ''.join(df['TISSUE'].unique())
+        covariate_labels = []
+        for code in df['TCGA_CODE'].to_list():
+            if datatype == "patient":
+                covariate_labels.append(tcga_code_map.get(code))
 
-        # Get TCGA_CODE/CCLE code
-        code = str(df['TCGA_CODE'].unique()[0])
+        if datatype == "reference":
+            for tissue in df['TISSUE'].to_list():
+                covariate_labels.append(ccle_code_map.get(tissue))
 
         # Drop TCGA_CODE
         df = df.drop(columns=['TCGA_CODE', 'TISSUE'])
 
-        # gbm code
-        gbm_code = tcga_code_map.get(code) if datatype == "patient" else ccle_code_map.get(tissue)
-
         # Preprocess data
-        data = preprocess_data(df, code, gene_lengths_series)
-
-        # Define covariate labels (TCGA category to which the new sample belong to)
-        covariate_labels = [gbm_code] * len(data)
+        data = preprocess_data(df, covariate_labels, gene_lengths_series)
 
         # Step 2: Batch correction
         self.update_state(state='PROGRESS', meta='Batch correction')
@@ -215,7 +212,7 @@ def analysis(self, file, datasets, datatype):
         umap_path = preprocess_paths.umap_path
 
         if umap_path:
-            umap = ParametricUMAP.load(umap_path, device='cuda:0')
+            umap = ParametricUMAP.load(umap_path)
             embedding = umap.transform(transformed.values)
 
             umap_results = pd.DataFrame(
@@ -340,23 +337,20 @@ def alignment(self, file, datatype):
 
         df = pd.read_csv(StringIO(file), sep=",", header=0, index_col=0)
 
-        # Get Tissue
-        tissue = ''.join(df['TISSUE'].unique())
+        covariate_labels = []
+        for code in df['TCGA_CODE'].to_list():
+            if datatype == "patient":
+                covariate_labels.append(tcga_code_map.get(code))
 
-        # Get TCGA_CODE/CCLE code
-        code = str(df['TCGA_CODE'].unique()[0])
+        if datatype == "reference":
+            for tissue in df['TISSUE'].to_list():
+                covariate_labels.append(ccle_code_map.get(tissue))
 
         # Drop TCGA_CODE
         df = df.drop(columns=['TCGA_CODE', 'TISSUE'])
 
-        # gbm code
-        gbm_code = tcga_code_map.get(code) if datatype == "patient" else ccle_code_map.get(tissue)
-
         # Preprocess data
-        data = preprocess_data(df, code, gene_lengths_series)
-
-        # Define covariate labels (TCGA category to which the new sample belong to)
-        covariate_labels = [gbm_code] * len(data)
+        data = preprocess_data(df, covariate_labels, gene_lengths_series)
 
         # Step 2: Batch correction
         self.update_state(state='PROGRESS', meta='Batch correction')
@@ -371,13 +365,12 @@ def alignment(self, file, datatype):
         self.update_state(state='PROGRESS', meta='Transform')
         transformed = celligner_transform_data(data=imputed,
                                                preprocess_paths=preprocess_paths,
-                                               device='cuda:0',
                                                transform_source=transform_source)
 
         umap_path = preprocess_paths.umap_path
 
         if umap_path:
-            umap = ParametricUMAP.load(umap_path, device='cuda:0')
+            umap = ParametricUMAP.load(umap_path)
             embedding = umap.transform(transformed.values)
 
             umap_results = pd.DataFrame(
@@ -420,7 +413,7 @@ def alignment(self, file, datatype):
 
 
 # Preprocess user data
-def preprocess_data(data, code, gene_lengths):
+def preprocess_data(data, covariate_labels, gene_lengths):
     # Transpose to samples as rows
     data = data.transpose()
 
@@ -449,8 +442,6 @@ def preprocess_data(data, code, gene_lengths):
     # Reset and format sample index
     data = data.sort_index()
     data = data.reset_index()
-    data['index'] = data['index'].apply(lambda x: f"{code}_{x}")
-    data = data.set_index('index')
 
     # Align gene lengths
     common_genes = data.columns.intersection(gene_lengths.index)
@@ -466,7 +457,7 @@ def preprocess_data(data, code, gene_lengths):
     # Standardize sample names
     data = data.sort_index()
     data = data.reset_index()
-    data['index'] = data['index'].apply(lambda x: f"{code}_{x}")
+    data['index'] = [f"{label}_{idx}" for label, idx in zip(covariate_labels, data['index'])]
     data = data.set_index('index')
 
     return data
@@ -547,12 +538,18 @@ def preprocess_shap_dict(shap_str):
 
 
 # Draw scatter plot for UMAP
-def draw_scatter_plot(umap, code, color):
+def draw_scatter_plot(umap, covariate_labels, color):
+
     symbol_map = {
         'TCGA': 'cross',
         'CCLE': 'circle',
-        code: 'diamond',
     }
+
+    if isinstance(covariate_labels, list):
+        for label in covariate_labels:
+            symbol_map[label] = 'diamond'
+    else:
+        symbol_map[covariate_labels] = 'diamond'
 
     plotlyPalette = [
         "#E13978", "#F5899E", "#C091E3", "#E08571", "#9F55BB", "#45A132", "#96568E",
@@ -569,40 +566,28 @@ def draw_scatter_plot(umap, code, color):
         "#D3C4A1", "#8C5B7B", "#F1C4B1", "#A4C3B2", "#E2B7A4", "#E1D7D4", "#C9A99D"
     ]
 
-    # Create scatter plot with Plotly, adding symbols based on 'Source'
     fig = px.scatter(
         umap,
         x='UMAP1',
         y='UMAP2',
         color=color,
-        symbol='Source',  # Assign different markers based on 'Source'
+        symbol='Source',
         symbol_map=symbol_map,
-        hover_data=['oncotree_code', 'Source', 'oncotree_code', 'index', 'tissue'],  # Optionally include in hover
+        hover_data=['oncotree_code', 'Source', 'oncotree_code', 'index', 'tissue'],
         color_discrete_sequence=plotlyPalette
     )
 
-    if color == "oncotree_code":
-        title = color.replace("_", " ").title()
+    title = color.replace("_", " ").title() if color == "oncotree_code" else "Tissue"
 
-    else:
-        title = "Tissue"
-
-    # Customize the layout
     fig.update_layout(
-        legend_title_text=f'{title} and Source',  # Adjusted for multiple legends
-        legend=dict(
-            # You can customize legend layout here if needed
-        ),
+        legend_title_text=f'{title} and Source',
         width=900,
         height=700,
     )
 
-    # Optionally, customize the marker symbols and sizes further
     fig.update_traces(marker=dict(size=6, line=dict(width=0.2, color='DarkSlateGrey')))
 
-    # Convert the figure to JSON
-    fig_json = fig.to_json(remove_uids=False)
-    return fig_json
+    return fig.to_json(remove_uids=False)
 
 
 def map_ensg_to_hgnc(df_columns):
