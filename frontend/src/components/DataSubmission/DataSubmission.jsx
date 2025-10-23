@@ -488,6 +488,36 @@ function validateFile(fileContent) {
           }
         }
 
+        // START: New validation for BATCH sample count
+        if (hasBatchColumn) {
+          const batchGroups = {}; // Stores counts: { 'TCGA|TISSUE|BATCH': count }
+
+          // Count samples for each TCGA|TISSUE|BATCH combination
+          for (let i = 0; i < cleanedData.length; i++) {
+            const row = cleanedData[i];
+            const tcga = String(row.TCGA_CODE).trim();
+            const tissue = String(row.TISSUE).trim();
+            const batch = String(row.BATCH).trim();
+            
+            const key = `${tcga}|${tissue}|${batch}`;
+
+            if (!batchGroups[key]) {
+              batchGroups[key] = 0;
+            }
+            batchGroups[key]++;
+          }
+
+          // Check if any group has fewer than 3 samples
+          for (const key in batchGroups) {
+            if (batchGroups[key] < 3) {
+              const [tcga, tissue, batch] = key.split('|');
+              reject(new Error(`Validation failed: The combination of TCGA_CODE '${tcga}' and TISSUE '${tissue}' for BATCH '${batch}' must have at least 3 samples. Found ${batchGroups[key]}.`));
+              return; // Stop validation
+            }
+          }
+        }
+        // END: New validation
+
         resolve(cleanedData);
       },
       error: function (error) {
