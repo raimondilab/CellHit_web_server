@@ -56,7 +56,7 @@ class FileResolver:
         # Serve the file
         return FileResponse(
             path=file_path,
-            filename="GBM.csv",
+            filename="example.csv",
             media_type="text/csv"
         )
 

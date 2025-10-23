@@ -10,7 +10,7 @@ import { Message } from 'primereact/message';
 const HelpPage = () => {
 
 const handleDownload = () => {
-        const downloadUrl = 'https://api.cellhit.bioinfolab.sns.it/api/download/GBM.csv';
+        const downloadUrl = 'https://api.cellhit.bioinfolab.sns.it/api/download/example.csv';
         window.open(downloadUrl, '_blank');
 };
 
