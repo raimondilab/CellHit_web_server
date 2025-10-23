@@ -30,6 +30,12 @@ const FaqPage = () => {
                         <p className="fs-1 text-justify"><b>How many samples are required?</b><br/>
                           A minimum of three sample rows is required for proper processing.
                         </p>
+                        <p className="fs-1 text-justify">
+                          <b>How many samples are required for batch correction?</b><br/>
+                          A minimum of three total samples is required for processing.
+                          For correction based on covariates (like a cancer/tissue pair), a minimum of
+                          <b> three samples per batch </b> is required.
+                        </p>
                         <p className="fs-1 text-justify"><b>What is the ComBat harmonization method used for?</b><br/>
                         The ComBat method aligns new patient bulk RNA-seq data with TCGA bulk RNA-seq data by correcting batch effects. It utilizes TCGA tumor labels, when provided, for enhanced harmonization.
                         </p>
