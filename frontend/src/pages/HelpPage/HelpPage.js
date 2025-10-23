@@ -4,6 +4,8 @@ import Footer from '../../components/Footer/Footer';
 import { Helmet } from 'react-helmet';
 import { Link } from 'react-router-dom';
 import { Chip } from 'primereact/chip';
+import { Message } from 'primereact/message';
+
 
 const HelpPage = () => {
 
@@ -244,6 +246,9 @@ const handleDownloadGdsc = () => {
               The values in the <b>"BATCH"</b> column must be <b>integers</b> (e.g., 1, 2, 3), representing distinct batch identifiers.
             </li>
             </ol>
+            <Message severity="warn"  className= "mb-4" text=" A minimum of three total samples (rows) is required for any file to be processed.
+                 If you are using the BATCH column for correction (based on covariates like cancer/tissue pairs), each unique batch must also contain at least three samples." />
+
             <p className="fs-1 text-justify">
             Due to the generally low performance of most trained models, likely stemming from the moderate
             and tissue-specific responses of cancer cell lines to the various non-oncological drugs in the PRISM dataset, we have decided to limit our prediction output to models (drugs) with a correlation coefficient (ρ) greater than 0.2. This cutoff
