@@ -364,7 +364,7 @@ async function getTaskResults() {
 function validateFile(fileContent) {
   return new Promise((resolve, reject) => {
 
-    const requiredColumns = ['TCGA_CODE', 'TISSUE', 'GENE'];
+    const requiredColumns = ['TCGA_CODE', 'TISSUE', 'SAMPLE'];
 
     Papa.parse(fileContent, {
       header: true,
@@ -402,12 +402,12 @@ function validateFile(fileContent) {
           return;
         }
 
-        const sampleColumns = validColumns.filter(col => !requiredColumns.includes(col));
+        const dataColumns = validColumns.filter(col => !requiredColumns.includes(col));
 
-        if (sampleColumns.length < 3) {
-              reject(new Error(`At least three sample columns are required. Only found ${sampleColumns.length}.`));
-              return;
-            }
+        if (dataColumns.length < 3) {
+          reject(new Error(`At least three data columns are required. Only found ${dataColumns.length}.`));
+          return;
+        }
 
         const cleanedData = data.map(row => {
           const cleanedRow = {};
@@ -419,29 +419,40 @@ function validateFile(fileContent) {
           return cleanedRow;
         });
 
-        const geneSampleTracker = new Set();
+        const sampleTracker = new Set();
+        const hasBatchColumn = validColumns.includes('BATCH');
 
         for (let i = 0; i < cleanedData.length; i++) {
           const row = cleanedData[i];
-          const originalRowNum = i + 2;
+          const originalRowNum = i + 2; // header + 1
 
-          if (!row.TCGA_CODE || !String(row.TCGA_CODE).trim() || (typeof tcgaCodeMap !== 'undefined' && !tcgaCodeMap.includes(String(row.TCGA_CODE).trim()))) {
+          if (!row.TCGA_CODE || !String(row.TCGA_CODE).trim() ||
+              (typeof tcgaCodeMap !== 'undefined' && !tcgaCodeMap.includes(String(row.TCGA_CODE).trim()))) {
             reject(new Error(`Invalid or missing TCGA_CODE in row ${originalRowNum}: '${row.TCGA_CODE}'`));
             return;
           }
 
-          if (!row.TISSUE || !String(row.TISSUE).trim() || (typeof tissue !== 'undefined' && !tissue.includes(String(row.TISSUE).trim()))) {
+          if (!row.TISSUE || !String(row.TISSUE).trim() ||
+              (typeof tissue !== 'undefined' && !tissue.includes(String(row.TISSUE).trim()))) {
             reject(new Error(`Invalid or missing TISSUE in row ${originalRowNum}: '${row.TISSUE}'`));
             return;
           }
 
-          const gene = String(row.GENE).trim();
-          if (!gene) {
-            reject(new Error(`Missing or empty GENE in row ${originalRowNum}`));
+          const sample = String(row.SAMPLE).trim();
+          if (!sample) {
+            reject(new Error(`Missing or empty SAMPLE in row ${originalRowNum}`));
             return;
           }
 
-          for (let col of sampleColumns) {
+          if (hasBatchColumn) {
+            const batchValue = String(row.BATCH).trim();
+            if (batchValue === '' || batchValue === '0' || isNaN(batchValue) || !Number.isInteger(Number(batchValue))) {
+              reject(new Error(`Invalid BATCH value in row ${originalRowNum}: '${row.BATCH}'. BATCH must be a non-zero integer.`));
+              return;
+            }
+          }
+
+          for (let col of dataColumns) {
             const value = row[col];
             let isInvalid = false;
             let reason = '';
@@ -464,17 +475,16 @@ function validateFile(fileContent) {
             }
 
             if (isInvalid) {
-              reject(new Error(`Sample columns must contain valid numeric values only. Found invalid value (${reason}) in column '${col}', row ${originalRowNum}: '${value}'`));
+              reject(new Error(`Data columns must contain valid numeric values only. Found invalid value (${reason}) in column '${col}', row ${originalRowNum}: '${value}'`));
               return;
             }
 
-            // Check for duplicate TCGA_CODE + GENE + sample
-            const key = `${row.TCGA_CODE}|${gene}|${col}`;
-            if (geneSampleTracker.has(key)) {
-              reject(new Error(`Duplicate entry for GENE '${gene}' under TCGA_CODE '${row.TCGA_CODE}' and sample column '${col}' at row ${originalRowNum}`));
+            const key = `${row.TCGA_CODE}|${sample}|${col}`;
+            if (sampleTracker.has(key)) {
+              reject(new Error(`Duplicate entry for SAMPLE '${sample}' under TCGA_CODE '${row.TCGA_CODE}' and column '${col}' at row ${originalRowNum}`));
               return;
             }
-            geneSampleTracker.add(key);
+            sampleTracker.add(key);
           }
         }
 
@@ -486,6 +496,8 @@ function validateFile(fileContent) {
     });
   });
 }
+
+
 
   return (
     <>
