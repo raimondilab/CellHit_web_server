@@ -234,10 +234,15 @@ const handleDownloadGdsc = () => {
             </p>
              <p className="fs-1 text-justify">To properly process the input file, it must adhere to the following specific structure:</p>
              <ol>
-              <li className="fs-1 text-justify">The file must include a column labelled "GENE," which contains gene names.</li>
-              <li className="fs-1 text-justify">Each sample should have its corresponding column with numeric values representing the transcriptomic data for each gene. Sample names should be unique and clearly labelled (e.g., GB101-1_S3, GB101-2_S4).</li>
+              <li className="fs-1 text-justify">The file must include a column labelled "SAMPLE," which contains samples names.</li>
+              <li className="fs-1 text-justify">Each sample should have its corresponding row with numeric values representing the transcriptomic data for each gene column. Sample names should be unique and clearly labelled (e.g., GB101-1_S3, GB101-2_S4).</li>
               <li className="fs-1 text-justify">Include a column titled "TCGA_CODE" to specify the cancer type associated with each sample in that row (for example, "GBM" for Glioblastoma Multiforme). The complete list of TCGA acronyms is available at <Link  onClick={handleDownloadTCGA}><b><i>here.</i></b></Link></li>
               <li className="fs-1 text-justify">Add a column labelled "TISSUE" to indicate the tissue type for each sample in that row (for example, "CNS/Brain"). The complete list of tissue names is available at <b><i><span style={{ cursor: 'pointer' }} onClick={handleDownloadTissue}>here.</span></i></b></li>
+              <li className="fs-1 text-justify">
+              (Optional) You may also include a column named <b>"BATCH"</b> to specify the batch or experimental group each sample belongs to.
+              This column is optional but can be useful for downstream batch-effect correction or quality control.
+              The values in the <b>"BATCH"</b> column must be <b>integers</b> (e.g., 1, 2, 3), representing distinct batch identifiers.
+            </li>
             </ol>
             <p className="fs-1 text-justify">
             Due to the generally low performance of most trained models, likely stemming from the moderate
@@ -250,9 +255,21 @@ const handleDownloadGdsc = () => {
             </p>
               <h5 className="display-6 fw-bold mb-4" id="umap">UMAP</h5>
               <p className="fs-1 text-justify mb-4">
-                The UMAP scatterplot consists of aligned sample transcriptomic RNA-seq data. To enable a quick qualitative assessment of the aligned data, the server generates a low-dimensional projection using parametric-UMAP mapping. This projection maps the incoming data within the pre-existing aligned transcriptomics spaces of the TCGA and CCLE datasets, providing contextualization against established datasets. The data is displayed in an interactive scatterplot, allowing users to visualize metadata associated with transcriptomic neighbors in the space.
-                Users can see the scatterplot with colours representing the oncotree code or tissue name by selecting it in the "colour by" options field.
-              </p>
+                  The UMAP scatterplot consists of aligned sample transcriptomic RNA-seq data.
+                  To enable a quick qualitative assessment of the aligned data, the server generates a low-dimensional projection
+                  using parametric-UMAP mapping. This projection maps the incoming data within the pre-existing aligned transcriptomics
+                  spaces of the TCGA and CCLE datasets, providing contextualization against established datasets.
+                  The data is displayed in an interactive scatterplot, allowing users to visualize metadata associated with
+                  transcriptomic neighbors in the space.
+                  <br /><br />
+                  Users can see the scatterplot with colours representing the <b>Oncotree code</b> or <b>Tissue name </b>
+                   by selecting the corresponding option in the <b>"Colour by"</b> field.
+                  <br /><br />
+                  When the optional <b>"BATCH"</b> column is provided in the input file, users can also visualize the UMAP projection
+                  coloured according to the batch of each uploaded sample. In this case, <b>TCGA</b> and <b>CCLE</b> reference samples
+                  will appear in grey, while the uploaded user samples will be displayed in colours corresponding to their respective batches.
+                  This helps to quickly identify potential batch effects or grouping patterns among the submitted samples.
+                </p>
               <div className="row">
                 <div className="col-md-6 text-center">
                   <img
@@ -277,6 +294,15 @@ const handleDownloadGdsc = () => {
                   />
                 </div>
               </div>
+              <img
+                      tabIndex="1"
+                      src="/assets/images/batch_plot.webp"
+                      data-toggle="tooltip"
+                      data-placement="top"
+                      title="Click to zoom-in"
+                      alt="Learning Workflow"
+                      className="center-help shrink img-fluid mb-5"
+                    />
               <h5 className="display-6 fw-bold mb-4" id="inference">Inference</h5>
               <p className="fs-1 text-justify mb-1">
                 The inference table  is a comprehensive tabular dataset that includes detailed predictions and metadata for each sample and selected assay. </p>

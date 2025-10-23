@@ -128,6 +128,8 @@ useEffect(() => {
         setUmapPlotData(umapData.oncotree || "{}");
     } else if (umapType === 'tissue') {
         setUmapPlotData(umapData.tissue || "{}");
+    } else if (umapType === 'batch') {
+        setUmapPlotData(umapData.batch || "{}");
     }
 }, [umapData, umapType]);
 
@@ -150,6 +152,8 @@ const handleColorBy = (e) => {
         setUmapPlotData(umapData.oncotree || "{}");
     } else if (value === 'tissue') {
         setUmapPlotData(umapData.tissue || "{}");
+    } else if (value === 'batch') {
+        setUmapPlotData(umapData.batch || "{}");
     }
 };
 
@@ -215,6 +219,9 @@ const handleClick = () => {
                           <select className="form-select mb-3" name="color" onChange={handleColorBy} value={umapType}>
                             <option value="oncotree" defaultValue>Oncotree</option>
                             <option value="tissue">Tissue</option>
+                            {umapData.batch && (
+                              <option value="batch">Batch</option>
+                            )}
                           </select>
                         </div>
                       </div>

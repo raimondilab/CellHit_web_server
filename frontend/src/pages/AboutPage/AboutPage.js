@@ -45,14 +45,20 @@ const AboutPage = () => {
                     Further details on the methodologies and specific procedures in each step will be discussed in the respective subsections.
                     </p>
                     <h4 className="fw-bold mb-3">ComBat</h4>
-                    <p className="fs-1 text-justify mb-4">
-                    Combat correction is performed using the <Link to="https://epigenelabs.github.io/pyComBat/" target="_blank" rel="noopener noreferrer"><b><i>pyComBat package</i></b></Link>.
-                    Notably, if the user assigns a TCGA tumor label (e.g., BRCA, LAML, LUAD;) to the samples in a
-                    dedicated column along with transcriptomics data, this metadata is utilized to achieve improved harmonization with
-                    TCGA (through the “mod” argument of pyComBat). It is important to note that the input data is expected to originate
-                    from bulk transcriptomics of patient tissue raw count format rather than from commercial cell lines.
-                    This step ensures the harmonization of new patient bulk RNA-seq data with TCGA bulk RNA-seq data.
+                    <p className="fs-1 text-justify">
+                        ComBat correction is performed using the
+                        <Link to="https://epigenelabs.github.io/pyComBat/" target="_blank" rel="noopener noreferrer"><b><i> pyComBatpackage</i></b></Link>. The input data is expected to be
+                        bulk transcriptomics (originating from either patient tissue or cancer cell lines) provided in
+                        raw count format. Prior to correction, these raw counts are transformed into <code>log2(TPM+1)</code>.
                     </p>
+                    <p className="fs-1 text-justify mb-4">
+                        Notably, if the user assigns a TCGA tumor label (e.g., <code>BRCA</code>, <code>LAML</code>,
+                        <code>LUAD</code>) to the samples in a dedicated metadata column, this information is
+                        utilized via the <code>“mod”</code> argument of pyComBat. This ensures that the biological
+                        variance associated with tumor type is preserved while harmonizing the new bulk RNA-seq
+                        data with the TCGA reference data.
+                    </p>
+
                     <h4 className="fw-bold mb-3">Gene imputer</h4>
                     <p className="fs-1 text-justify mb-4">
                      A machine learning pipeline was developed to handle missing values in incoming transcriptomic data.

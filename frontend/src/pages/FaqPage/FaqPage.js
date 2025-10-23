@@ -25,7 +25,10 @@ const FaqPage = () => {
                          The methods are based on research outlined in <Link to="https://doi.org/10.1038/s41467-025-56827-5" target="_blank" rel="noopener noreferrer"><b><i> Learning and actioning general principles of cancer cell drug sensitivity</i></b></Link> and other supporting studies cited in the workflow.
                         </p>
                         <p className="fs-1 text-justify"><b>What kind of data does CellHit require as input?</b><br/>
-                        CellHit requires bulk RNA-seq transcriptomic data from patient tissues in raw counts. This ensures compatibility with its harmonization and predictive models.
+                        CellHit requires bulk RNA-seq transcriptomic data from patient tissues or cancer cell lines in raw counts. This ensures compatibility with its harmonization and predictive models.
+                        </p>
+                        <p className="fs-1 text-justify"><b>How many samples are required?</b><br/>
+                          A minimum of three sample rows is required for proper processing.
                         </p>
                         <p className="fs-1 text-justify"><b>What is the ComBat harmonization method used for?</b><br/>
                         The ComBat method aligns new patient bulk RNA-seq data with TCGA bulk RNA-seq data by correcting batch effects. It utilizes TCGA tumor labels, when provided, for enhanced harmonization.

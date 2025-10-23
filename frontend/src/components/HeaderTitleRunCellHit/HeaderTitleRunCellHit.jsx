@@ -27,12 +27,17 @@ const HeaderTitleRunCellHit = () => {
             <p className="text-justify mb-3">To run CellHit on your data, you need to upload a transcriptomic dataset of your choice. Start by clicking the "Upload Dataset" button, which will take you to the upload window. Next, select the drug dataset by choosing either GDSC or PRISM. Finally, click the submit button to complete the process.
             <br/>Please ensure that you provide a CSV, ZIP, or GZ file containing bulk transcriptomic data from cancer cells, in raw counts.
             </p>
-             <p className=" text-justify ">To properly process the input file, it must adhere to the following specific structure:</p>
+             <p className="fs-1 text-justify">To properly process the input file, it must adhere to the following specific structure:</p>
              <ol>
-              <li className="text-justify">The file must include a column labelled "GENE," which contains gene names.</li>
-              <li className="text-justify">Each sample should have its corresponding column with numeric values representing the transcriptomic data for each gene. Sample names should be unique and clearly labelled (e.g., GB101-1_S3, GB101-2_S4).</li>
-              <li className="text-justify">Include a column titled "TCGA_CODE" to specify the cancer type associated with each sample in that row (for example, "GBM" for Glioblastoma Multiforme).</li>
-              <li className="text-justify">Add a column labelled "TISSUE" to indicate the tissue type for each sample in that row (for example, "CNS/Brain").</li>
+              <li className="fs-1 text-justify">The file must include a column labelled "SAMPLE," which contains samples names.</li>
+              <li className="fs-1 text-justify">Each sample should have its corresponding row with numeric values representing the transcriptomic data for each gene column. Sample names should be unique and clearly labelled (e.g., GB101-1_S3, GB101-2_S4).</li>
+              <li className="fs-1 text-justify">Include a column titled "TCGA_CODE" to specify the cancer type associated with each sample in that row (for example, "GBM" for Glioblastoma Multiforme).</li>
+              <li className="fs-1 text-justify">Add a column labelled "TISSUE" to indicate the tissue type for each sample in that row (for example, "CNS/Brain"). </li>
+              <li className="fs-1 text-justify">
+              (Optional) You may also include a column named <b>"BATCH"</b> to specify the batch or experimental group each sample belongs to.
+              This column is optional but can be useful for downstream batch-effect correction or quality control.
+              The values in the <b>"BATCH"</b> column must be <b>integers</b> (e.g., 1, 2, 3), representing distinct batch identifiers.
+            </li>
             </ol>
             <p className="m-0 mb-1 text-justify">For more information, please refer to the
               <Link className="" to="/about/" target="_blank" rel="noopener noreferrer"><b> about</b></Link> page.
