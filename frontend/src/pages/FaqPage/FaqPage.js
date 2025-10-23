@@ -27,14 +27,10 @@ const FaqPage = () => {
                         <p className="fs-1 text-justify"><b>What kind of data does CellHit require as input?</b><br/>
                         CellHit requires bulk RNA-seq transcriptomic data from patient tissues or cancer cell lines in raw counts. This ensures compatibility with its harmonization and predictive models.
                         </p>
-                        <p className="fs-1 text-justify"><b>How many samples are required?</b><br/>
-                          A minimum of three sample rows is required for proper processing.
-                        </p>
                         <p className="fs-1 text-justify">
-                          <b>How many samples are required for batch correction?</b><br/>
-                          A minimum of three total samples is required for processing.
-                          For correction based on covariates (like a cancer/tissue pair), a minimum of
-                          three samples per batch is required.
+                          <b>What are the minimum sample requirements for an input file?</b><br/>
+                          A minimum of three total samples (rows) is required for any file to be processed.
+                          If you are using the BATCH column for correction (based on covariates like cancer/tissue pairs), each unique batch must also contain at least three samples.
                         </p>
                         <p className="fs-1 text-justify"><b>What is the ComBat harmonization method used for?</b><br/>
                         The ComBat method aligns new patient bulk RNA-seq data with TCGA bulk RNA-seq data by correcting batch effects. It utilizes TCGA tumor labels, when provided, for enhanced harmonization.
