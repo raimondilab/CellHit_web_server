@@ -38,8 +38,8 @@ PARENT_DIR = BASE_DIR.parent
 RESULTS_DIR = PARENT_DIR / 'distrib_files/'
 
 celery = Celery(__name__)
-celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/1")
-celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/1")
+celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
+celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
 
 # Set time limits to 4 hours
 celery.conf.update(
@@ -66,7 +66,7 @@ def start_flower():
         "-A",
         __name__,
         "flower",
-        "--port=5556"
+        "--port=5555"
     ]
     try:
         process = Popen(flower_cmd)
@@ -84,7 +84,7 @@ def start_celery(worker_name):
         "worker",
         "--pool=solo",
         "--loglevel=info",
-        "-n", f"{worker_name}_test@%h"
+        "-n", f"{worker_name}@%h"
     ]
     try:
         process = Popen(celery_cmd)
@@ -177,25 +177,21 @@ def analysis(self, file, datasets, datatype):
 
         df = pd.read_csv(StringIO(file), sep=",", header=0, index_col=0)
 
-        covariate_labels = []
-        for code in df['TCGA_CODE'].to_list():
-            if datatype == "patient":
-                covariate_labels.append(tcga_code_map.get(code))
-
-        if datatype == "reference":
-            for tissue in df['TISSUE'].to_list():
-                covariate_labels.append(ccle_code_map.get(tissue))
-
-        # Drop TCGA_CODE
-        df = df.drop(columns=['TCGA_CODE', 'TISSUE'])
+        if 'BATCH' in df.columns:
+            df['BATCH'] = df['BATCH'].astype(str)
 
         # Preprocess data
-        data = preprocess_data(df, covariate_labels, gene_lengths_series)
+        data, code, tissue, covariate_labels, batch_labels = preprocess_data(df, gene_lengths_series, datatype)
+
+        if 'BATCH' in df.columns:
+            batch_labels_int = list(map(lambda x: int(x[0]), batch_labels))
+        else:
+            batch_labels_int = None
 
         # Step 2: Batch correction
         self.update_state(state='PROGRESS', meta='Batch correction')
         transform_source = 'target' if datatype == "patient" else 'reference'
-        corrected = batch_correct(data, covariate_labels, preprocess_paths, transform_source=transform_source)
+        corrected = batch_correct(data, covariate_labels, preprocess_paths, transform_source=transform_source,  batch_labels=batch_labels_int)
 
         # Step 3: Imputation
         self.update_state(state='PROGRESS', meta='Imputation')
@@ -212,7 +208,7 @@ def analysis(self, file, datasets, datatype):
         umap_path = preprocess_paths.umap_path
 
         if umap_path:
-            umap = ParametricUMAP.load(umap_path)
+            umap = ParametricUMAP.load(umap_path, device='cuda:0')
             embedding = umap.transform(transformed.values)
 
             umap_results = pd.DataFrame(
@@ -224,6 +220,11 @@ def analysis(self, file, datasets, datatype):
             umap_results['Source'] = code
             umap_results['oncotree_code'] = code
             umap_results['tissue'] = tissue
+
+            if batch_labels:
+                umap_results['batch'] = batch_labels
+                umap_df['batch'] = [0] * umap_df.shape[0]
+
             umap_results = umap_results.reset_index()
 
             results_pipeline['umap'] = umap_results
@@ -239,6 +240,11 @@ def analysis(self, file, datasets, datatype):
 
         # Convert umap data in json format
         umap_json_tissue = draw_scatter_plot(umap_concat, code, 'tissue')
+
+        if batch_labels:
+
+            # Convert umap data in json format
+            umap_json_batch = draw_scatter_plot(umap_concat, code, 'batch')
 
         results_pipeline['transformed'] = transformed
 
@@ -314,11 +320,21 @@ def analysis(self, file, datasets, datatype):
         # Convert the combined dataframe to JSON
         predictions_json = combined_predictions_df.fillna("").to_dict(orient='records')
 
-        result = {
-            "heatmap": combined_heatmap_df,
-            "table": predictions_json,
-            "umap": {'oncotree': umap_json, "tissue": umap_json_tissue}
-        }
+        if batch_labels.lenght > 0:
+
+            result = {
+                "heatmap": combined_heatmap_df,
+                "table": predictions_json,
+                "umap": {'oncotree': umap_json, "tissue": umap_json_tissue, 'batch': umap_json_batch}
+            }
+
+        else:
+
+            result = {
+                "heatmap": combined_heatmap_df,
+                "table": predictions_json,
+                "umap": {'oncotree': umap_json, "tissue": umap_json_tissue}
+            }
 
         return result
 
@@ -337,25 +353,22 @@ def alignment(self, file, datatype):
 
         df = pd.read_csv(StringIO(file), sep=",", header=0, index_col=0)
 
-        covariate_labels = []
-        for code in df['TCGA_CODE'].to_list():
-            if datatype == "patient":
-                covariate_labels.append(tcga_code_map.get(code))
+        if 'BATCH' in df.columns:
+            df['BATCH'] = df['BATCH'].astype(str)
 
-        if datatype == "reference":
-            for tissue in df['TISSUE'].to_list():
-                covariate_labels.append(ccle_code_map.get(tissue))
+            # Preprocess data
+        data, code, tissue, covariate_labels, batch_labels = preprocess_data(df, gene_lengths_series, datatype)
 
-        # Drop TCGA_CODE
-        df = df.drop(columns=['TCGA_CODE', 'TISSUE'])
-
-        # Preprocess data
-        data = preprocess_data(df, covariate_labels, gene_lengths_series)
+        if 'BATCH' in df.columns:
+            batch_labels_int = list(map(lambda x: int(x[0]), batch_labels))
+        else:
+            batch_labels_int = None
 
         # Step 2: Batch correction
         self.update_state(state='PROGRESS', meta='Batch correction')
         transform_source = 'target' if datatype == "patient" else 'reference'
-        corrected = batch_correct(data, covariate_labels, preprocess_paths, transform_source=transform_source)
+        corrected = batch_correct(data, covariate_labels, preprocess_paths, transform_source=transform_source,
+                                  batch_labels=batch_labels_int)
 
         # Step 3: Imputation
         self.update_state(state='PROGRESS', meta='Imputation')
@@ -365,12 +378,13 @@ def alignment(self, file, datatype):
         self.update_state(state='PROGRESS', meta='Transform')
         transformed = celligner_transform_data(data=imputed,
                                                preprocess_paths=preprocess_paths,
+                                               device='cuda:0',
                                                transform_source=transform_source)
 
         umap_path = preprocess_paths.umap_path
 
         if umap_path:
-            umap = ParametricUMAP.load(umap_path)
+            umap = ParametricUMAP.load(umap_path, device='cuda:0')
             embedding = umap.transform(transformed.values)
 
             umap_results = pd.DataFrame(
@@ -382,6 +396,11 @@ def alignment(self, file, datatype):
             umap_results['Source'] = code
             umap_results['oncotree_code'] = code
             umap_results['tissue'] = tissue
+
+            if batch_labels:
+                umap_results['batch'] = batch_labels
+                umap_df['batch'] = [0] * umap_df.shape[0]
+
             umap_results = umap_results.reset_index()
 
             results_pipeline['umap'] = umap_results
@@ -401,9 +420,19 @@ def alignment(self, file, datatype):
         # Convert umap data in json format
         umap_json_tissue = draw_scatter_plot(umap_concat, code, 'tissue')
 
-        result = {
-            "umap": {'oncotree': umap_json, "tissue": umap_json_tissue}
-        }
+        # Convert umap data in json format
+        if batch_labels:
+            umap_json_batch = draw_scatter_plot(umap_concat, code, 'batch')
+
+            result = {
+                "umap": {'oncotree': umap_json, "tissue": umap_json_tissue, 'batch': umap_json_batch}
+            }
+
+        else:
+
+            result = {
+                "umap": {'oncotree': umap_json, "tissue": umap_json_tissue}
+            }
 
         return result
 
@@ -413,58 +442,95 @@ def alignment(self, file, datatype):
 
 
 # Preprocess user data
-def preprocess_data(data, covariate_labels, gene_lengths):
-    # Transpose to samples as rows
-    data = data.transpose()
+def preprocess_data(data, gene_lengths, datatype):
 
-    # Sort columns (genes)
-    data = data[sorted(data.columns)]
+    # Separate numeric and non-numeric columns
+    numeric_cols = data.select_dtypes(include=[np.number]).columns
+    non_numeric_cols = data.select_dtypes(exclude=[np.number]).columns
 
-    # Check if gene names are ENSG identifiers
-    if any(str(col).startswith("ENSG") for col in data.columns):
-        # Map ENSG to HGNC gene names
-        data.columns = map_ensg_to_hgnc(data.columns)
+    # Sort numeric columns (genes)
+    data_numeric = data[numeric_cols]
+    data_numeric = data_numeric[sorted(data_numeric.columns)]
 
-    # Clean up any leftover 'GENE' text
-    data.columns = pd.Index([str(col).replace("GENE", "").strip() for col in data.columns])
+    # Check if gene names are ENSG identifiers and map to HGNC
+    if any(str(col).startswith("ENSG") for col in data_numeric.columns):
+        data_numeric.columns = map_ensg_to_hgnc(data_numeric.columns)
+
+    # Clean up gene names
+    data_numeric.columns = pd.Index([str(col).replace("SAMPLE", "").strip() for col in data_numeric.columns])
 
     # Remove columns with zero standard deviation
-    data = data.loc[:, data.std() != 0]
+    data_numeric = data_numeric.loc[:, data_numeric.std() != 0]
 
-    # Ensure all column names are strings and no MultiIndex remains
-    if isinstance(data.columns, pd.MultiIndex):
-        data.columns = ['_'.join(map(str, col)).strip() for col in data.columns.values]
-        data.columns = data.columns.astype(str)
+    # Ensure all column names are simple strings
+    if isinstance(data_numeric.columns, pd.MultiIndex):
+        data_numeric.columns = ['_'.join(map(str, col)).strip() for col in data_numeric.columns.values]
+    data_numeric.columns = data_numeric.columns.astype(str)
 
-    # Group columns
-    data = data.groupby(data.columns, axis=1).mean()
-
-    # Reset and format sample index
-    data = data.sort_index()
-    data = data.reset_index()
+    # Group duplicate columns (mean)
+    data_numeric = data_numeric.groupby(data_numeric.columns, axis=1).mean()
 
     # Align gene lengths
-    common_genes = data.columns.intersection(gene_lengths.index)
-    data = data[common_genes]
+    common_genes = data_numeric.columns.intersection(gene_lengths.index)
+    data_numeric = data_numeric[common_genes]
     gene_lengths = gene_lengths.loc[common_genes]
 
-    # Convert raw counts -> TPM
-    tpm = raw_counts_to_log2_tpm(data, gene_lengths)
+    # Convert raw counts to TPM
+    tpm = raw_counts_to_log2_tpm(data_numeric, gene_lengths)
 
     # Log2 transform
-    data = np.log2(tpm + 1)
+    data_numeric = np.log2(tpm + 1)
 
     # Standardize sample names
-    data = data.sort_index()
-    data = data.reset_index()
-    data['index'] = [f"{label}_{idx}" for label, idx in zip(covariate_labels, data['index'])]
-    data = data.set_index('index')
+    data_numeric = data_numeric.sort_index()
+    data_numeric = data_numeric.reset_index()
+    data_numeric = data_numeric.set_index('SAMPLE')
 
-    return data
+    # Reattach non-numeric metadata columns
+    if len(non_numeric_cols) > 0:
+        meta = data[non_numeric_cols]
+        # Align indices just in case
+        meta = meta.reindex(data_numeric.index, fill_value=np.nan)
+        data = pd.concat([data_numeric, meta], axis=1)
+    else:
+        data = data_numeric
+
+    # --- Extract metadata after all operations ---
+    tissue = None
+    batch_labels = None
+
+    if 'TISSUE' in data.columns:
+        tissue = data['TISSUE'].to_list()
+
+    if 'BATCH' in data.columns:
+        batch_labels = data['BATCH'].to_list()
+
+    if datatype == "patient":
+        code = data['TCGA_CODE'].to_list()
+    elif datatype == "reference":
+        code = data['TISSUE'].to_list()
+
+    covariate_labels = []
+
+    if datatype == "patient" and 'TCGA_CODE' in data.columns:
+        for c in data['TCGA_CODE'].to_list():
+            covariate_labels.append(tcga_code_map.get(c))
+
+    elif datatype == "reference" and 'TISSUE' in data.columns:
+        for t in data['TISSUE'].to_list():
+            covariate_labels.append(ccle_code_map.get(t))
+
+    # Drop metadata columns from the final data matrix
+    for col in ['TCGA_CODE', 'TISSUE']:
+        if col in data.columns:
+            data = data.drop(columns=col)
+
+    return data, code, tissue, covariate_labels, batch_labels
 
 
 # Draw IC50 heatmap
 def draw_heatmap(heatmap_df, dataset, top=15):
+
     # Exclude non-numeric columns
     numeric_data = heatmap_df.select_dtypes(include='number')
 
@@ -538,18 +604,18 @@ def preprocess_shap_dict(shap_str):
 
 
 # Draw scatter plot for UMAP
-def draw_scatter_plot(umap, covariate_labels, color):
+def draw_scatter_plot(umap, code, color):
 
     symbol_map = {
         'TCGA': 'cross',
         'CCLE': 'circle',
     }
 
-    if isinstance(covariate_labels, list):
-        for label in covariate_labels:
+    if isinstance(code, list):
+        for label in list(set(code)):
             symbol_map[label] = 'diamond'
     else:
-        symbol_map[covariate_labels] = 'diamond'
+        symbol_map[code] = 'diamond'
 
     plotlyPalette = [
         "#E13978", "#F5899E", "#C091E3", "#E08571", "#9F55BB", "#45A132", "#96568E",
@@ -566,6 +632,9 @@ def draw_scatter_plot(umap, covariate_labels, color):
         "#D3C4A1", "#8C5B7B", "#F1C4B1", "#A4C3B2", "#E2B7A4", "#E1D7D4", "#C9A99D"
     ]
 
+    if color == "batch":
+        plotlyPalette.insert(0, "#717171")
+
     fig = px.scatter(
         umap,
         x='UMAP1',
@@ -577,7 +646,12 @@ def draw_scatter_plot(umap, covariate_labels, color):
         color_discrete_sequence=plotlyPalette
     )
 
-    title = color.replace("_", " ").title() if color == "oncotree_code" else "Tissue"
+    if color == "oncotree_code":
+        title = color.replace("_", " ").title()
+    elif color == "tissue":
+        title = "Tissue"
+    elif color == "batch":
+        title = "Batch"
 
     fig.update_layout(
         legend_title_text=f'{title} and Source',
@@ -715,4 +789,3 @@ def raw_counts_to_log2_tpm(counts: pd.DataFrame, gene_lengths: pd.Series):
     tpm = rpk / scaling_factors[:, None]
 
     return pd.DataFrame(tpm, index=counts.index, columns=counts.columns)
-
