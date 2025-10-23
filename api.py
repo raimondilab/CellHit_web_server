@@ -47,7 +47,7 @@ class FileResolver:
         """
         Serve the example file GBM.csv for download.
         """
-        file_path = "./src/GBM.csv"
+        file_path = "./src/example.csv"
 
         # Check if file exists
         if not os.path.exists(file_path):
