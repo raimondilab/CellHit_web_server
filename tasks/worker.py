@@ -320,7 +320,7 @@ def analysis(self, file, datasets, datatype):
         # Convert the combined dataframe to JSON
         predictions_json = combined_predictions_df.fillna("").to_dict(orient='records')
 
-        if batch_labels.lenght > 0:
+        if batch_labels:
 
             result = {
                 "heatmap": combined_heatmap_df,
