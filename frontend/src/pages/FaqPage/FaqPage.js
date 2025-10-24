@@ -25,7 +25,7 @@ const FaqPage = () => {
                          The methods are based on research outlined in <Link to="https://doi.org/10.1038/s41467-025-56827-5" target="_blank" rel="noopener noreferrer"><b><i> Learning and actioning general principles of cancer cell drug sensitivity</i></b></Link> and other supporting studies cited in the workflow.
                         </p>
                         <p className="fs-1 text-justify"><b>What kind of data does CellHit require as input?</b><br/>
-                        CellHit requires bulk RNA-seq transcriptomic data from patient tissues or cancer cell lines in raw counts. This ensures compatibility with its harmonization and predictive models.
+                        CellHit requires HUMAN <code> gene-level </code> bulk RNA-seq transcriptomic data from patient tissues or cancer cell lines in raw counts. This ensures compatibility with its harmonization and predictive models.
                         </p>
                         <p className="fs-1 text-justify">
                           <b>What are the minimum sample requirements for an input file?</b><br/>
@@ -64,7 +64,7 @@ const FaqPage = () => {
                          Yes, CellHit projects aligned data into a low-dimensional UMAP space for contextualization relative to CCLE and TCGA transcriptomic datasets.
                         </p>
                         <p className="fs-1 text-justify"><b>What types of cancer datasets can CellHit process?</b><br/>
-                         CellHit is compatible with patient transcriptomic datasets and harmonizes them with TCGA and CCLE data for analysis and prediction.
+                         CellHit is compatible with HUMAN patient and cancer cell line transcriptomic datasets and harmonizes them with TCGA and CCLE data for analysis and prediction.
                         </p>
                         <p className="fs-1 text-justify"><b>Is CellHit suitable for commercial cell line data?</b><br/>
                          No, CellHit is specifically designed for bulk RNA-seq data from patient tissues and not for data from commercial cell lines.

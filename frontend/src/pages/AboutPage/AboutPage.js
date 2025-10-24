@@ -47,8 +47,8 @@ const AboutPage = () => {
                     <h4 className="fw-bold mb-3">ComBat</h4>
                     <p className="fs-1 text-justify">
                         ComBat correction is performed using the
-                        <Link to="https://epigenelabs.github.io/pyComBat/" target="_blank" rel="noopener noreferrer"><b><i> pyComBatpackage</i></b></Link>. The input data is expected to be
-                        bulk transcriptomics (originating from either patient tissue or cancer cell lines) provided in
+                        <Link to="https://epigenelabs.github.io/pyComBat/" target="_blank" rel="noopener noreferrer"><b><i> pyComBatpackage</i></b></Link>.
+                        The input data is expected to be <code>gene-level </code> bulk transcriptomics (originating from either patient tissue or cancer cell lines) provided in
                         raw count format. Prior to correction, these raw counts are transformed into <code>log2(TPM+1)</code>.
                     </p>
                     <p className="fs-1 text-justify mb-4">
