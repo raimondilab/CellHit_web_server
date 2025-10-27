@@ -495,6 +495,8 @@ def preprocess_data(data, gene_lengths, datatype):
     else:
         data = data_numeric
 
+    print(data)
+
     # --- Extract metadata after all operations ---
     tissue = None
     batch_labels = None
