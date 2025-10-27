@@ -528,6 +528,7 @@ def preprocess_data(data, gene_lengths, datatype):
         if col in data.columns:
             data = data.drop(columns=col)
 
+    print( code, tissue, covariate_labels, batch_labels)
     return data, code, tissue, covariate_labels, batch_labels
 
 
