@@ -498,13 +498,14 @@ def preprocess_data(data, gene_lengths, datatype):
     # --- Extract metadata after all operations ---
     tissue = None
     batch_labels = None
+    code = None
 
     if 'TISSUE' in data.columns:
         tissue = data['TISSUE'].to_list()
 
     if 'BATCH' in data.columns:
         batch_labels = data['BATCH'].to_list()
-
+    print(datatype)
     if datatype == "patient":
         code = data['TCGA_CODE'].to_list()
     elif datatype == "reference":
