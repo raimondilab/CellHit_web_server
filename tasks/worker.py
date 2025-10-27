@@ -517,7 +517,7 @@ def preprocess_data(data, gene_lengths, datatype):
         for c in data['TCGA_CODE'].to_list():
             covariate_labels.append(tcga_code_map.get(c))
 
-    elif datatype == "reference" and 'TISSUE' in data.columns:
+    elif datatype == "celline" and 'TISSUE' in data.columns:
         for t in data['TISSUE'].to_list():
             covariate_labels.append(ccle_code_map.get(t))
 
