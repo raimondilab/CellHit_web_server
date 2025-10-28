@@ -495,8 +495,6 @@ def preprocess_data(data, gene_lengths, datatype):
     else:
         data = data_numeric
 
-    print(data)
-
     # --- Extract metadata after all operations ---
     tissue = None
     batch_labels = None
@@ -526,7 +524,6 @@ def preprocess_data(data, gene_lengths, datatype):
         if col in data.columns:
             data = data.drop(columns=col)
 
-    print( code, tissue, covariate_labels, batch_labels)
     return data, code, tissue, covariate_labels, batch_labels
 
 
