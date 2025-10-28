@@ -121,15 +121,15 @@ def batch_correct_ccle(
 
     ccle = pd.read_feather(ccle_data_path or preprocess_paths.ccle_data_path).set_index('index')
     ccle_metadata = pd.read_csv(ccle_metadata_path or preprocess_paths.ccle_metadata_path).sort_values(by='ModelID')
-    ccle_metadata_mapper = dict(zip(ccle_metadata['ModelID'], ccle_metadata['OncotreeCode']))
+    ccle_metadata_mapper = dict(zip(ccle_metadata['ModelID'], ccle_metadata['OncotreeLineage']))
 
-    ccle['ccle_cancer_acronym'] = ccle.index.map(ccle_metadata_mapper).map(ccle_code_map)
+    ccle['ccle_cancer_acronym'] = ccle.index.map(ccle_metadata_mapper)  # .map(ccle_code_map)
     ccle = ccle.dropna(subset=['ccle_cancer_acronym'])
 
     ccle_covariates = ccle.pop('ccle_cancer_acronym')
     ccle_covariates = ccle_covariates.astype(str)
     ccle_covariates = ccle_covariates.map(ccle_code_map).to_list()
-    #ccle_covariates = ccle_covariates.apply(ccle_code_map.lookup_ccle_code).to_list()
+    ccle_covariates = [int(x) if pd.notna(x) else -1 for x in ccle_covariates]
 
     # Prepare data for correction
     common_genes = list(set(data.columns).intersection(ccle.columns))

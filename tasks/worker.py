@@ -508,10 +508,8 @@ def preprocess_data(data, gene_lengths, datatype):
     if 'BATCH' in data.columns:
         batch_labels = data['BATCH'].to_list()
 
-    if datatype == "patient":
+    if 'TCGA_CODE' in data.columns:
         code = data['TCGA_CODE'].to_list()
-    elif datatype == "celline":
-        code = data['TISSUE'].to_list()
 
     covariate_labels = []
 
