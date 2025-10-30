@@ -62,7 +62,7 @@ class FileResolver:
 
 
 # Add route for downloading the file
-@app.get("/api/download/GBM.csv", response_class=FileResponse)
+@app.get("/api/download/example.csv", response_class=FileResponse)
 async def download_gbm_file():
     return FileResolver.download_example_file()
 
