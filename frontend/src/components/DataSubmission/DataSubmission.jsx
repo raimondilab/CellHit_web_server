@@ -612,7 +612,7 @@ function validateFile(fileContent) {
                 </div>
               </form>
               <span>
-                e.g. c34f0793-9946-44f4-860a-2d74dd7c8044
+                e.g. b7373d91-4d64-4087-8f78-ee8819e79d61
               </span>
             </div>
 
@@ -644,6 +644,15 @@ function validateFile(fileContent) {
               <Link className="" to="/about/" target="_blank" rel="noopener noreferrer"><b><i> about</i></b></Link> page.
             </p>
 
+          </div>
+        </div>
+         <div className="row">
+          <div className="col-md-12">
+             <p className="fs-1 mb-3 text-justify mb-2">
+              If you encounter technical issues, please contact
+                <a href="mailto:natalia.deoliveirarosa@sns.it"> natalia.deoliveirarosa@sns.it </a>
+                and attach the input file used.
+            </p>
           </div>
         </div>
       </div>
