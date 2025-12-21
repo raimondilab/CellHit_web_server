@@ -60,12 +60,59 @@ class FileResolver:
             media_type="text/csv"
         )
 
+    @staticmethod
+    def download_gdsc_predictions() -> Response:
+        """
+        Serve the example file gdsc.csv for download.
+        """
+        file_path = "./src/full_results_gdsc.csv"
+
+        # Check if file exists
+        if not os.path.exists(file_path):
+            raise HTTPException(status_code=404, detail="File not found.")
+
+        # Serve the file
+        return FileResponse(
+            path=file_path,
+            filename="full_results_gdsc.csv",
+            media_type="text/csv"
+        )
+
+    @staticmethod
+    def download_prism_predictions() -> Response:
+        """
+        Serve the example file prism.csv for download.
+        """
+        file_path = "./src/full_results_prism.csv"
+
+        # Check if file exists
+        if not os.path.exists(file_path):
+            raise HTTPException(status_code=404, detail="File not found.")
+
+        # Serve the file
+        return FileResponse(
+            path=file_path,
+            filename="full_results_prism.csv",
+            media_type="text/csv"
+        )
+
 
 # Add route for downloading the file
 @app.get("/api/download/example.csv", response_class=FileResponse)
 async def download_gbm_file():
     return FileResolver.download_example_file()
 
+
+# Add route for downloading the file
+@app.get("/api/download/full_results_gdsc.csv", response_class=FileResponse)
+async def download_gbm_file():
+    return FileResolver.download_gdsc_predictions()
+
+
+# Add route for downloading the file
+@app.get("/api/download/full_results_prism.csv", response_class=FileResponse)
+async def download_gbm_file():
+    return FileResolver.download_prism_predictions()
 
 # Main entry point
 if __name__ == "__main__":

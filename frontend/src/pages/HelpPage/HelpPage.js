@@ -55,6 +55,10 @@ const handleDownloadPrismPre = () => {
   document.body.removeChild(link);
 };
 
+const handleDownloadPrismPrediction = () => {
+  const downloadUrl = 'https://api.cellhit.bioinfolab.sns.it/api/download/full_results_prism.csv';
+   window.open(downloadUrl, '_blank');
+};
 
 const handleDownloadGdsc = () => {
   const downloadUrl = '/assets/data/gdsc_drugs.csv';
@@ -66,6 +70,10 @@ const handleDownloadGdsc = () => {
   document.body.removeChild(link);
 };
 
+const handleDownloadGdscPrediction = () => {
+   const downloadUrl = 'https://api.cellhit.bioinfolab.sns.it/api/download/full_results_gdsc.csv';
+   window.open(downloadUrl, '_blank');
+};
 
   return (
     <>
@@ -104,6 +112,9 @@ const handleDownloadGdsc = () => {
             You can find the complete list of PRISM drug names available <b><Link onClick={handleDownloadPrismPre}> here</Link></b>.
             Additionally, the comprehensive list of GDSC drugs is available <b><Link onClick={handleDownloadGdsc}>here</Link></b>.
             </p>
+             <p className="fs-1 text-justify">
+            You can download all PRISM predictions available <b><Link onClick={handleDownloadPrismPrediction}>here</Link></b>. Additionally, the GDSC predictions are available <b><Link onClick={handleDownloadGdscPrediction}>here</Link></b>.
+          </p>
             <p className="fs-1 text-justify">Specifically, it contains:</p>
                 <ul>
                   <li className="fs-1 text-justify mb-1">
@@ -256,6 +267,7 @@ const handleDownloadGdsc = () => {
             <b><Link onClick={handleDownloadPrism}> here</Link></b>.
             Additionally, the comprehensive list of GDSC drugs is available <b><Link onClick={handleDownloadGdsc}>here</Link></b>.
             </p>
+
             <p className="fs-1 m-0 mb-4 text-justify"> Please click <b><Link onClick={handleDownload}>here</Link></b> for an example input file.
             </p>
               <h5 className="display-6 fw-bold mb-4" id="umap">UMAP</h5>
