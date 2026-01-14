@@ -247,10 +247,10 @@ const handleDownloadGdscPrediction = () => {
             </p>
              <p className="fs-1 text-justify">To properly process the input file, it must adhere to the following specific structure:</p>
              <ol>
-              <li className="fs-1 text-justify">The file must include a column labelled "SAMPLE," which contains samples names.</li>
+              <li className="fs-1 text-justify">The file must include a column labelled <b> "SAMPLE," </b> which contains samples names.</li>
               <li className="fs-1 text-justify">Each sample should have its corresponding row with numeric values representing the transcriptomic data for each gene column. Sample names should be unique and clearly labelled (e.g., GB101-1_S3, GB101-2_S4).</li>
-              <li className="fs-1 text-justify">Include a column titled "TCGA_CODE" to specify the cancer type associated with each sample in that row (for example, "GBM" for Glioblastoma Multiforme). The complete list of TCGA acronyms is available at <Link  onClick={handleDownloadTCGA}><b><i>here.</i></b></Link></li>
-              <li className="fs-1 text-justify">Add a column labelled "TISSUE" to indicate the tissue type for each sample in that row (for example, "CNS/Brain"). The complete list of tissue names is available at <b><i><span style={{ cursor: 'pointer' }} onClick={handleDownloadTissue}>here.</span></i></b></li>
+              <li className="fs-1 text-justify">Include a column titled <b> "TCGA_CODE" </b> to specify the cancer type associated with each sample in that row (for example, "GBM" for Glioblastoma Multiforme). The complete list of TCGA acronyms is available at <Link  onClick={handleDownloadTCGA}><b><i>here.</i></b></Link></li>
+              <li className="fs-1 text-justify">Add a column labelled <b> "TISSUE" </b>to indicate the tissue type for each sample in that row (for example, "CNS/Brain"). The complete list of tissue names is available at <b><i><span style={{ cursor: 'pointer' }} onClick={handleDownloadTissue}>here.</span></i></b></li>
               <li className="fs-1 text-justify">
               (Optional) You may also include a column named <b>"BATCH"</b> to specify the batch or experimental group each sample belongs to.
               This column is optional but can be useful for downstream batch-effect correction or quality control.
