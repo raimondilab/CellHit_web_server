@@ -310,7 +310,7 @@ def run_full_inference(
             values='prediction'
         )
 
-        drug_stats = pd.read_csv(drug_stats_path or inference_paths.drug_stats)
+        drug_stats = pd.read_csv(drug_stats_path or inference_paths.drug_stats,encoding='utf-8', encoding_errors='replace')
         median_mapper = dict(zip(drug_stats['Drug'], drug_stats['median']))
         for drug in heatmap_data.columns:
             heatmap_data[drug] = heatmap_data[drug] - median_mapper[drug]

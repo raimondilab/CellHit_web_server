@@ -60,7 +60,14 @@ celery.conf.update(
 )
 
 
+import os
+from subprocess import Popen
+
 def start_flower():
+    my_env = os.environ.copy()
+    my_env["LANG"] = "C.UTF-8"
+    my_env["LC_ALL"] = "C.UTF-8"
+
     flower_cmd = [
         "celery",
         "-A",
@@ -69,7 +76,7 @@ def start_flower():
         "--port=5555"
     ]
     try:
-        process = Popen(flower_cmd)
+        process = Popen(flower_cmd, env=my_env)
         return process
     except Exception as e:
         print(f"Error Flower: {e}")
@@ -77,6 +84,11 @@ def start_flower():
 
 
 def start_celery(worker_name):
+
+    my_env = os.environ.copy()
+    my_env["LANG"] = "C.UTF-8"
+    my_env["LC_ALL"] = "C.UTF-8"
+
     celery_cmd = [
         "celery",
         "-A",
@@ -87,10 +99,10 @@ def start_celery(worker_name):
         "-n", f"{worker_name}@%h"
     ]
     try:
-        process = Popen(celery_cmd)
+        process = Popen(celery_cmd, env=my_env)
         return process
     except Exception as e:
-        print(f"Error Flower: {e}")
+        print(f"Error Worker: {e}") # Corrigido de Flower para Worker
         return None
 
 
