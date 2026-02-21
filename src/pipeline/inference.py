@@ -57,26 +57,34 @@ def compute_model_predictions(
         name = id_to_name_mapper[stem]
         repurposing_target = id_to_repurposing_target_mapper[stem]
 
-        model = EnsembleXGBoost.load_model(model_path, limit_load=limit_load)
-        predictions = model.predict(tdf, return_shaps=True, return_stds=True)
+        try:
 
-        output = elaborate_output(
-            predictions=predictions,
-            model=model,
-            data=tdf,
-            mean_mapper=mean_mapper,
-            std_mapper=std_mapper,
-            drug_id=stem,
-            drug_name=name,
-            repurposing_target=repurposing_target,
-            drug_min=min_mapper[name],
-            drug_median=median_mapper[name],
-            drug_max=max_mapper[name]
-        )
+            model = EnsembleXGBoost.load_model(model_path, limit_load=limit_load)
 
-        preds.append(output)
-        del model
-        gc.collect()
+            predictions = model.predict(tdf, return_shaps=True, return_stds=True)
+
+            output = elaborate_output(
+                predictions=predictions,
+                model=model,
+                data=tdf,
+                mean_mapper=mean_mapper,
+                std_mapper=std_mapper,
+                drug_id=stem,
+                drug_name=name,
+                repurposing_target=repurposing_target,
+                drug_min=min_mapper[name],
+                drug_median=median_mapper[name],
+                drug_max=max_mapper[name]
+            )
+
+            preds.append(output)
+            del model
+            gc.collect()
+
+        except Exception as e:
+            print(f"CRITICAL ERROR loading model {model_path.name}")
+            print(f"Skipping this model and moving to next...")
+            continue
 
     return pd.concat(preds)
 
