@@ -57,34 +57,26 @@ def compute_model_predictions(
         name = id_to_name_mapper[stem]
         repurposing_target = id_to_repurposing_target_mapper[stem]
 
-        try:
+        model = EnsembleXGBoost.load_model(model_path, limit_load=limit_load)
+        predictions = model.predict(tdf, return_shaps=True, return_stds=True)
 
-            model = EnsembleXGBoost.load_model(model_path, limit_load=limit_load)
+        output = elaborate_output(
+            predictions=predictions,
+            model=model,
+            data=tdf,
+            mean_mapper=mean_mapper,
+            std_mapper=std_mapper,
+            drug_id=stem,
+            drug_name=name,
+            repurposing_target=repurposing_target,
+            drug_min=min_mapper[name],
+            drug_median=median_mapper[name],
+            drug_max=max_mapper[name]
+        )
 
-            predictions = model.predict(tdf, return_shaps=True, return_stds=True)
-
-            output = elaborate_output(
-                predictions=predictions,
-                model=model,
-                data=tdf,
-                mean_mapper=mean_mapper,
-                std_mapper=std_mapper,
-                drug_id=stem,
-                drug_name=name,
-                repurposing_target=repurposing_target,
-                drug_min=min_mapper[name],
-                drug_median=median_mapper[name],
-                drug_max=max_mapper[name]
-            )
-
-            preds.append(output)
-            del model
-            gc.collect()
-
-        except Exception as e:
-            print(f"CRITICAL ERROR loading model {model_path.name}")
-            print(f"Skipping this model and moving to next...")
-            continue
+        preds.append(output)
+        del model
+        gc.collect()
 
     return pd.concat(preds)
 
@@ -318,7 +310,7 @@ def run_full_inference(
             values='prediction'
         )
 
-        drug_stats = pd.read_csv(drug_stats_path or inference_paths.drug_stats,encoding='utf-8', encoding_errors='replace')
+        drug_stats = pd.read_csv(drug_stats_path or inference_paths.drug_stats)
         median_mapper = dict(zip(drug_stats['Drug'], drug_stats['median']))
         for drug in heatmap_data.columns:
             heatmap_data[drug] = heatmap_data[drug] - median_mapper[drug]
