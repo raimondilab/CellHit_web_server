@@ -452,6 +452,9 @@ def alignment(self, file, datatype):
 # Preprocess user data
 def preprocess_data(data, gene_lengths, datatype):
 
+    if 'SAMPLE' in data.columns:
+        data = data.set_index('SAMPLE')
+
     # Separate numeric and non-numeric columns
     numeric_cols = data.select_dtypes(include=[np.number]).columns
     non_numeric_cols = data.select_dtypes(exclude=[np.number]).columns
