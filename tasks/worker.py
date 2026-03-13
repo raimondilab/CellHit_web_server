@@ -183,7 +183,7 @@ def analysis(self, file, datasets, datatype):
         # Step 1: Processing
         self.update_state(state='PROGRESS', meta='Processing')
 
-        df = pd.read_csv(StringIO(file), sep=",", header=0, index_col=0)
+        df = pd.read_csv(StringIO(file), sep=",", header=0)
 
         tmp_dir = Path("tmp_files")
         tmp_dir.mkdir(exist_ok=True)
@@ -368,7 +368,7 @@ def alignment(self, file, datatype):
         # Step 1: Processing
         self.update_state(state='PROGRESS', meta='Processing')
 
-        df = pd.read_csv(StringIO(file), sep=",", header=0, index_col=0)
+        df = pd.read_csv(StringIO(file), sep=",", header=0)
 
         tmp_dir = Path("tmp_files")
         tmp_dir.mkdir(exist_ok=True)
