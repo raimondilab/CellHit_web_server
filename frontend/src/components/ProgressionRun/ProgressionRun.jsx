@@ -177,8 +177,9 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit, alignO
                 clearInterval(statusInterval.current);
                 Swal.fire({
                     icon: "error",
-                    text: taskData.data.errors ? taskData.data.errors[0].message : "Oops... An error has occurred!"
-                });
+                    title: "Processing Failed",
+                    text: "We encountered an issue processing your data. If the problem continues, please contact the team for assistance.",
+                })
                 setIsSubmit(false);
 
             } else if (taskData) {
@@ -192,9 +193,10 @@ const ProgressionRun = ({ taskID, statusTask, setTaskStatus, setIsSubmit, alignO
                     clearInterval(statusInterval.current);
                     setIsSubmit(false);
                     Swal.fire({
-                        icon: "error",
-                        text: taskID // Assuming taskID contains the error message on failure
-                    });
+                    icon: "error",
+                    title: "Processing Failed",
+                    text: "We encountered an issue processing your data. If the problem continues, please contact the team for assistance.",
+                })
                 }
 
                 if (newStatus !== "SUCCESS") {
