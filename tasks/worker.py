@@ -185,6 +185,12 @@ def analysis(self, file, datasets, datatype):
 
         df = pd.read_csv(StringIO(file), sep=",", header=0, index_col=0)
 
+        tmp_dir = Path("tmp_files")
+        tmp_dir.mkdir(exist_ok=True)
+
+        file_path = tmp_dir / f"{task_id}.csv"
+        df.to_csv(file_path, index=True)
+
         if 'BATCH' in df.columns:
             df['BATCH'] = df['BATCH'].astype(str)
 
@@ -354,12 +360,21 @@ def analysis(self, file, datasets, datatype):
 @celery.task(bind=True)
 def alignment(self, file, datatype):
     try:
+
+        task_id = self.request.id  # Get the task ID
+
         results_pipeline = {}
 
         # Step 1: Processing
         self.update_state(state='PROGRESS', meta='Processing')
 
         df = pd.read_csv(StringIO(file), sep=",", header=0, index_col=0)
+
+        tmp_dir = Path("tmp_files")
+        tmp_dir.mkdir(exist_ok=True)
+
+        file_path = tmp_dir / f"{task_id}.csv"
+        df.to_csv(file_path, index=True)
 
         if 'BATCH' in df.columns:
             df['BATCH'] = df['BATCH'].astype(str)
