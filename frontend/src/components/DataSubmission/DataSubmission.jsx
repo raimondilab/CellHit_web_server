@@ -419,6 +419,11 @@ function validateFile(fileContent) {
           return cleanedRow;
         });
 
+        if (cleanedData.length > 150) {
+          reject(new Error(`Validation failed: Maximum limit exceeded. You can only process up to 150 samples per job. Your file contains ${cleanedData.length} samples.`));
+          return;
+        }
+
         const sampleTracker = new Set();
         const hasBatchColumn = validColumns.includes('BATCH');
 
@@ -526,8 +531,6 @@ function validateFile(fileContent) {
     });
   });
 }
-
-
 
   return (
     <>
