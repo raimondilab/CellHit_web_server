@@ -271,7 +271,6 @@ def run_full_inference(
         drug_stats_path=drug_stats_path,
         drug_metadata_path=drug_metadata_path,
         models_path=models_path,
-        limit_load=50,
         **kwargs
     )
     # compute quantile scores
