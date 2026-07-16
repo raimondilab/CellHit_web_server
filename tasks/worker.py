@@ -218,13 +218,13 @@ def analysis(self, file, datasets, datatype):
 
         transformed = celligner_transform_data(data=imputed,
                                                preprocess_paths=preprocess_paths,
-                                               device='cuda:0',
+                                                device='cpu',
                                                transform_source=transform_source)
 
         umap_path = preprocess_paths.umap_path
 
         if umap_path:
-            umap = ParametricUMAP.load(umap_path, device='cuda:0')
+            umap = ParametricUMAP.load(umap_path,  device='cpu')
             embedding = umap.transform(transformed.values)
 
             umap_results = pd.DataFrame(
@@ -403,13 +403,13 @@ def alignment(self, file, datatype):
         self.update_state(state='PROGRESS', meta='Transform')
         transformed = celligner_transform_data(data=imputed,
                                                preprocess_paths=preprocess_paths,
-                                               device='cuda:0',
+                                                device='cpu',
                                                transform_source=transform_source)
 
         umap_path = preprocess_paths.umap_path 
 
         if umap_path:
-            umap = ParametricUMAP.load(umap_path, device='cuda:0')
+            umap = ParametricUMAP.load(umap_path,  device='cpu')
             embedding = umap.transform(transformed.values)
 
             umap_results = pd.DataFrame(
