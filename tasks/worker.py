@@ -88,7 +88,7 @@ def start_celery(worker_name):
     celery_cmd = [
         "celery",
         "-A",
-        name,
+        __name__,
         "worker",
         "--pool=prefork",
         "--concurrency=1",
