@@ -88,9 +88,11 @@ def start_celery(worker_name):
     celery_cmd = [
         "celery",
         "-A",
-        __name__,
+        name,
         "worker",
-        "--pool=solo",
+        "--pool=prefork",
+        "--concurrency=1",
+        "--max-tasks-per-child=1",
         "--loglevel=info",
         "-n", f"{worker_name}@%h"
     ]
@@ -98,7 +100,7 @@ def start_celery(worker_name):
         process = Popen(celery_cmd, env=my_env)
         return process
     except Exception as e:
-        print(f"Error Worker: {e}") # Corrigido de Flower para Worker
+        print(f"Error Worker: {e}")
         return None
 
 
