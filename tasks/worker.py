@@ -90,9 +90,7 @@ def start_celery(worker_name):
         "-A",
         __name__,
         "worker",
-        "--pool=prefork",
-        "--concurrency=1",
-        "--max-tasks-per-child=1",
+        "--pool=solo",
         "--loglevel=info",
         "-n", f"{worker_name}@%h"
     ]
