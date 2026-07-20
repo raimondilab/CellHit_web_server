@@ -104,6 +104,18 @@ const handleDownloadGdscPrediction = () => {
                     alt="graphical abstract"
                     className="center-help shrink img-fluid mb-5"
                   />
+            <h5 className="display-6 fw-bold mb-4" id="sensitivity-value">The CellHit sensitivity value</h5>
+            <p className="fs-1 text-justify mb-2">
+              For every drug-sample pair, CellHit predicts a single <b>sensitivity value</b>. Its exact meaning depends on the drug screening dataset the underlying model was trained on, but in both cases <b>lower values indicate higher predicted sensitivity</b> (the drug is expected to be more effective on that sample) and <b>higher values indicate resistance</b>:
+            </p>
+            <ul>
+              <li className="fs-1 text-justify mb-1"><b>GDSC</b>: the value is the natural logarithm of the half-maximal inhibitory concentration, <b>ln(IC50)</b>, with IC50 expressed in micromolar (µM). IC50 is the drug concentration required to inhibit a given biological process (e.g., cell proliferation) by 50%.</li>
+              <li className="fs-1 text-justify mb-1"><b>PRISM</b>: the value is the <b>log-fold change (LFC)</b> in cell viability, i.e., the log2 ratio between viable cells in the treated and control conditions. More negative LFC values reflect a stronger reduction in viability upon treatment, and therefore higher sensitivity.</li>
+            </ul>
+            <Message severity="info" className="mb-3" text="GDSC and PRISM predictions are expressed on different scales (ln(IC50) versus log-fold change) and come from distinct assays, so their absolute values are not directly comparable. Predictions should be compared and ranked within a single dataset (GDSC or PRISM), not across the two." />
+            <p className="fs-1 text-justify mb-5">
+              Throughout this page, whenever a <i>prediction</i> or an <i>experimental reference value</i> is reported, it refers to this dataset-specific sensitivity value: ln(IC50) for GDSC and LFC for PRISM.
+            </p>
             <h5 className="display-6 fw-bold mb-4" id="explore">Explore now</h5>
             <p className="fs-1 text-justify mb-2">We provide precomputed predictions for all TCGA samples across both GDSC and PRISM
             drugs, totaling 4.060.342 and 17.958.038 predictions, respectively, along with a comprehensive
@@ -137,16 +149,16 @@ const handleDownloadGdscPrediction = () => {
 
                   <li className="fs-1 text-justify mb-1"><b>Prediction and Uncertainty:</b></li>
                   <ul>
-                    <li className="fs-1 text-justify mb-1"><Chip label="predictions" />: Numerical prediction output of the machine learning model, given in terms of the natural logarithm of the IC50 (ln(IC50)) expressed in micromolar (µM). IC50 represents the concentration of the drug required to inhibit a given biological process (e.g., cell proliferation) by 50%; lower values indicate higher drug sensitivity, higher values indicate resistance.</li>
+                    <li className="fs-1 text-justify mb-1"><Chip label="predictions" />: Numerical prediction output of the machine learning model, expressed as the dataset-specific sensitivity value defined above: the natural logarithm of the IC50 (ln(IC50)), with IC50 in micromolar (µM), for GDSC, and the log-fold change (LFC) in cell viability for PRISM. IC50 is the drug concentration required to inhibit a given biological process (e.g., cell proliferation) by 50%. In both datasets, lower values indicate higher drug sensitivity and higher values indicate resistance; note that GDSC (ln(IC50)) and PRISM (LFC) values lie on different scales and are not directly comparable.</li>
                     <li className="fs-1 text-justify mb-1"><Chip label="predictionsStd" />: Standard deviation representing uncertainty estimation around the prediction. Computed from the ensemble of multiple machine learning models, this value provides an indication of predictive consistency (lower std indicates higher confidence in the prediction).</li>
                   </ul>
 
                   <li className="fs-1 text-justify mb-1"><b>Experimental Reference Values:</b></li>
                   <p className="fs-1 text-justify mb-1"> These metrics represent historical or previously recorded experimental drug sensitivity measurements, useful for contextualizing the current prediction:</p>
                   <ul>
-                    <li className="fs-1 text-justify mb-1"><Chip label="experimentalMin" />: Minimum experimentally observed ln(IC50) value for this drug across available datasets, indicating the highest sensitivity (lowest resistance).</li>
-                    <li className="fs-1 text-justify mb-1"><Chip label="experimentalMedian" />: Median experimentally observed ln(IC50) across cell lines or samples, representing typical or average sensitivity.</li>
-                     <li className="fs-1 text-justify mb-1"><Chip label="experimentalMax" />: Maximum experimentally observed ln(IC50), indicating the least sensitive or most resistant cases recorded experimentally.</li>
+                    <li className="fs-1 text-justify mb-1"><Chip label="experimentalMin" />: Minimum experimentally observed sensitivity value (ln(IC50) for GDSC, LFC for PRISM) for this drug across available datasets, indicating the highest sensitivity (lowest resistance).</li>
+                    <li className="fs-1 text-justify mb-1"><Chip label="experimentalMedian" />: Median experimentally observed sensitivity value (ln(IC50) for GDSC, LFC for PRISM) across cell lines or samples, representing typical or average sensitivity.</li>
+                     <li className="fs-1 text-justify mb-1"><Chip label="experimentalMax" />: Maximum experimentally observed sensitivity value (ln(IC50) for GDSC, LFC for PRISM), indicating the least sensitive or most resistant cases recorded experimentally.</li>
                   </ul>
 
                   <li className="fs-1 text-justify mb-1"><b>Feature Importance and Interpretation:</b></li>
@@ -263,7 +275,7 @@ const handleDownloadGdscPrediction = () => {
             <p className="fs-1 text-justify">
             Due to the generally low performance of most trained models, likely stemming from the moderate
             and tissue-specific responses of cancer cell lines to the various non-oncological drugs in the PRISM dataset, we have decided to limit our prediction output to models (drugs) with a correlation coefficient (ρ) greater than 0.2. This cutoff
-            of ρ > 0.2 is consistent with previous modeling efforts using an earlier release of the PRISM dataset. You can find the complete list of PRISM drug names available
+            of ρ &gt; 0.2 is consistent with previous modeling efforts using an earlier release of the PRISM dataset. You can find the complete list of PRISM drug names available
             <b><Link onClick={handleDownloadPrism}> here</Link></b>.
             Additionally, the comprehensive list of GDSC drugs is available <b><Link onClick={handleDownloadGdsc}>here</Link></b>.
             </p>
@@ -345,16 +357,16 @@ const handleDownloadGdscPrediction = () => {
 
                   <li className="fs-1 text-justify mb-1"><b>Prediction and Uncertainty:</b></li>
                   <ul>
-                    <li className="fs-1 text-justify mb-1"><Chip label="prediction" />: Numerical prediction output of the machine learning model, given in terms of the natural logarithm of the IC50 (ln(IC50)) expressed in micromolar (µM). IC50 represents the concentration of the drug required to inhibit a given biological process (e.g., cell proliferation) by 50%; lower values indicate higher drug sensitivity, higher values indicate resistance.</li>
+                    <li className="fs-1 text-justify mb-1"><Chip label="prediction" />: Numerical prediction output of the machine learning model, expressed as the dataset-specific sensitivity value defined above: the natural logarithm of the IC50 (ln(IC50)), with IC50 in micromolar (µM), for GDSC, and the log-fold change (LFC) in cell viability for PRISM. IC50 is the drug concentration required to inhibit a given biological process (e.g., cell proliferation) by 50%. In both datasets, lower values indicate higher drug sensitivity and higher values indicate resistance; note that GDSC (ln(IC50)) and PRISM (LFC) values lie on different scales and are not directly comparable.</li>
                     <li className="fs-1 text-justify mb-1"><Chip label="std" />: Standard deviation representing uncertainty estimation around the prediction. Computed from the ensemble of multiple machine learning models, this value provides an indication of predictive consistency (lower std indicates higher confidence in the prediction).</li>
                   </ul>
 
                   <li className="fs-1 text-justify mb-1"><b>Experimental Reference Values:</b></li>
                   <p className="fs-1 text-justify mb-1"> These metrics represent historical or previously recorded experimental drug sensitivity measurements, useful for contextualizing the current prediction:</p>
                   <ul>
-                    <li className="fs-1 text-justify mb-1"><Chip label="DrugMin" />: Minimum experimentally observed ln(IC50) value for this drug across available datasets, indicating the highest sensitivity (lowest resistance).</li>
-                    <li className="fs-1 text-justify mb-1"><Chip label="DrugMedian" />: Median experimentally observed ln(IC50) across cell lines or samples, representing typical or average sensitivity.</li>
-                     <li className="fs-1 text-justify mb-1"><Chip label="DrugMax" />: Maximum experimentally observed ln(IC50), indicating the least sensitive or most resistant cases recorded experimentally.</li>
+                    <li className="fs-1 text-justify mb-1"><Chip label="DrugMin" />: Minimum experimentally observed sensitivity value (ln(IC50) for GDSC, LFC for PRISM) for this drug across available datasets, indicating the highest sensitivity (lowest resistance).</li>
+                    <li className="fs-1 text-justify mb-1"><Chip label="DrugMedian" />: Median experimentally observed sensitivity value (ln(IC50) for GDSC, LFC for PRISM) across cell lines or samples, representing typical or average sensitivity.</li>
+                     <li className="fs-1 text-justify mb-1"><Chip label="DrugMax" />: Maximum experimentally observed sensitivity value (ln(IC50) for GDSC, LFC for PRISM), indicating the least sensitive or most resistant cases recorded experimentally.</li>
                   </ul>
 
                   <li className="fs-1 text-justify mb-1"><b>Feature Importance and Interpretation:</b></li>
@@ -366,8 +378,8 @@ const handleDownloadGdscPrediction = () => {
                    <li className="fs-1 text-justify mb-1"><b>SHAP-based Explanation Details:</b></li>
                    <p className="fs-1 text-justify mb-2">SHAP (SHapley Additive exPlanations) values quantitatively represent the impact of gene expression on model predictions:</p>
                    <ul>
-                         <li className="fs-1 text-justify mb-1"><Chip label="ShapPos" /> Dictionary listing genes with the strongest positive SHAP values. A higher gene expression at the recorded level for these genes is associated with an increased predicted ln(IC50), implying greater drug resistance.</li>
-                         <li className="fs-1 text-justify mb-1"><Chip label="ShapNeg" /> Dictionary of genes with the strongest negative SHAP values. Increased gene expression for these genes at the observed level decreases predicted ln(IC50), indicating higher drug sensitivity.</li>
+                         <li className="fs-1 text-justify mb-1"><Chip label="ShapPos" /> Dictionary listing genes with the strongest positive SHAP values. A higher gene expression at the recorded level for these genes is associated with an increased predicted sensitivity value (ln(IC50) for GDSC, LFC for PRISM), implying greater drug resistance.</li>
+                         <li className="fs-1 text-justify mb-1"><Chip label="ShapNeg" /> Dictionary of genes with the strongest negative SHAP values. Increased gene expression for these genes at the observed level decreases the predicted sensitivity value (ln(IC50) for GDSC, LFC for PRISM), indicating higher drug sensitivity.</li>
                   </ul>
 
                   <li className="fs-1 text-justify mb-1"><b>Quantitative Assessment of Prediction Quality:</b></li>
@@ -411,8 +423,8 @@ const handleDownloadGdscPrediction = () => {
                       className="center-help shrink img-fluid mb-5"
                     />
                <p className="fs-1 text-justify mb-4">
-                Users can access additional information by clicking on a specific prediction row in the table, including a graph displaying the top 15 genes ranked by their absolute SHAP importance. In this graph, blue bars represent genes that lower the IC50 value (indicating increased drug sensitivity). In contrast, red bars represent genes that raise the IC50 value (indicating decreased sensitivity).
-                <br/>Additionally, we utilize kernel density estimation (KDE) plots to visualize two complementary distributional features of the predictions. The first plot compares a drug's predicted response to that of other drugs tested on the same cell line; a red line on the left side of the distribution indicates higher efficacy. The second plot examines the drug's behaviour across multiple cell lines, helping to identify instances where consistently low IC50 values may suggest general toxicity instead of selective effectiveness. <br/>Click the replay icon to reset the selection and hide the SHAP plot and distribution plots.
+                Users can access additional information by clicking on a specific prediction row in the table, including a graph displaying the top 15 genes ranked by their absolute SHAP importance. In this graph, blue bars represent genes that lower the predicted sensitivity value (ln(IC50) for GDSC, LFC for PRISM), indicating increased drug sensitivity. In contrast, red bars represent genes that raise it, indicating decreased sensitivity.
+                <br/>Additionally, we utilize kernel density estimation (KDE) plots to visualize two complementary distributional features of the predictions. The first plot compares a drug's predicted response to that of other drugs tested on the same cell line; a red line on the left side of the distribution indicates higher efficacy. The second plot examines the drug's behaviour across multiple cell lines, helping to identify instances where consistently low sensitivity values may suggest general toxicity instead of selective effectiveness. <br/>Click the replay icon to reset the selection and hide the SHAP plot and distribution plots.
               </p>
                 <div className="row">
                 <div className="col-md-12 text-center">
@@ -472,7 +484,7 @@ const handleDownloadGdscPrediction = () => {
              </ul>
              <p className="fs-1 text-justify">By incorporating response information and applying hierarchical clustering to the rows, we can simplify the grouping of patients with similar response patterns. Both rows and columns are clustered based on predicted sensitivities, which helps group drugs and samples with identical response profiles. This clustering aids in identifying subgroups of patients with unique sensitivity characteristics.
               </p>
-             <p className="fs-1 text-justify mb-4">To refine the extensive drug set from GDSC and PRISM, users can select from a dropdown menu to choose between 15 and 50 top medications based on the highest variance across predicted samples. Additionally, any drug with an average ln(IC50) value lower than -1 is included in the selection.</p>
+             <p className="fs-1 text-justify mb-4">To refine the extensive drug set from GDSC and PRISM, users can select from a dropdown menu to choose between 15 and 50 top medications based on the highest variance across predicted samples. Additionally, any drug with an average sensitivity value (ln(IC50) for GDSC, LFC for PRISM) lower than -1 is included in the selection.</p>
                <div className="row">
                 <div className="col-md-6 text-center">
                   <img
