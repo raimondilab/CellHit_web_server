@@ -28,6 +28,9 @@ from src.pipeline.align import batch_correct, impute_missing, celligner_transfor
 from src.pipeline import InferencePaths, run_full_inference
 import plotly.express as px
 
+import os
+from subprocess import Popen
+
 # Get the base directory of the script
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -59,10 +62,6 @@ celery.conf.update(
     result_expires=60 * 60 * 24 * 30  # 30 days in seconds
 )
 
-
-import os
-from subprocess import Popen
-
 def start_flower():
     flower_cmd = [
         "celery",
@@ -80,7 +79,6 @@ def start_flower():
 
 
 def start_celery(worker_name):
-
     my_env = os.environ.copy()
     my_env["LANG"] = "C.UTF-8"
     my_env["LC_ALL"] = "C.UTF-8"
@@ -205,7 +203,8 @@ def analysis(self, file, datasets, datatype):
         # Step 2: Batch correction
         self.update_state(state='PROGRESS', meta='Batch correction')
         transform_source = 'target' if datatype == "patient" else 'reference'
-        corrected = batch_correct(data, covariate_labels, preprocess_paths, transform_source=transform_source,  batch_labels=batch_labels_int)
+        corrected = batch_correct(data, covariate_labels, preprocess_paths, transform_source=transform_source,
+                                  batch_labels=batch_labels_int)
 
         # Step 3: Imputation
         self.update_state(state='PROGRESS', meta='Imputation')
@@ -216,13 +215,13 @@ def analysis(self, file, datasets, datatype):
 
         transformed = celligner_transform_data(data=imputed,
                                                preprocess_paths=preprocess_paths,
-                                                device='cpu',
+                                               device='cuda:0',
                                                transform_source=transform_source)
 
         umap_path = preprocess_paths.umap_path
 
         if umap_path:
-            umap = ParametricUMAP.load(umap_path,  device='cpu')
+            umap = ParametricUMAP.load(umap_path, device='cuda:0')
             embedding = umap.transform(transformed.values)
 
             umap_results = pd.DataFrame(
@@ -256,7 +255,6 @@ def analysis(self, file, datasets, datatype):
         umap_json_tissue = draw_scatter_plot(umap_concat, code, 'tissue')
 
         if batch_labels:
-
             # Convert umap data in json format
             umap_json_batch = draw_scatter_plot(umap_concat, code, 'batch')
 
@@ -401,13 +399,13 @@ def alignment(self, file, datatype):
         self.update_state(state='PROGRESS', meta='Transform')
         transformed = celligner_transform_data(data=imputed,
                                                preprocess_paths=preprocess_paths,
-                                                device='cpu',
+                                               device='cuda:0',
                                                transform_source=transform_source)
 
-        umap_path = preprocess_paths.umap_path 
+        umap_path = preprocess_paths.umap_path
 
         if umap_path:
-            umap = ParametricUMAP.load(umap_path,  device='cpu')
+            umap = ParametricUMAP.load(umap_path, device='cuda:0')
             embedding = umap.transform(transformed.values)
 
             umap_results = pd.DataFrame(
@@ -466,7 +464,6 @@ def alignment(self, file, datatype):
 
 # Preprocess user data
 def preprocess_data(data, gene_lengths, datatype):
-
     if 'SAMPLE' in data.columns:
         data = data.set_index('SAMPLE')
 
@@ -555,7 +552,6 @@ def preprocess_data(data, gene_lengths, datatype):
 
 # Draw IC50 heatmap
 def draw_heatmap(heatmap_df, dataset, top=15):
-
     # Exclude non-numeric columns
     numeric_data = heatmap_df.select_dtypes(include='number')
 
@@ -630,7 +626,6 @@ def preprocess_shap_dict(shap_str):
 
 # Draw scatter plot for UMAP
 def draw_scatter_plot(umap, code, color):
-
     symbol_map = {
         'TCGA': 'cross',
         'CCLE': 'circle',
