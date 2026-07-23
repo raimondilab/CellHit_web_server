@@ -99,19 +99,19 @@ class FileResolver:
 
 # Add route for downloading the file
 @app.get("/api/download/example.csv", response_class=FileResponse)
-async def download_gbm_file():
+async def download_example():
     return FileResolver.download_example_file()
 
 
 # Add route for downloading the file
 @app.get("/api/download/full_results_gdsc.csv", response_class=FileResponse)
-async def download_gbm_file():
+async def download_gdsc_file():
     return FileResolver.download_gdsc_predictions()
 
 
 # Add route for downloading the file
 @app.get("/api/download/full_results_prism.csv", response_class=FileResponse)
-async def download_gbm_file():
+async def download_prism_file():
     return FileResolver.download_prism_predictions()
 
 # Main entry point
