@@ -271,7 +271,7 @@ const handleDownloadGdscPrediction = () => {
             </ol>
             <Message severity="warn"  className= "mb-4" text=" A minimum of three total samples (rows) is required for any file to be processed.
                  If you are using the BATCH column for correction (based on covariates like cancer/tissue pairs), each unique batch must also contain at least three samples." />
-           <Message severity="warn"  className= "mb-4" text="Verify your annotations: TCGA_CODE and TISSUE must match each sample's tumor type and tissue, since errors can affect predictions." />
+           <Message severity="warn"  className= "mb-4" text="Please verify that TCGA_CODE and TISSUE match each sample’s tumor type and tissue. Accurate annotations are essential for correct processing, visualization, and interpretation of the results." />
 
             <p className="fs-1 text-justify">
             Due to the generally low performance of most trained models, likely stemming from the moderate
