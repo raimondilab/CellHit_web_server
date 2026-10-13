@@ -30,6 +30,8 @@ PLOTLY_JS_URL = f"https://{PUBLIC_HOST}{PLOTLY_JS_ROUTE}"
 UI_DIR = Path(__file__).resolve().parent / "ui"
 HEATMAP_URI = "ui://cellhit/heatmap.html"
 HEATMAP_TOP = 15
+UMAP_URI = "ui://cellhit/umap.html"
+UMAP_COLORINGS = ("oncotree", "tissue", "batch")
 
 # Hard cap on rows sent back to the model
 MAX_ROWS = 500
@@ -41,6 +43,7 @@ DROPPED_COLUMNS = {"ShapDictionary"}
 UUID_RE = re.compile(
     r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
 )
+
 
 
 async def graphql(query: str, variables: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -81,8 +84,8 @@ query TaskStatus($taskId: String!, $step: String!) {
 }
 """
 
-TASK_TABLE_QUERY = """
-query TaskTable($taskId: String!, $step: String!) {
+TASK_RESULT_QUERY = """
+query TaskResult($taskId: String!, $step: String!) {
   getResults(taskId: $taskId, step: $step) {
     result
   }
@@ -119,17 +122,43 @@ apps.add_html_resource(
 )
 
 
+async def available_heatmap_datasets(task_id: str) -> list[str]:
+    """List the datasets (GDSC, PRISM) that were run for an analysis task."""
+    data = await graphql(TASK_RESULT_QUERY, {"taskId": task_id, "step": "heatmap"})
+    precomputed = decode_json(data["getResults"]["result"]) or {}
+    return [name for name in ("GDSC", "PRISM") if name in precomputed]
+
+
+async def fetch_heatmap(task_id: str, dataset: str) -> dict[str, Any] | None:
+    """Fetch the median-scaled and standardized heatmap figures of one dataset."""
+    data = await graphql(HEATMAP_QUERY, {"taskId": task_id, "top": HEATMAP_TOP, "dataset": dataset})
+    result = decode_json(data["getHeatmap"]["result"])
+    if not result:
+        return None
+    heatmap = result["heatmap"][dataset]
+    standardized = result["standardized_heatmap"][dataset]
+    return {
+        "dataset": dataset,
+        "figures": {
+            "heatmap": decode_json(heatmap["data"]),
+            "standardized": decode_json(standardized["data"]),
+        },
+        "height": heatmap["height"],
+    }
+
+
 @apps.tool(
     resource_uri=HEATMAP_URI,
     description=(
         f"Show an interactive heatmap of the top {HEATMAP_TOP} drugs for a completed "
-        "CellHit analysis task. Always share `result_page` with the user."
+        "CellHit analysis task. The user can switch dataset and scaling in the view. "
+        "Always share `result_page` with the user."
     ),
 )
 async def show_heatmap(task: str, dataset: Literal["GDSC", "PRISM"]) -> CallToolResult:
     """Args:
         task: CellHit result URL or bare task ID.
-        dataset: "GDSC" or "PRISM".
+        dataset: "GDSC" or "PRISM", the dataset shown first.
     """
     status = await get_task_status(task)
     if status["state"] != "completed":
@@ -141,14 +170,18 @@ async def show_heatmap(task: str, dataset: Literal["GDSC", "PRISM"]) -> CallTool
         text = f"Alignment-only task: there is no heatmap. Full results: {url}"
         return CallToolResult(content=[TextContent(type="text", text=text)])
 
-    data = await graphql(HEATMAP_QUERY, {"taskId": task_id, "top": HEATMAP_TOP, "dataset": dataset})
-    result = decode_json(data["getHeatmap"]["result"])
-    if not result:
-        text = f"No heatmap available for this task. Full results: {url}"
+    datasets = await available_heatmap_datasets(task_id)
+    if dataset not in datasets:
+        text = (
+            f"{dataset} was not run for this task. Available: {', '.join(datasets) or 'none'}. "
+            f"Full results: {url}"
+        )
         return CallToolResult(content=[TextContent(type="text", text=text)])
 
-    heatmap = result["heatmap"][dataset]
-    standardized = result["standardized_heatmap"][dataset]
+    heatmap = await fetch_heatmap(task_id, dataset)
+    if heatmap is None:
+        text = f"No heatmap available for this task. Full results: {url}"
+        return CallToolResult(content=[TextContent(type="text", text=text)])
 
     # The figures go only to the App; the model gets a short summary
     return CallToolResult(
@@ -159,16 +192,104 @@ async def show_heatmap(task: str, dataset: Literal["GDSC", "PRISM"]) -> CallTool
                 f"is shown to the user. Full results: {url}",
             )
         ],
-        structured_content={
-            "task_id": task_id,
-            "dataset": dataset,
-            "result_page": url,
-            "figures": {
-                "heatmap": decode_json(heatmap["data"]),
-                "standardized": decode_json(standardized["data"]),
-            },
-            "height": heatmap["height"],
-        },
+        structured_content={"task_id": task_id, "result_page": url, "datasets": datasets, **heatmap},
+    )
+
+
+@apps.tool(
+    resource_uri=HEATMAP_URI,
+    visibility=["app"],
+    description="Return the heatmap figures of one dataset for the CellHit App.",
+)
+async def get_heatmap_figures(task_id: str, dataset: Literal["GDSC", "PRISM"]) -> CallToolResult:
+    """Args:
+        task_id: Bare task ID.
+        dataset: "GDSC" or "PRISM".
+    """
+    heatmap = await fetch_heatmap(parse_task_id(task_id), dataset)
+    if heatmap is None:
+        return CallToolResult(
+            content=[TextContent(type="text", text=f"No {dataset} heatmap available.")],
+            is_error=True,
+        )
+    return CallToolResult(
+        content=[TextContent(type="text", text=f"{dataset} heatmap figures.")],
+        structured_content=heatmap,
+    )
+
+
+async def fetch_umap(task_id: str) -> dict[str, Any]:
+    """Fetch the UMAP figures of a task, keyed by coloring."""
+    data = await graphql(TASK_RESULT_QUERY, {"taskId": task_id, "step": "umap"})
+    return decode_json(data["getResults"]["result"]) or {}
+
+
+apps.add_html_resource(
+    UMAP_URI,
+    load_ui("umap.html"),
+    title="CellHit alignment",
+    csp=ResourceCsp(resource_domains=[f"https://{PUBLIC_HOST}"]),
+)
+
+
+@apps.tool(
+    resource_uri=UMAP_URI,
+    description=(
+        "Show an interactive UMAP of a CellHit task: the user's samples aligned with "
+        "the CCLE and TCGA reference samples, colored by oncotree code, tissue or batch. "
+        "Works for analysis and alignment-only tasks. Always share `result_page` with the user."
+    ),
+)
+async def show_umap(task: str) -> CallToolResult:
+    """Args:
+        task: CellHit result URL or bare task ID.
+    """
+    status = await get_task_status(task)
+    if status["state"] != "completed":
+        return CallToolResult(content=[TextContent(type="text", text=json.dumps(status))])
+
+    task_id = status["task_id"]
+    url = result_page_url(task_id, status["task_type"])
+    umap = await fetch_umap(task_id)
+    colorings = [name for name in UMAP_COLORINGS if name in umap]
+    if not colorings:
+        text = f"No UMAP available for this task. Full results: {url}"
+        return CallToolResult(content=[TextContent(type="text", text=text)])
+
+    # Only the available colorings are sent here; the App loads each figure on demand
+    return CallToolResult(
+        content=[
+            TextContent(
+                type="text",
+                text=f"UMAP of task {task_id} is shown to the user, colored by "
+                f"{', '.join(colorings)}. Full results: {url}",
+            )
+        ],
+        structured_content={"task_id": task_id, "result_page": url, "colorings": colorings},
+    )
+
+
+@apps.tool(
+    resource_uri=UMAP_URI,
+    visibility=["app"],
+    description="Return one UMAP figure of a task for the CellHit App.",
+)
+async def get_umap_figure(
+    task_id: str, coloring: Literal["oncotree", "tissue", "batch"]
+) -> CallToolResult:
+    """Args:
+        task_id: Bare task ID.
+        coloring: "oncotree", "tissue" or "batch".
+    """
+    umap = await fetch_umap(parse_task_id(task_id))
+    if coloring not in umap:
+        return CallToolResult(
+            content=[TextContent(type="text", text=f"Coloring '{coloring}' not available.")],
+            is_error=True,
+        )
+    return CallToolResult(
+        content=[TextContent(type="text", text=f"UMAP figure colored by {coloring}.")],
+        structured_content={"coloring": coloring, "figure": decode_json(umap[coloring])},
     )
 
 
@@ -258,7 +379,7 @@ async def get_task_results(
             "result_page": url,
         }
 
-    data = await graphql(TASK_TABLE_QUERY, {"taskId": task_id, "step": "table"})
+    data = await graphql(TASK_RESULT_QUERY, {"taskId": task_id, "step": "table"})
     table = data["getResults"]["result"]
     # The custom JSON scalar is serialized as a string
     if isinstance(table, str):
@@ -287,7 +408,7 @@ async def get_task_results(
 
 
 if __name__ == "__main__":
-    # In mcp v2, transport settings are passed to run() instead of the constructor
+
     mcp.run(
         transport="streamable-http",
         host="127.0.0.1",

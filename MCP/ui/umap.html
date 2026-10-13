@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CellHit alignment</title>
+<script src="{{PLOTLY_JS_URL}}"></script>
+<style>
+  :root {
+    --text: #1d2733;
+    --muted: #5b6878;
+    --line: #d5dce4;
+    --active-bg: #1d2733;
+    --active-text: #ffffff;
+    color-scheme: light;
+  }
+  :root[data-theme="dark"] {
+    --text: #e6ebf0;
+    --muted: #9aa7b5;
+    --line: #3a4552;
+    --active-bg: #e6ebf0;
+    --active-text: #1d2733;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 12px 4px;
+    background: transparent;
+    color: var(--text);
+    font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  h1 { margin: 0; font-size: 15px; font-weight: 600; }
+  .toggle { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .toggle button {
+    border: 0;
+    padding: 4px 10px;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    cursor: pointer;
+  }
+  .toggle button[aria-pressed="true"] { background: var(--active-bg); color: var(--active-text); }
+  .toggle button:disabled { cursor: progress; }
+  .toggle button:focus-visible, a:focus-visible { outline: 2px solid var(--muted); outline-offset: 2px; }
+  #plot { width: 100%; }
+  #status { color: var(--muted); }
+  a { color: inherit; }
+  footer { margin-top: 6px; font-size: 13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Alignment</h1>
+  <div class="toggle" role="group" aria-label="Color by" hidden></div>
+</header>
+<p id="status">Loading…</p>
+<div id="plot"></div>
+<footer id="footer" hidden><a id="link" href="#" target="_blank" rel="noopener">Open full results</a></footer>
+
+<script>
+  const PROTOCOL_VERSION = "2026-01-26";
+  const LABELS = { oncotree: "Oncotree", tissue: "Tissue", batch: "Batch" };
+  let nextId = 1;
+  const pending = new Map();
+  const figures = {};
+  let task = null;
+  let current = null;
+  let hostCapabilities = {};
+
+  const statusEl = document.getElementById("status");
+  const toggleEl = document.querySelector(".toggle");
+
+  function send(message) {
+    window.parent.postMessage({ jsonrpc: "2.0", ...message }, "*");
+  }
+
+  function request(method, params) {
+    const id = nextId++;
+    send({ id, method, params });
+    return new Promise((resolve, reject) => pending.set(id, { resolve, reject }));
+  }
+
+  function setStatus(text) {
+    statusEl.textContent = text;
+    statusEl.hidden = !text;
+    reportSize();
+  }
+
+  function applyTheme(theme) {
+    if (theme) document.documentElement.dataset.theme = theme;
+    if (current && figures[current]) draw(figures[current]);
+  }
+
+  function reportSize() {
+    send({
+      method: "ui/notifications/size-changed",
+      params: { height: Math.ceil(document.documentElement.scrollHeight) },
+    });
+  }
+
+  function draw(figure) {
+    const styles = getComputedStyle(document.documentElement);
+    const layout = {
+      ...figure.layout,
+      paper_bgcolor: "rgba(0,0,0,0)",
+      plot_bgcolor: "rgba(0,0,0,0)",
+      font: { ...(figure.layout.font || {}), color: styles.getPropertyValue("--text").trim() },
+    };
+    Plotly.react("plot", figure.data, layout, { responsive: true, displaylogo: false })
+      .then(reportSize);
+  }
+
+  function setPressed(coloring) {
+    toggleEl.querySelectorAll("button").forEach((b) =>
+      b.setAttribute("aria-pressed", String(b.dataset.coloring === coloring)));
+  }
+
+  function setBusy(busy) {
+    toggleEl.querySelectorAll("button").forEach((b) => { b.disabled = busy; });
+  }
+
+  // Figures are large, so each coloring is fetched only when first selected
+  async function show(coloring) {
+    current = coloring;
+    setPressed(coloring);
+    if (!figures[coloring]) {
+      setStatus("Loading…");
+      setBusy(true);
+      try {
+        const result = await request("tools/call", {
+          name: "get_umap_figure",
+          arguments: { task_id: task.task_id, coloring },
+        });
+        if (!result || result.isError || !result.structuredContent) {
+          throw new Error(result && result.content && result.content[0] ? result.content[0].text : "");
+        }
+        figures[coloring] = result.structuredContent.figure;
+      } catch (error) {
+        setBusy(false);
+        setStatus(`Could not load the ${LABELS[coloring]} view. ${error.message || ""}`.trim());
+        return;
+      }
+      setBusy(false);
+    }
+    setStatus("");
+    if (current === coloring) draw(figures[coloring]);
+  }
+
+  function showResult(result) {
+    const content = result && result.structuredContent;
+    if (!content || !content.colorings) {
+      const text = result && result.content && result.content[0] ? result.content[0].text : "";
+      setStatus(text || "No UMAP available.");
+      return;
+    }
+    task = content;
+    toggleEl.innerHTML = "";
+    content.colorings.forEach((coloring) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.dataset.coloring = coloring;
+      button.textContent = LABELS[coloring] || coloring;
+      button.addEventListener("click", () => show(coloring));
+      toggleEl.appendChild(button);
+    });
+    toggleEl.hidden = false;
+    document.getElementById("link").href = content.result_page;
+    document.getElementById("footer").hidden = false;
+    show(content.colorings[0]);
+  }
+
+  // Use the host to open links when it supports it; sandboxed iframes may block them
+  document.getElementById("link").addEventListener("click", (event) => {
+    if (!hostCapabilities.openLinks || !task) return;
+    event.preventDefault();
+    request("ui/open-link", { url: task.result_page });
+  });
+
+  window.addEventListener("message", (event) => {
+    if (event.source !== window.parent) return;
+    const message = event.data;
+    if (!message || message.jsonrpc !== "2.0") return;
+
+    // Response to one of our requests
+    if (message.id !== undefined && pending.has(message.id)) {
+      const { resolve, reject } = pending.get(message.id);
+      pending.delete(message.id);
+      if (message.error) reject(new Error(message.error.message || "Request failed"));
+      else resolve(message.result);
+      return;
+    }
+    // Request from the host (e.g. teardown): acknowledge it
+    if (message.id !== undefined && message.method) {
+      send({ id: message.id, result: {} });
+      return;
+    }
+    if (message.method === "ui/notifications/tool-result") showResult(message.params);
+    if (message.method === "ui/notifications/host-context-changed") applyTheme(message.params.theme);
+  });
+
+  request("ui/initialize", {
+    protocolVersion: PROTOCOL_VERSION,
+    appInfo: { name: "cellhit-umap", version: "1.0.0" },
+    appCapabilities: {},
+  }).then((result) => {
+    hostCapabilities = (result && result.hostCapabilities) || {};
+    applyTheme(result && result.hostContext && result.hostContext.theme);
+    send({ method: "ui/notifications/initialized", params: {} });
+  });
+</script>
+</body>
+</html>
