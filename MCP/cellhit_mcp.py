@@ -1,11 +1,16 @@
 import json
 import os
 import re
+from pathlib import Path
 from typing import Any, Literal
 
 import httpx
+from mcp.server.apps import Apps, ResourceCsp
 from mcp.server.mcpserver import MCPServer
 from mcp.server.transport_security import TransportSecuritySettings
+from mcp.types import CallToolResult, TextContent
+from starlette.requests import Request
+from starlette.responses import FileResponse
 
 ENDPOINT = os.environ.get("CELLHIT_GRAPHQL_URL", "http://127.0.0.1:8003/graphql")
 TIMEOUT = float(os.environ.get("CELLHIT_TIMEOUT", "60"))
@@ -13,6 +18,18 @@ WEB_URL = os.environ.get("CELLHIT_WEB_URL", "https://cellhit.bioinfolab.sns.it")
 
 PUBLIC_HOST = os.environ.get("CELLHIT_MCP_HOST", "mcp.cellhit.bioinfolab.sns.it")
 PORT = int(os.environ.get("CELLHIT_MCP_PORT", "8012"))
+
+# plotly.js matching the plotly.py version (5.24.1) that generates the figures
+PLOTLY_JS_PATH = os.environ.get(
+    "CELLHIT_PLOTLY_JS",
+    "/data/SW/Anaconda3-2025.06-1/envs/cellhit/lib/python3.10/site-packages/plotly/package_data/plotly.min.js",
+)
+PLOTLY_JS_ROUTE = "/libs/plotly-2.35.2.min.js"
+PLOTLY_JS_URL = f"https://{PUBLIC_HOST}{PLOTLY_JS_ROUTE}"
+
+UI_DIR = Path(__file__).resolve().parent / "ui"
+HEATMAP_URI = "ui://cellhit/heatmap.html"
+HEATMAP_TOP = 15
 
 # Hard cap on rows sent back to the model
 MAX_ROWS = 500
@@ -25,7 +42,6 @@ UUID_RE = re.compile(
     r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
 )
 
-mcp = MCPServer("cellhit")
 
 
 async def graphql(query: str, variables: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -73,6 +89,101 @@ query TaskTable($taskId: String!, $step: String!) {
   }
 }
 """
+
+HEATMAP_QUERY = """
+query TaskHeatmap($taskId: String!, $top: Int!, $dataset: String!) {
+  getHeatmap(taskId: $taskId, top: $top, dataset: $dataset) {
+    result
+  }
+}
+"""
+
+
+def load_ui(filename: str) -> str:
+    """Read an MCP App HTML file and inject the plotly.js URL."""
+    html = (UI_DIR / filename).read_text(encoding="utf-8")
+    return html.replace("{{PLOTLY_JS_URL}}", PLOTLY_JS_URL)
+
+
+def decode_json(value: Any) -> Any:
+    """Decode a value that the API may return as a JSON-encoded string."""
+    return json.loads(value) if isinstance(value, str) else value
+
+
+# MCP App tools must be registered before MCPServer is created
+apps = Apps()
+apps.add_html_resource(
+    HEATMAP_URI,
+    load_ui("heatmap.html"),
+    title="CellHit heatmap",
+    csp=ResourceCsp(resource_domains=[f"https://{PUBLIC_HOST}"]),
+)
+
+
+@apps.tool(
+    resource_uri=HEATMAP_URI,
+    description=(
+        f"Show an interactive heatmap of the top {HEATMAP_TOP} drugs for a completed "
+        "CellHit analysis task. Always share `result_page` with the user."
+    ),
+)
+async def show_heatmap(task: str, dataset: Literal["GDSC", "PRISM"]) -> CallToolResult:
+    """Args:
+        task: CellHit result URL or bare task ID.
+        dataset: "GDSC" or "PRISM".
+    """
+    status = await get_task_status(task)
+    if status["state"] != "completed":
+        return CallToolResult(content=[TextContent(type="text", text=json.dumps(status))])
+
+    task_id = status["task_id"]
+    url = result_page_url(task_id, status["task_type"])
+    if status["task_type"] != "analysis":
+        text = f"Alignment-only task: there is no heatmap. Full results: {url}"
+        return CallToolResult(content=[TextContent(type="text", text=text)])
+
+    data = await graphql(HEATMAP_QUERY, {"taskId": task_id, "top": HEATMAP_TOP, "dataset": dataset})
+    result = decode_json(data["getHeatmap"]["result"])
+    if not result:
+        text = f"No heatmap available for this task. Full results: {url}"
+        return CallToolResult(content=[TextContent(type="text", text=text)])
+
+    heatmap = result["heatmap"][dataset]
+    standardized = result["standardized_heatmap"][dataset]
+
+    # The figures go only to the App; the model gets a short summary
+    return CallToolResult(
+        content=[
+            TextContent(
+                type="text",
+                text=f"Heatmap of the top {HEATMAP_TOP} {dataset} drugs for task {task_id} "
+                f"is shown to the user. Full results: {url}",
+            )
+        ],
+        structured_content={
+            "task_id": task_id,
+            "dataset": dataset,
+            "result_page": url,
+            "figures": {
+                "heatmap": decode_json(heatmap["data"]),
+                "standardized": decode_json(standardized["data"]),
+            },
+            "height": heatmap["height"],
+        },
+    )
+
+
+mcp = MCPServer("cellhit", extensions=[apps])
+
+
+@mcp.custom_route(PLOTLY_JS_ROUTE, methods=["GET"])
+async def plotly_js(request: Request) -> FileResponse:
+    """Serve plotly.js for the MCP App iframes."""
+    return FileResponse(
+        PLOTLY_JS_PATH,
+        media_type="application/javascript",
+        headers={"Cache-Control": "public, max-age=31536000, immutable"},
+    )
 
 
 @mcp.tool()
@@ -177,6 +288,7 @@ async def get_task_results(
 
 
 if __name__ == "__main__":
+    # In mcp v2, transport settings are passed to run() instead of the constructor
     mcp.run(
         transport="streamable-http",
         host="127.0.0.1",
