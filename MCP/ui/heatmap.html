@@ -39,6 +39,7 @@
     margin-bottom: 8px;
   }
   h1 { margin: 0; font-size: 15px; font-weight: 600; }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; }
   .toggle { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
   .toggle button {
     border: 0;
@@ -49,6 +50,7 @@
     cursor: pointer;
   }
   .toggle button[aria-pressed="true"] { background: var(--active-bg); color: var(--active-text); }
+  .toggle button:disabled { cursor: progress; }
   .toggle button:focus-visible, a:focus-visible { outline: 2px solid var(--muted); outline-offset: 2px; }
   #plot { width: 100%; }
   #status { color: var(--muted); }
@@ -59,21 +61,31 @@
 <body>
 <header>
   <h1 id="title">Heatmap</h1>
-  <div class="toggle" role="group" aria-label="Heatmap scale" hidden>
-    <button type="button" data-view="heatmap" aria-pressed="true">Heatmap</button>
-    <button type="button" data-view="standardized" aria-pressed="false">Standardized</button>
+  <div class="controls" hidden>
+    <div class="toggle" id="datasets" role="group" aria-label="Drug database"></div>
+    <div class="toggle" id="scaling" role="group" aria-label="Scaling">
+      <button type="button" data-view="heatmap" aria-pressed="true">Median</button>
+      <button type="button" data-view="standardized" aria-pressed="false">Standardized</button>
+    </div>
   </div>
 </header>
 <p id="status">Loading…</p>
 <div id="plot"></div>
-<footer id="footer" hidden><a id="link" target="_blank" rel="noopener">Open full results</a></footer>
+<footer id="footer" hidden><a id="link" href="#" target="_blank" rel="noopener">Open full results</a></footer>
 
 <script>
   const PROTOCOL_VERSION = "2026-01-26";
   let nextId = 1;
   const pending = new Map();
-  let data = null;
+  const heatmaps = {};
+  let task = null;
+  let dataset = null;
   let view = "heatmap";
+  let hostCapabilities = {};
+
+  const statusEl = document.getElementById("status");
+  const datasetsEl = document.getElementById("datasets");
+  const scalingEl = document.getElementById("scaling");
 
   function send(message) {
     window.parent.postMessage({ jsonrpc: "2.0", ...message }, "*");
@@ -82,12 +94,7 @@
   function request(method, params) {
     const id = nextId++;
     send({ id, method, params });
-    return new Promise((resolve) => pending.set(id, resolve));
-  }
-
-  function applyTheme(theme) {
-    if (theme) document.documentElement.dataset.theme = theme;
-    if (data) render();
+    return new Promise((resolve, reject) => pending.set(id, { resolve, reject }));
   }
 
   function reportSize() {
@@ -97,46 +104,106 @@
     });
   }
 
+  function setStatus(text) {
+    statusEl.textContent = text;
+    statusEl.hidden = !text;
+    reportSize();
+  }
+
+  function setPressed(group, attribute, value) {
+    group.querySelectorAll("button").forEach((b) =>
+      b.setAttribute("aria-pressed", String(b.dataset[attribute] === value)));
+  }
+
+  function setBusy(busy) {
+    document.querySelectorAll(".toggle button").forEach((b) => { b.disabled = busy; });
+  }
+
+  function applyTheme(theme) {
+    if (theme) document.documentElement.dataset.theme = theme;
+    if (dataset && heatmaps[dataset]) render();
+  }
+
   function render() {
-    const figure = data.figures[view];
+    const heatmap = heatmaps[dataset];
+    const figure = heatmap.figures[view];
     const styles = getComputedStyle(document.documentElement);
     const layout = {
       ...figure.layout,
-      height: data.height,
+      height: heatmap.height,
       paper_bgcolor: "rgba(0,0,0,0)",
       plot_bgcolor: "rgba(0,0,0,0)",
       font: { ...(figure.layout.font || {}), color: styles.getPropertyValue("--text").trim() },
     };
+    document.getElementById("title").textContent = `Top 15 drugs (${dataset})`;
     Plotly.react("plot", figure.data, layout, { responsive: true, displaylogo: false })
       .then(reportSize);
   }
 
-  function showResult(result) {
-    const content = result && result.structuredContent;
-    document.getElementById("status").hidden = false;
-    if (!content || !content.figures) {
-      const text = result && result.content && result.content[0] ? result.content[0].text : "";
-      document.getElementById("status").textContent = text || "No heatmap available.";
-      reportSize();
-      return;
+  // Each dataset is fetched only when first selected
+  async function selectDataset(name) {
+    dataset = name;
+    setPressed(datasetsEl, "dataset", name);
+    if (!heatmaps[name]) {
+      setStatus("Loading…");
+      setBusy(true);
+      try {
+        const result = await request("tools/call", {
+          name: "get_heatmap_figures",
+          arguments: { task_id: task.task_id, dataset: name },
+        });
+        if (!result || result.isError || !result.structuredContent) {
+          throw new Error(result && result.content && result.content[0] ? result.content[0].text : "");
+        }
+        heatmaps[name] = result.structuredContent;
+      } catch (error) {
+        setBusy(false);
+        setStatus(`Could not load ${name}. ${error.message || ""}`.trim());
+        return;
+      }
+      setBusy(false);
     }
-    data = content;
-    document.getElementById("status").hidden = true;
-    document.getElementById("title").textContent = `Top 15 drugs (${content.dataset})`;
-    document.querySelector(".toggle").hidden = false;
-    const link = document.getElementById("link");
-    link.href = content.result_page;
-    document.getElementById("footer").hidden = false;
-    render();
+    setStatus("");
+    if (dataset === name) render();
   }
 
-  document.querySelectorAll(".toggle button").forEach((button) => {
+  function showResult(result) {
+    const content = result && result.structuredContent;
+    if (!content || !content.figures) {
+      const text = result && result.content && result.content[0] ? result.content[0].text : "";
+      setStatus(text || "No heatmap available.");
+      return;
+    }
+    task = content;
+    heatmaps[content.dataset] = content;
+    datasetsEl.innerHTML = "";
+    content.datasets.forEach((name) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.dataset.dataset = name;
+      button.textContent = name;
+      button.addEventListener("click", () => selectDataset(name));
+      datasetsEl.appendChild(button);
+    });
+    document.querySelector(".controls").hidden = false;
+    document.getElementById("link").href = content.result_page;
+    document.getElementById("footer").hidden = false;
+    selectDataset(content.dataset);
+  }
+
+  scalingEl.querySelectorAll("button").forEach((button) => {
     button.addEventListener("click", () => {
       view = button.dataset.view;
-      document.querySelectorAll(".toggle button").forEach((b) =>
-        b.setAttribute("aria-pressed", String(b === button)));
-      render();
+      setPressed(scalingEl, "view", view);
+      if (dataset && heatmaps[dataset]) render();
     });
+  });
+
+  // Use the host to open links when it supports it; sandboxed iframes may block them
+  document.getElementById("link").addEventListener("click", (event) => {
+    if (!hostCapabilities.openLinks || !task) return;
+    event.preventDefault();
+    request("ui/open-link", { url: task.result_page });
   });
 
   window.addEventListener("message", (event) => {
@@ -146,8 +213,10 @@
 
     // Response to one of our requests
     if (message.id !== undefined && pending.has(message.id)) {
-      pending.get(message.id)(message.result);
+      const { resolve, reject } = pending.get(message.id);
       pending.delete(message.id);
+      if (message.error) reject(new Error(message.error.message || "Request failed"));
+      else resolve(message.result);
       return;
     }
     // Request from the host (e.g. teardown): acknowledge it
@@ -161,9 +230,10 @@
 
   request("ui/initialize", {
     protocolVersion: PROTOCOL_VERSION,
-    appInfo: { name: "cellhit-heatmap", version: "1.0.0" },
+    appInfo: { name: "cellhit-heatmap", version: "1.1.0" },
     appCapabilities: {},
   }).then((result) => {
+    hostCapabilities = (result && result.hostCapabilities) || {};
     applyTheme(result && result.hostContext && result.hostContext.theme);
     send({ method: "ui/notifications/initialized", params: {} });
   });
