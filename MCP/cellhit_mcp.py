@@ -509,14 +509,96 @@ ONCOTREE_TYPES = "; ".join(
     )
 )
 
+# Tissue labels of the sample annotation (OncoTree tissues)
+TISSUES = ", ".join(
+    (
+        "CNS/Brain",
+        "Bowel",
+        "Myeloid",
+        "Esophagus/Stomach",
+        "Pleura",
+        "Skin",
+        "Lung",
+        "Testis",
+        "Soft Tissue",
+        "Kidney",
+        "Liver",
+        "Prostate",
+        "Breast",
+        "Head and Neck",
+        "Cervix",
+        "Ovary/Fallopian Tube",
+        "Uterus",
+        "Thymus",
+        "Thyroid",
+        "Bladder/Urinary Tract",
+        "Pancreas",
+        "Adrenal Gland",
+        "Eye",
+        "Biliary Tract",
+        "Lymphoid",
+        "Peripheral Nervous System",
+        "Ampulla of Vater",
+        "Vulva/Vagina",
+        "Bone",
+    )
+)
+
+# TCGA study codes; only TCGA samples have one (TARGET and Treehouse samples do not)
+TCGA_CODES = "; ".join(
+    (
+        "ACC (Adrenocortical carcinoma)",
+        "BLCA (Bladder Urothelial Carcinoma)",
+        "BRCA (Breast Invasive Carcinoma)",
+        "CESC (Cervical Squamous Cell Carcinoma and Endocervical Adenocarcinoma)",
+        "CHOL (Cholangiocarcinoma)",
+        "COAD (Colon Adenocarcinoma)",
+        "DLBC (Lymphoid Neoplasm Diffuse Large B-cell Lymphoma)",
+        "ESCA (Esophageal Carcinoma)",
+        "GBM (Glioblastoma Multiforme)",
+        "HNSC (Head and Neck Squamous Cell Carcinoma)",
+        "KICH (Kidney Chromophobe)",
+        "KIRC (Kidney Renal Clear Cell Carcinoma)",
+        "KIRP (Kidney Renal Papillary Cell Carcinoma)",
+        "LAML (Acute Myeloid Leukemia)",
+        "LGG (Brain Lower Grade Glioma)",
+        "LIHC (Liver Hepatocellular Carcinoma)",
+        "LUAD (Lung Adenocarcinoma)",
+        "LUSC (Lung Squamous Cell Carcinoma)",
+        "MESO (Mesothelioma)",
+        "OV (Ovarian Serous Cystadenocarcinoma)",
+        "PAAD (Pancreatic Adenocarcinoma)",
+        "PCPG (Pheochromocytoma and Paraganglioma)",
+        "PRAD (Prostate Adenocarcinoma)",
+        "READ (Rectum Adenocarcinoma)",
+        "SARC (Sarcoma)",
+        "SKCM (Skin Cutaneous Melanoma)",
+        "STAD (Stomach Adenocarcinoma)",
+        "TGCT (Testicular Germ Cell Tumors)",
+        "THCA (Thyroid Carcinoma)",
+        "THYM (Thymoma)",
+        "UCEC (Uterine Corpus Endometrial Carcinoma)",
+        "UCS (Uterine Carcinosarcoma)",
+        "UVM (Uveal Melanoma)",
+    )
+)
+
 PRECOMPUTED_DESCRIPTION = f"""Query CellHit precomputed drug-response predictions for TCGA patients and CCLE cell lines.
 
-Pass at least `drug` or `sample`. `prediction` is ln(IC50) for GDSC and log-fold change
+Pass at least one of `drug`, `sample`, `tissue`, `disease`, `tcga_code` or `oncotree_code`. `prediction` is ln(IC50) for GDSC and log-fold change
 for PRISM; lower values mean higher sensitivity. Compare only within the same dataset.
 
 Filters:
 - drug: exact drug name.
 - sample: exact sample ID, a TCGA barcode or a CCLE DepMap ID (e.g. ACH-001113).
+- tissue: tissue of the sample itself; case-insensitive partial match (e.g. "brain").
+  Values: {TISSUES}.
+- disease: disease of the sample itself (Treehouse/DepMap labels such as
+  "glioblastoma multiforme", "neuroblastoma", "acute lymphoblastic leukemia");
+  case-insensitive partial match. Use it for pediatric and Treehouse samples.
+- tcga_code: TCGA study code of the sample itself; exact match. Only TCGA samples have one.
+  Values: {TCGA_CODES}.
+- oncotree_code: OncoTree code of the sample itself (e.g. "GBM", "LUAD", "HGSOC"); exact match.
 - neighbor: which nearest neighbor the neigh_* filters use. "transcriptomic" = the
   sample whose expression is most similar; "response" = the sample whose predicted
   drug-response profile is most similar. Required, together with `drug`, for any neigh_* filter.
@@ -543,6 +625,10 @@ async def get_precomputed(
     neigh_ccle_oncotree: str | None = None,
     neigh_tcga_site: str | None = None,
     neigh_tcga_diagnosis: str | None = None,
+    tissue: str | None = None,
+    disease: str | None = None,
+    tcga_code: str | None = None,
+    oncotree_code: str | None = None,
     limit: int = 50,
     offset: int = 0,
 ) -> dict[str, Any]:
@@ -552,8 +638,16 @@ async def get_precomputed(
         "neighTcgaSite": neigh_tcga_site,
         "neighTcgaDiagnosis": neigh_tcga_diagnosis,
     }
-    if not drug and not sample:
-        raise ToolError("Pass at least one filter: drug or sample.")
+    sample_filters = {
+        "tissue": tissue,
+        "disease": disease,
+        "tcgaCode": tcga_code,
+        "oncotreeCode": oncotree_code,
+    }
+    if not drug and not sample and not any(sample_filters.values()):
+        raise ToolError(
+            "Pass at least one filter: drug, sample, tissue, disease, tcga_code or oncotree_code."
+        )
     if any(neighbor_filters.values()) and (neighbor is None or not drug):
         raise ToolError("neigh_* filters require both `neighbor` and `drug`.")
 
@@ -565,6 +659,7 @@ async def get_precomputed(
         "sample": sample,
         "neighbor": neighbor,
         **{key: value for key, value in neighbor_filters.items() if value},
+        **{key: value for key, value in sample_filters.items() if value},
     }
     field = dataset.lower()
     query = f"query Precomputed($pagination: PaginationInput) {{ {field}(pagination: $pagination) {{ {PRECOMPUTED_FIELDS} }} }}"
