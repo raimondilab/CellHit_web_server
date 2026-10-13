@@ -22,6 +22,7 @@ import RunCellHit from './pages/RunCellHit/RunCellHit'
 import AboutPage from './pages/AboutPage/AboutPage'
 import HelpPage from './pages/HelpPage/HelpPage'
 import FaqPage from './pages/FaqPage/FaqPage'
+import McpPage from './pages/McpPage/McpPage'
 
 const router = createBrowserRouter([ {
       path: "/",
@@ -45,6 +46,10 @@ const router = createBrowserRouter([ {
     {
       path: "/faq/",
       element: <FaqPage/>,
+    },
+    {
+      path: "/mcp/",
+      element: <McpPage/>,
     },
     {
       path: "/explore/",
