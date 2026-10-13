@@ -16,6 +16,52 @@ import pandas as pd
 import mimetypes
 
 
+# Neighbor filter fields mapped to the columns of each neighbor type
+NEIGHBOR_COLUMNS = {
+    "transcriptomic": {
+        "neigh_cell_line": "transcr_ccle_neigh",
+        "neigh_ccle_tissue": "transcr_ccle_neigh_oncotree",
+        "neigh_tcga_tissue": "transcr_tcga_neigh_site",
+        "neigh_tcga_diagnosis": "transcr_tcga_neigh_diagnosis",
+    },
+    "response": {
+        "neigh_cell_line": "response_ccle_neigh",
+        "neigh_ccle_tissue": "response_ccle_neigh_oncotree",
+        "neigh_tcga_tissue": "response_tcga_neigh_site",
+        "neigh_tcga_diagnosis": "response_tcga_neigh_diagnosis",
+    },
+}
+
+
+def apply_pagination(query, model, pagination: (schemas.PaginationInput | None)):
+    """Apply the optional drug, sample and neighbor filters, then offset and limit."""
+    if pagination is None:
+        return query
+
+    if pagination.drug is not None:
+        query = query.filter(model.drug_name == pagination.drug)
+
+    if pagination.sample is not None:
+        query = query.filter(model.sample_index == pagination.sample)
+
+    neighbor_filters = {
+        field: getattr(pagination, field)
+        for field in NEIGHBOR_COLUMNS["transcriptomic"]
+        if getattr(pagination, field) is not None
+    }
+    if neighbor_filters:
+        if pagination.neighbor not in NEIGHBOR_COLUMNS:
+            raise ValueError('Neighbor filters require neighbor: "transcriptomic" or "response".')
+        # Neighbor columns are not indexed: the drug index keeps the scan small
+        if pagination.drug is None:
+            raise ValueError("Neighbor filters require a drug.")
+        columns = NEIGHBOR_COLUMNS[pagination.neighbor]
+        for field, value in neighbor_filters.items():
+            query = query.filter(getattr(model, columns[field]) == value)
+
+    return query.offset(pagination.offset).limit(pagination.limit)
+
+
 class QueryResolver:
 
     @staticmethod
@@ -26,12 +72,7 @@ class QueryResolver:
 
             query = db.query(models.Gdsc)
 
-            if pagination is not None and pagination.drug is not None:
-                query = query.filter(models.Gdsc.drug_name == pagination.drug).offset(pagination.offset).limit(
-                    pagination.limit)
-
-            if pagination is not None and pagination.drug is None:
-                query = query.offset(pagination.offset).limit(pagination.limit)
+            query = apply_pagination(query, models.Gdsc, pagination)
 
             data = query.all()
 
@@ -43,12 +84,7 @@ class QueryResolver:
             db = DBSession()
             query = db.query(models.Gdsc)
 
-            if pagination is not None and pagination.drug is not None:
-                query = query.filter(models.Gdsc.drug_name == pagination.drug).offset(pagination.offset).limit(
-                    pagination.limit)
-
-            if pagination is not None and pagination.drug is None:
-                query = query.offset(pagination.offset).limit(pagination.limit)
+            query = apply_pagination(query, models.Gdsc, pagination)
 
             data = query.all()
 
@@ -82,12 +118,7 @@ class QueryResolver:
         try:
             query = db.query(models.Prism)
 
-            if pagination is not None and pagination.drug is not None:
-                query = query.filter(models.Prism.drug_name == pagination.drug).offset(pagination.offset).limit(
-                    pagination.limit)
-
-            if pagination is not None and pagination.drug is None:
-                query = query.offset(pagination.offset).limit(pagination.limit)
+            query = apply_pagination(query, models.Prism, pagination)
 
             data = query.all()
 
@@ -99,12 +130,7 @@ class QueryResolver:
             db = DBSession()
             query = db.query(models.Prism)
 
-            if pagination is not None and pagination.drug is not None:
-                query = query.filter(models.Prism.drug_name == pagination.drug).offset(pagination.offset).limit(
-                    pagination.limit)
-
-            if pagination is not None and pagination.drug is None:
-                query = query.offset(pagination.offset).limit(pagination.limit)
+            query = apply_pagination(query, models.Prism, pagination)
 
             data = query.all()
 

@@ -78,6 +78,13 @@ class PaginationInput:
     offset: int
     limit: int
     drug: Optional[str]
+    sample: Optional[str] = None
+    # Filters on the nearest neighbor; `neighbor` selects which one: "transcriptomic" or "response"
+    neighbor: Optional[str] = None
+    neigh_cell_line: Optional[str] = None
+    neigh_ccle_tissue: Optional[str] = None
+    neigh_tcga_tissue: Optional[str] = None
+    neigh_tcga_diagnosis: Optional[str] = None
 
 
 @strawberry.scalar
@@ -93,6 +100,3 @@ class Task:
     status: Optional[str]
     result: JSON
     type: str
-
-
-

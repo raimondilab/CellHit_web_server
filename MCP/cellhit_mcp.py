@@ -45,7 +45,6 @@ UUID_RE = re.compile(
 )
 
 
-
 async def graphql(query: str, variables: dict[str, Any] | None = None) -> dict[str, Any]:
     """Send a GraphQL request to the CellHit API and return its `data` object."""
     async with httpx.AsyncClient(timeout=TIMEOUT) as client:
