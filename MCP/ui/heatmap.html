@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CellHit heatmap</title>
+<script src="{{PLOTLY_JS_URL}}"></script>
+<style>
+  :root {
+    --text: #1d2733;
+    --muted: #5b6878;
+    --line: #d5dce4;
+    --active-bg: #1d2733;
+    --active-text: #ffffff;
+    color-scheme: light;
+  }
+  :root[data-theme="dark"] {
+    --text: #e6ebf0;
+    --muted: #9aa7b5;
+    --line: #3a4552;
+    --active-bg: #e6ebf0;
+    --active-text: #1d2733;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 12px 4px;
+    background: transparent;
+    color: var(--text);
+    font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  h1 { margin: 0; font-size: 15px; font-weight: 600; }
+  .toggle { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .toggle button {
+    border: 0;
+    padding: 4px 10px;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    cursor: pointer;
+  }
+  .toggle button[aria-pressed="true"] { background: var(--active-bg); color: var(--active-text); }
+  .toggle button:focus-visible, a:focus-visible { outline: 2px solid var(--muted); outline-offset: 2px; }
+  #plot { width: 100%; }
+  #status { color: var(--muted); }
+  a { color: inherit; }
+  footer { margin-top: 6px; font-size: 13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">Heatmap</h1>
+  <div class="toggle" role="group" aria-label="Heatmap scale" hidden>
+    <button type="button" data-view="heatmap" aria-pressed="true">Heatmap</button>
+    <button type="button" data-view="standardized" aria-pressed="false">Standardized</button>
+  </div>
+</header>
+<p id="status">Loading…</p>
+<div id="plot"></div>
+<footer id="footer" hidden><a id="link" target="_blank" rel="noopener">Open full results</a></footer>
+
+<script>
+  const PROTOCOL_VERSION = "2026-01-26";
+  let nextId = 1;
+  const pending = new Map();
+  let data = null;
+  let view = "heatmap";
+
+  function send(message) {
+    window.parent.postMessage({ jsonrpc: "2.0", ...message }, "*");
+  }
+
+  function request(method, params) {
+    const id = nextId++;
+    send({ id, method, params });
+    return new Promise((resolve) => pending.set(id, resolve));
+  }
+
+  function applyTheme(theme) {
+    if (theme) document.documentElement.dataset.theme = theme;
+    if (data) render();
+  }
+
+  function reportSize() {
+    send({
+      method: "ui/notifications/size-changed",
+      params: { height: Math.ceil(document.documentElement.scrollHeight) },
+    });
+  }
+
+  function render() {
+    const figure = data.figures[view];
+    const styles = getComputedStyle(document.documentElement);
+    const layout = {
+      ...figure.layout,
+      height: data.height,
+      paper_bgcolor: "rgba(0,0,0,0)",
+      plot_bgcolor: "rgba(0,0,0,0)",
+      font: { ...(figure.layout.font || {}), color: styles.getPropertyValue("--text").trim() },
+    };
+    Plotly.react("plot", figure.data, layout, { responsive: true, displaylogo: false })
+      .then(reportSize);
+  }
+
+  function showResult(result) {
+    const content = result && result.structuredContent;
+    document.getElementById("status").hidden = false;
+    if (!content || !content.figures) {
+      const text = result && result.content && result.content[0] ? result.content[0].text : "";
+      document.getElementById("status").textContent = text || "No heatmap available.";
+      reportSize();
+      return;
+    }
+    data = content;
+    document.getElementById("status").hidden = true;
+    document.getElementById("title").textContent = `Top 15 drugs (${content.dataset})`;
+    document.querySelector(".toggle").hidden = false;
+    const link = document.getElementById("link");
+    link.href = content.result_page;
+    document.getElementById("footer").hidden = false;
+    render();
+  }
+
+  document.querySelectorAll(".toggle button").forEach((button) => {
+    button.addEventListener("click", () => {
+      view = button.dataset.view;
+      document.querySelectorAll(".toggle button").forEach((b) =>
+        b.setAttribute("aria-pressed", String(b === button)));
+      render();
+    });
+  });
+
+  window.addEventListener("message", (event) => {
+    if (event.source !== window.parent) return;
+    const message = event.data;
+    if (!message || message.jsonrpc !== "2.0") return;
+
+    // Response to one of our requests
+    if (message.id !== undefined && pending.has(message.id)) {
+      pending.get(message.id)(message.result);
+      pending.delete(message.id);
+      return;
+    }
+    // Request from the host (e.g. teardown): acknowledge it
+    if (message.id !== undefined && message.method) {
+      send({ id: message.id, result: {} });
+      return;
+    }
+    if (message.method === "ui/notifications/tool-result") showResult(message.params);
+    if (message.method === "ui/notifications/host-context-changed") applyTheme(message.params.theme);
+  });
+
+  request("ui/initialize", {
+    protocolVersion: PROTOCOL_VERSION,
+    appInfo: { name: "cellhit-heatmap", version: "1.0.0" },
+    appCapabilities: {},
+  }).then((result) => {
+    applyTheme(result && result.hostContext && result.hostContext.theme);
+    send({ method: "ui/notifications/initialized", params: {} });
+  });
+</script>
+</body>
+</html>
