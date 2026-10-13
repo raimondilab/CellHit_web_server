@@ -6,7 +6,7 @@ module.exports = {
     cwd: '/var/www/html/CLRP/MCP',
     exec_mode: 'fork',
     env: {
-      COEX_GRAPHQL_URL: 'http://127.0.0.1:8009/graphql'
+      COEX_GRAPHQL_URL: 'http://127.0.0.1:8012/graphql'
     },
     autorestart: true,
     max_restarts: 10
