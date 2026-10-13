@@ -17,7 +17,7 @@ BASE_DIR = Path(__file__).resolve().parent
 # Get the parent folder of the base directory
 PARENT_DIR = BASE_DIR.parent
 
-sys.path.append('/data/Users/nrosa/CLRP/src/celligner')
+sys.path.append('/var/www/html/CLRP/src/celligner')
 from celligner import Celligner
 
 
