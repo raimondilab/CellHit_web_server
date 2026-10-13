@@ -85,6 +85,11 @@ class PaginationInput:
     neigh_ccle_oncotree: Optional[str] = None
     neigh_tcga_site: Optional[str] = None
     neigh_tcga_diagnosis: Optional[str] = None
+    # Filters on the sample's own annotation (sample_annotation table)
+    tissue: Optional[str] = None
+    disease: Optional[str] = None
+    tcga_code: Optional[str] = None
+    oncotree_code: Optional[str] = None
 
 
 @strawberry.scalar

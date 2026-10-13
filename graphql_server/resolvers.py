@@ -9,7 +9,7 @@ from typing import List, Optional
 # other imports
 from model import models
 from model.database import DBSession
-from sqlalchemy import func
+from sqlalchemy import func, select
 from sqlalchemy.exc import OperationalError
 from tasks import worker
 from strawberry.file_uploads import Upload
@@ -38,7 +38,7 @@ EXACT_NEIGHBOR_FIELDS = {"neigh_cell_line"}
 
 
 def apply_pagination(query, model, pagination: (schemas.PaginationInput | None)):
-    """Apply the optional drug, sample and neighbor filters, then offset and limit."""
+    """Apply the optional drug, sample, neighbor and sample annotation filters, then offset and limit."""
     if pagination is None:
         return query
 
@@ -66,6 +66,20 @@ def apply_pagination(query, model, pagination: (schemas.PaginationInput | None))
                 query = query.filter(column == value)
             else:
                 query = query.filter(func.lower(column).contains(value.lower(), autoescape=True))
+
+    annotation = models.SampleAnnotation
+    annotation_filters = []
+    if pagination.tissue is not None:
+        annotation_filters.append(func.lower(annotation.tissue).contains(pagination.tissue.lower(), autoescape=True))
+    if pagination.disease is not None:
+        annotation_filters.append(func.lower(annotation.disease).contains(pagination.disease.lower(), autoescape=True))
+    if pagination.tcga_code is not None:
+        annotation_filters.append(func.upper(annotation.tcga_code) == pagination.tcga_code.upper())
+    if pagination.oncotree_code is not None:
+        annotation_filters.append(func.upper(annotation.oncotree_code) == pagination.oncotree_code.upper())
+    if annotation_filters:
+        samples = select(annotation.sample_index).where(*annotation_filters)
+        query = query.filter(model.sample_index.in_(samples))
 
     return query.offset(pagination.offset).limit(pagination.limit)
 

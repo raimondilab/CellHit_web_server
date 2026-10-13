@@ -65,3 +65,15 @@ class Prism(Base):
     top_local_shap_genes: str = Column(name="top_local_shap_genes", nullable=False, type_=String(400))
     recovered_target: str = Column(name="recovered_target", nullable=False, type_=String(3000))
 
+
+class SampleAnnotation(Base):
+    """Per-sample annotation built by static/clrp/build_sample_annotation.py."""
+    __tablename__ = "sample_annotation"
+    sample_index: str = Column(name="sample_index", type_=String(100), primary_key=True)
+    source: str = Column(name="source", nullable=False, type_=String(40))
+    cell_line_name: str = Column(name="cell_line_name", nullable=True, type_=String(200))
+    tcga_code: str = Column(name="tcga_code", nullable=True, type_=String(20), index=True)
+    oncotree_code: str = Column(name="oncotree_code", nullable=True, type_=String(20), index=True)
+    disease: str = Column(name="disease", nullable=True, type_=String(400))
+    tissue: str = Column(name="tissue", nullable=True, type_=String(100), index=True)
+    tissue_source: str = Column(name="tissue_source", nullable=True, type_=String(20))
