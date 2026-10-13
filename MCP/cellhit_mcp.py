@@ -4,10 +4,10 @@ import re
 from typing import Any, Literal
 
 import httpx
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 from mcp.server.transport_security import TransportSecuritySettings
 
-ENDPOINT = os.environ.get("CELLHIT_GRAPHQL_URL", "http://127.0.0.1:8009/graphql")
+ENDPOINT = os.environ.get("CELLHIT_GRAPHQL_URL", "http://127.0.0.1:8003/graphql")
 TIMEOUT = float(os.environ.get("CELLHIT_TIMEOUT", "60"))
 WEB_URL = os.environ.get("CELLHIT_WEB_URL", "https://cellhit.bioinfolab.sns.it")
 
@@ -25,15 +25,7 @@ UUID_RE = re.compile(
     r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
 )
 
-mcp = FastMCP(
-    "cellhit",
-    host="127.0.0.1",
-    port=PORT,
-    transport_security=TransportSecuritySettings(
-        allowed_hosts=[PUBLIC_HOST, f"127.0.0.1:{PORT}", f"localhost:{PORT}"],
-        allowed_origins=[f"https://{PUBLIC_HOST}"],
-    ),
-)
+mcp = MCPServer("cellhit")
 
 
 async def graphql(query: str, variables: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -185,4 +177,12 @@ async def get_task_results(
 
 
 if __name__ == "__main__":
-    mcp.run(transport="streamable-http")
+    mcp.run(
+        transport="streamable-http",
+        host="127.0.0.1",
+        port=PORT,
+        transport_security=TransportSecuritySettings(
+            allowed_hosts=[PUBLIC_HOST, f"127.0.0.1:{PORT}", f"localhost:{PORT}"],
+            allowed_origins=[f"https://{PUBLIC_HOST}"],
+        ),
+    )
