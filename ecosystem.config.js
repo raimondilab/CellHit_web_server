@@ -6,7 +6,7 @@ module.exports = {
     interpreter: 'python3',
     exec_mode: 'fork',
     env: {
-      CONDA_PREFIX: '/data/SW/anaconda3/envs/CLRP/',
+      CONDA_PREFIX: '/data/SW/Anaconda3-2025.06-1/envs/cellhit/',
       PYTHONHASHSEED: '0'
     }
   }]
