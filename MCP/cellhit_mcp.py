@@ -12,7 +12,7 @@ TIMEOUT = float(os.environ.get("CELLHIT_TIMEOUT", "60"))
 WEB_URL = os.environ.get("CELLHIT_WEB_URL", "https://cellhit.bioinfolab.sns.it")
 
 PUBLIC_HOST = os.environ.get("CELLHIT_MCP_HOST", "mcp.cellhit.bioinfolab.sns.it")
-PORT = int(os.environ.get("CELLHIT_MCP_PORT", "8011"))
+PORT = int(os.environ.get("CELLHIT_MCP_PORT", "8012"))
 
 # Hard cap on rows sent back to the model
 MAX_ROWS = 500
