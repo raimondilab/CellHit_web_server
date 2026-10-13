@@ -1,0 +1,73 @@
+disease,tissue,confident
+acute lymphoblastic leukemia,Lymphoid,yes
+neuroblastoma,Peripheral Nervous System,yes
+osteosarcoma,Bone,yes
+wilms tumor,Kidney,yes
+medulloblastoma,CNS/Brain,yes
+ependymoma,CNS/Brain,yes
+acute megakaryoblastic leukemia,Myeloid,yes
+Ewing sarcoma,Bone,yes
+embryonal rhabdomyosarcoma,Soft Tissue,yes
+rhabdomyosarcoma,Soft Tissue,yes
+lymphoma,Lymphoid,yes
+alveolar rhabdomyosarcoma,Soft Tissue,yes
+choroid plexus carcinoma,CNS/Brain,yes
+hepatoblastoma,Liver,yes
+supratentorial embryonal tumor NOS,CNS/Brain,yes
+dysembryoplastic neuroepithelial tumor,CNS/Brain,yes
+undifferentiated sarcoma NOS,Soft Tissue,yes
+acute leukemia,Myeloid,no
+desmoplastic small round cell tumor,Soft Tissue,yes
+melanoma,Skin,no
+gastrointestinal stromal tumor,Soft Tissue,yes
+spindle cell/sclerosing rhabdomyosarcoma,Soft Tissue,yes
+inflammatory myofibroblastic tumor,Soft Tissue,yes
+fibromatosis,Soft Tissue,yes
+atypical teratoid/rhabdoid tumor,CNS/Brain,yes
+juvenile myelomonocytic leukemia,Myeloid,yes
+meningioma,CNS/Brain,yes
+myoepithelial carcinoma,Soft Tissue,no
+epithelioid sarcoma,Soft Tissue,yes
+nasopharyngeal carcinoma,Head and Neck,yes
+undifferentiated spindle cell sarcoma,Soft Tissue,yes
+acute leukemia of ambiguous lineage,Myeloid,no
+retinoblastoma,Eye,yes
+germ cell tumor,,no
+embryonal tumor with multilayered rosettes,CNS/Brain,yes
+undifferentiated hepatic sarcoma,Liver,yes
+neurofibroma,Peripheral Nervous System,yes
+INI-deficient soft tissue sarcoma NOS,Soft Tissue,yes
+"chronic myelogenous leukemia (S02), acute lymphoblastic leukemia (S01)",,no
+myofibromatosis,Soft Tissue,yes
+rhabdoid tumor,,no
+infantile fibrosarcoma,Soft Tissue,yes
+leukemia,,no
+myeloproliferative neoplasm,Myeloid,yes
+thymic carcinoma,Thymus,yes
+"Sertoli-Leydig cell tumor, retiform",Ovary/Fallopian Tube,yes
+ganglioglioma,CNS/Brain,yes
+melanotic neuroectodermal tumor,,no
+neoplasm (uncertain whether benign or malignant),,no
+acinar cell carcinoma,Pancreas,no
+angiosarcoma,Soft Tissue,yes
+gliomatosis cerebri,CNS/Brain,yes
+myeloid neoplasm NOS,Myeloid,yes
+NUT midline carcinoma,,no
+pleomorphic myxoid liposarcoma,Soft Tissue,yes
+sclerosing epithelioid fibrosarcoma,Soft Tissue,yes
+epithelioid hemangioendothelioma,Soft Tissue,yes
+alveolar soft part sarcoma,Soft Tissue,yes
+pleuropulmonary blastoma,Lung,yes
+acute undifferentiated leukemia,Myeloid,no
+PEComa,Soft Tissue,yes
+endometrial stromal sarcoma,Uterus,yes
+clear cell carcinoma of cervix,Cervix,yes
+teratoma,,no
+craniopharyngioma,CNS/Brain,yes
+rosette forming glioneuronal tumor,CNS/Brain,yes
+adrenocortical adenoma,Adrenal Gland,yes
+neurofibromatosis type 1,Peripheral Nervous System,no
+lipoblastomatosis,Soft Tissue,yes
+neuroendocrine carcinoma,,no
+adrenocortical cancer,Adrenal Gland,yes
+follicular neoplasm,Thyroid,no
