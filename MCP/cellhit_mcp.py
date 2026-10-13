@@ -7,6 +7,7 @@ from typing import Any, Literal
 import httpx
 from mcp.server.apps import Apps, ResourceCsp
 from mcp.server.mcpserver import MCPServer
+from mcp.server.mcpserver.exceptions import ToolError
 from mcp.server.transport_security import TransportSecuritySettings
 from mcp.types import CallToolResult, TextContent
 from starlette.requests import Request
@@ -33,8 +34,9 @@ HEATMAP_TOP = 15
 UMAP_URI = "ui://cellhit/umap.html"
 UMAP_COLORINGS = ("oncotree", "tissue", "batch")
 
-# Hard cap on rows sent back to the model
+# Hard caps on rows sent back to the model
 MAX_ROWS = 500
+MAX_ROWS_PRECOMPUTED = 200
 
 # Per-row SHAP dictionaries are large; TopGenes already summarizes them
 DROPPED_COLUMNS = {"ShapDictionary"}
@@ -45,16 +47,26 @@ UUID_RE = re.compile(
 )
 
 
+
 async def graphql(query: str, variables: dict[str, Any] | None = None) -> dict[str, Any]:
-    """Send a GraphQL request to the CellHit API and return its `data` object."""
-    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-        response = await client.post(
-            ENDPOINT, json={"query": query, "variables": variables or {}}
-        )
-    response.raise_for_status()
+    """Send a GraphQL request to the CellHit API and return its `data` object.
+
+    Errors are raised as ToolError so their message reaches the client;
+    other exceptions are reported without details.
+    """
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            response = await client.post(
+                ENDPOINT, json={"query": query, "variables": variables or {}}
+            )
+        response.raise_for_status()
+    except httpx.HTTPStatusError as error:
+        raise ToolError(f"CellHit API returned HTTP {error.response.status_code}.") from error
+    except httpx.HTTPError as error:
+        raise ToolError("CellHit API is unreachable. Try again later.") from error
     payload = response.json()
     if payload.get("errors"):
-        raise RuntimeError(payload["errors"][0].get("message", "GraphQL error"))
+        raise ToolError(payload["errors"][0].get("message", "GraphQL error"))
     return payload["data"]
 
 
@@ -62,7 +74,7 @@ def parse_task_id(task: str) -> str:
     """Extract the task ID from a CellHit result URL or a bare ID."""
     match = UUID_RE.search(task)
     if not match:
-        raise ValueError("No task ID found. Pass a CellHit result URL or a task ID.")
+        raise ToolError("No task ID found. Pass a CellHit result URL or a task ID.")
     return match.group(0).lower()
 
 
@@ -362,7 +374,7 @@ async def get_task_results(
         limit: Maximum rows to return (max 500).
     """
     if not drug and not sample:
-        raise ValueError("Pass at least one filter: drug or sample.")
+        raise ToolError("Pass at least one filter: drug or sample.")
 
     status = await get_task_status(task)
     if status["state"] != "completed":
@@ -404,6 +416,161 @@ async def get_task_results(
         ],
         "result_page": url,
     }
+
+
+PRECOMPUTED_FIELDS = """
+    drugName drugId source sampleIndex
+    predictions predictionsStd quantileScore
+    experimentalMin experimentalMedian experimentalMax modelCorr
+    transcrCcleNeigh transcrCcleNeighCelllinename transcrCcleNeighOncotree
+    transcrTcgaNeigh transcrTcgaNeighDiagnosis transcrTcgaNeighSite
+    responseCcleNeigh responseCcleNeighCelllinename responseCcleNeighOncotree
+    responseTcgaNeigh responseTcgaNeighDiagnosis responseTcgaNeighSite
+    putativeTarget topLocalShapGenes
+"""
+
+# OncoTree cancer types found in the CCLE neighbor columns
+ONCOTREE_TYPES = "; ".join(
+    (
+        "Acute Myeloid Leukemia",
+        "Adenosquamous Carcinoma of the Pancreas",
+        "Adrenocortical Carcinoma",
+        "Ampullary Carcinoma",
+        "Anaplastic Thyroid Cancer",
+        "B-Lymphoblastic Leukemia/Lymphoma",
+        "Bladder Squamous Cell Carcinoma",
+        "Bladder Urothelial Carcinoma",
+        "Breast Ductal Carcinoma In Situ",
+        "Breast Neoplasm, NOS",
+        "Cervical Adenocarcinoma",
+        "Cervical Squamous Cell Carcinoma",
+        "Chondrosarcoma",
+        "Colorectal Adenocarcinoma",
+        "Cutaneous Squamous Cell Carcinoma",
+        "Diffuse Glioma",
+        "Embryonal Tumor",
+        "Endometrial Carcinoma",
+        "Epithelioid Sarcoma",
+        "Esophageal Squamous Cell Carcinoma",
+        "Esophagogastric Adenocarcinoma",
+        "Ewing Sarcoma",
+        "Fibrosarcoma",
+        "Gestational Trophoblastic Disease",
+        "Glassy Cell Carcinoma of the Cervix",
+        "Head and Neck Squamous Cell Carcinoma",
+        "Hepatoblastoma",
+        "Hepatocellular Carcinoma",
+        "Hepatocellular Carcinoma plus Intrahepatic Cholangiocarcinoma",
+        "Hodgkin Lymphoma",
+        "Intracholecystic Papillary Neoplasm",
+        "Intraductal Papillary Neoplasm of the Bile Duct",
+        "Invasive Breast Carcinoma",
+        "Leiomyosarcoma",
+        "Liposarcoma",
+        "Lung Neuroendocrine Tumor",
+        "Medullary Thyroid Cancer",
+        "Melanoma",
+        "Meningothelial Tumor",
+        "Merkel Cell Carcinoma",
+        "Mixed Cervical Carcinoma",
+        "Mucosal Melanoma of the Vulva/Vagina",
+        "Myelodysplastic Syndromes",
+        "Myeloproliferative Neoplasms",
+        "Nerve Sheath Tumor",
+        "Neuroblastoma",
+        "Non-Cancerous",
+        "Non-Hodgkin Lymphoma",
+        "Non-Seminomatous Germ Cell Tumor",
+        "Non-Small Cell Lung Cancer",
+        "Ocular Melanoma",
+        "Osteosarcoma",
+        "Ovarian Cancer, Other",
+        "Ovarian Epithelial Tumor",
+        "Ovarian Germ Cell Tumor",
+        "Pancreatic Adenocarcinoma",
+        "Pancreatic Neuroendocrine Tumor",
+        "Pleural Mesothelioma",
+        "Poorly Differentiated Thyroid Cancer",
+        "Prostate Adenocarcinoma",
+        "Prostate Small Cell Carcinoma",
+        "Renal Cell Carcinoma",
+        "Retinoblastoma",
+        "Rhabdoid Cancer",
+        "Rhabdomyosarcoma",
+        "Sarcoma, NOS",
+        "Small Bowel Cancer",
+        "Squamous Cell Carcinoma of the Vulva/Vagina",
+        "Synovial Sarcoma",
+        "T-Lymphoblastic Leukemia/Lymphoma",
+        "Undifferentiated Pleomorphic Sarcoma/Malignant Fibrous Histiocytoma/High-Grade Spindle Cell Sarcoma",
+        "Urethral Cancer",
+        "Uterine Sarcoma/Mesenchymal",
+        "Well-Differentiated Thyroid Cancer",
+    )
+)
+
+PRECOMPUTED_DESCRIPTION = f"""Query CellHit precomputed drug-response predictions for TCGA patients and CCLE cell lines.
+
+Pass at least `drug` or `sample`. `prediction` is ln(IC50) for GDSC and log-fold change
+for PRISM; lower values mean higher sensitivity. Compare only within the same dataset.
+
+Filters:
+- drug: exact drug name.
+- sample: exact sample ID, a TCGA barcode or a CCLE DepMap ID (e.g. ACH-001113).
+- neighbor: which nearest neighbor the neigh_* filters use. "transcriptomic" = the
+  sample whose expression is most similar; "response" = the sample whose predicted
+  drug-response profile is most similar. Required, together with `drug`, for any neigh_* filter.
+- neigh_cell_line: exact DepMap ID of the neighboring CCLE cell line.
+- neigh_ccle_oncotree: OncoTree cancer type of the CCLE neighbor; case-insensitive partial
+  match (e.g. "glioma", "lung"). Known values: {ONCOTREE_TYPES}.
+- neigh_tcga_site: anatomic site of the TCGA neighbor (GDC labels such as "Upper lobe, lung",
+  "Breast, NOS", "Cerebrum"); case-insensitive partial match (e.g. "lung").
+- neigh_tcga_diagnosis: histological diagnosis of the TCGA neighbor (GDC labels such as
+  "Adenocarcinoma, NOS", "Glioblastoma", "Infiltrating duct carcinoma, NOS");
+  case-insensitive partial match (e.g. "adenocarcinoma").
+- limit / offset: page through results (limit max 200). If `returned` equals `limit`,
+  more rows may exist.
+"""
+
+
+@mcp.tool(description=PRECOMPUTED_DESCRIPTION)
+async def get_precomputed(
+    dataset: Literal["GDSC", "PRISM"],
+    drug: str | None = None,
+    sample: str | None = None,
+    neighbor: Literal["transcriptomic", "response"] | None = None,
+    neigh_cell_line: str | None = None,
+    neigh_ccle_oncotree: str | None = None,
+    neigh_tcga_site: str | None = None,
+    neigh_tcga_diagnosis: str | None = None,
+    limit: int = 50,
+    offset: int = 0,
+) -> dict[str, Any]:
+    neighbor_filters = {
+        "neighCellLine": neigh_cell_line,
+        "neighCcleOncotree": neigh_ccle_oncotree,
+        "neighTcgaSite": neigh_tcga_site,
+        "neighTcgaDiagnosis": neigh_tcga_diagnosis,
+    }
+    if not drug and not sample:
+        raise ToolError("Pass at least one filter: drug or sample.")
+    if any(neighbor_filters.values()) and (neighbor is None or not drug):
+        raise ToolError("neigh_* filters require both `neighbor` and `drug`.")
+
+    limit = max(1, min(limit, MAX_ROWS_PRECOMPUTED))
+    pagination = {
+        "offset": max(0, offset),
+        "limit": limit,
+        "drug": drug,
+        "sample": sample,
+        "neighbor": neighbor,
+        **{key: value for key, value in neighbor_filters.items() if value},
+    }
+    field = dataset.lower()
+    query = f"query Precomputed($pagination: PaginationInput) {{ {field}(pagination: $pagination) {{ {PRECOMPUTED_FIELDS} }} }}"
+    data = await graphql(query, {"pagination": pagination})
+    rows = data[field]
+    return {"dataset": dataset, "offset": pagination["offset"], "returned": len(rows), "rows": rows}
 
 
 if __name__ == "__main__":

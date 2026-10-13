@@ -82,8 +82,8 @@ class PaginationInput:
     # Filters on the nearest neighbor; `neighbor` selects which one: "transcriptomic" or "response"
     neighbor: Optional[str] = None
     neigh_cell_line: Optional[str] = None
-    neigh_ccle_tissue: Optional[str] = None
-    neigh_tcga_tissue: Optional[str] = None
+    neigh_ccle_oncotree: Optional[str] = None
+    neigh_tcga_site: Optional[str] = None
     neigh_tcga_diagnosis: Optional[str] = None
 
 

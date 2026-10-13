@@ -9,6 +9,7 @@ from typing import List, Optional
 # other imports
 from model import models
 from model.database import DBSession
+from sqlalchemy import func
 from sqlalchemy.exc import OperationalError
 from tasks import worker
 from strawberry.file_uploads import Upload
@@ -20,17 +21,20 @@ import mimetypes
 NEIGHBOR_COLUMNS = {
     "transcriptomic": {
         "neigh_cell_line": "transcr_ccle_neigh",
-        "neigh_ccle_tissue": "transcr_ccle_neigh_oncotree",
-        "neigh_tcga_tissue": "transcr_tcga_neigh_site",
+        "neigh_ccle_oncotree": "transcr_ccle_neigh_oncotree",
+        "neigh_tcga_site": "transcr_tcga_neigh_site",
         "neigh_tcga_diagnosis": "transcr_tcga_neigh_diagnosis",
     },
     "response": {
         "neigh_cell_line": "response_ccle_neigh",
-        "neigh_ccle_tissue": "response_ccle_neigh_oncotree",
-        "neigh_tcga_tissue": "response_tcga_neigh_site",
+        "neigh_ccle_oncotree": "response_ccle_neigh_oncotree",
+        "neigh_tcga_site": "response_tcga_neigh_site",
         "neigh_tcga_diagnosis": "response_tcga_neigh_diagnosis",
     },
 }
+
+# Neighbor fields matched exactly (IDs); the others use a case-insensitive partial match
+EXACT_NEIGHBOR_FIELDS = {"neigh_cell_line"}
 
 
 def apply_pagination(query, model, pagination: (schemas.PaginationInput | None)):
@@ -57,7 +61,11 @@ def apply_pagination(query, model, pagination: (schemas.PaginationInput | None))
             raise ValueError("Neighbor filters require a drug.")
         columns = NEIGHBOR_COLUMNS[pagination.neighbor]
         for field, value in neighbor_filters.items():
-            query = query.filter(getattr(model, columns[field]) == value)
+            column = getattr(model, columns[field])
+            if field in EXACT_NEIGHBOR_FIELDS:
+                query = query.filter(column == value)
+            else:
+                query = query.filter(func.lower(column).contains(value.lower(), autoescape=True))
 
     return query.offset(pagination.offset).limit(pagination.limit)
 
