@@ -33,6 +33,11 @@ HEATMAP_URI = "ui://cellhit/heatmap.html"
 HEATMAP_TOP = 15
 UMAP_URI = "ui://cellhit/umap.html"
 UMAP_COLORINGS = ("oncotree", "tissue", "batch")
+# Marker symbols set by the worker's draw_scatter_plot
+UMAP_SYMBOLS = (
+    "In the plot, the user's samples are diamonds, TCGA reference samples are crosses "
+    "and CCLE cell lines are circles; hovering a point shows its ID, OncoTree code and tissue."
+)
 
 # Hard caps on rows sent back to the model
 MAX_ROWS = 500
@@ -248,6 +253,7 @@ apps.add_html_resource(
     description=(
         "Show an interactive UMAP of a CellHit task: the user's samples aligned with "
         "the CCLE and TCGA reference samples, colored by oncotree code, tissue or batch. "
+        f"{UMAP_SYMBOLS} "
         "Works for analysis and alignment-only tasks. Always share `result_page` with the user."
     ),
 )
@@ -273,7 +279,7 @@ async def show_umap(task: str) -> CallToolResult:
             TextContent(
                 type="text",
                 text=f"UMAP of task {task_id} is shown to the user, colored by "
-                f"{', '.join(colorings)}. Full results: {url}",
+                f"{', '.join(colorings)}. {UMAP_SYMBOLS} Full results: {url}",
             )
         ],
         structured_content={"task_id": task_id, "result_page": url, "colorings": colorings},
