@@ -12,7 +12,7 @@ from mcp.types import CallToolResult, TextContent
 from starlette.requests import Request
 from starlette.responses import FileResponse
 
-ENDPOINT = os.environ.get("CELLHIT_GRAPHQL_URL", "http://127.0.0.1:8009/graphql")
+ENDPOINT = os.environ.get("CELLHIT_GRAPHQL_URL", "http://127.0.0.1:8003/graphql")
 TIMEOUT = float(os.environ.get("CELLHIT_TIMEOUT", "60"))
 WEB_URL = os.environ.get("CELLHIT_WEB_URL", "https://cellhit.bioinfolab.sns.it")
 
