@@ -102,7 +102,9 @@ def start_celery(worker_name):
 
 @celery.task
 def get_task(task_id):
-    res = AsyncResult(task_id)
+    # Bind to this app explicitly: the default app is thread-local, and in the
+    # GraphQL worker threads it has no result backend
+    res = AsyncResult(task_id, app=celery)
     return res
 
 
