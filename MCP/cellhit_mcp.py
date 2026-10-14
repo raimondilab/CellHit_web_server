@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import re
@@ -12,9 +13,53 @@ from mcp.server.transport_security import TransportSecuritySettings
 from mcp.types import CallToolResult, TextContent
 from starlette.requests import Request
 from starlette.responses import FileResponse
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn="https://d092fe5ca5e085c31d821df339148ad6@o4505080802312192.ingest.us.sentry.io/4512253891969024",
+    # Add data like request headers and IP for users,
+    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+    send_default_pii=True,
+    # Enable sending logs to Sentry
+    enable_logs=True,
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for tracing.
+    traces_sample_rate=1.0,
+    # Set profile_session_sample_rate to 1.0 to profile 100%
+    # of profile sessions.
+    profile_session_sample_rate=1.0,
+)
+
+
+def slow_function():
+    import time
+    time.sleep(0.1)
+    return "done"
+
+
+def fast_function():
+    import time
+    time.sleep(0.05)
+    return "done"
+
+
+# Manually call start_profiler and stop_profiler
+# to profile the code in between
+sentry_sdk.profiler.start_profiler()
+
+for i in range(0, 10):
+    slow_function()
+    fast_function()
+
+# Calls to stop_profiler are optional - if you don't stop the profiler, it will keep profiling
+# your application until the process exits or stop_profiler is called.
+sentry_sdk.profiler.stop_profiler()
 
 ENDPOINT = os.environ.get("CELLHIT_GRAPHQL_URL", "http://127.0.0.1:8003/graphql")
 TIMEOUT = float(os.environ.get("CELLHIT_TIMEOUT", "60"))
+# Concurrent requests from the MCP to the CellHit API, and how long a request may wait for a slot
+MAX_CONCURRENT = int(os.environ.get("CELLHIT_MAX_CONCURRENT", "4"))
+QUEUE_TIMEOUT = float(os.environ.get("CELLHIT_QUEUE_TIMEOUT", "30"))
 WEB_URL = os.environ.get("CELLHIT_WEB_URL", "https://cellhit.bioinfolab.sns.it")
 
 PUBLIC_HOST = os.environ.get("CELLHIT_MCP_HOST", "mcp.cellhit.bioinfolab.sns.it")
@@ -51,6 +96,8 @@ UUID_RE = re.compile(
     r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
 )
 
+# Keeps MCP traffic from saturating the API that also serves the website
+api_slots = asyncio.Semaphore(MAX_CONCURRENT)
 
 
 async def graphql(query: str, variables: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -60,12 +107,27 @@ async def graphql(query: str, variables: dict[str, Any] | None = None) -> dict[s
     other exceptions are reported without details.
     """
     try:
+        await asyncio.wait_for(api_slots.acquire(), timeout=QUEUE_TIMEOUT)
+    except asyncio.TimeoutError as error:
+        raise ToolError("CellHit is busy. Try again in a minute.") from error
+    try:
+        return await _send(query, variables)
+    finally:
+        api_slots.release()
+
+
+async def _send(query: str, variables: dict[str, Any] | None) -> dict[str, Any]:
+    """Post one GraphQL request; called only while holding an API slot."""
+    try:
         async with httpx.AsyncClient(timeout=TIMEOUT) as client:
             response = await client.post(
                 ENDPOINT, json={"query": query, "variables": variables or {}}
             )
         response.raise_for_status()
     except httpx.HTTPStatusError as error:
+        # 503 comes from the API's own request limiter
+        if error.response.status_code == 503:
+            raise ToolError("CellHit is busy. Try again in a minute.") from error
         raise ToolError(f"CellHit API returned HTTP {error.response.status_code}.") from error
     except httpx.HTTPError as error:
         raise ToolError("CellHit API is unreachable. Try again later.") from error
@@ -166,9 +228,9 @@ async def fetch_heatmap(task_id: str, dataset: str) -> dict[str, Any] | None:
 @apps.tool(
     resource_uri=HEATMAP_URI,
     description=(
-        f"Show an interactive heatmap of the top {HEATMAP_TOP} drugs for a completed "
-        "CellHit analysis task. The user can switch dataset and scaling in the view. "
-        "Always share `result_page` with the user."
+            f"Show an interactive heatmap of the top {HEATMAP_TOP} drugs for a completed "
+            "CellHit analysis task. The user can switch dataset and scaling in the view. "
+            "Always share `result_page` with the user."
     ),
 )
 async def show_heatmap(task: str, dataset: Literal["GDSC", "PRISM"]) -> CallToolResult:
@@ -205,7 +267,7 @@ async def show_heatmap(task: str, dataset: Literal["GDSC", "PRISM"]) -> CallTool
             TextContent(
                 type="text",
                 text=f"Heatmap of the top {HEATMAP_TOP} {dataset} drugs for task {task_id} "
-                f"is shown to the user. Full results: {url}",
+                     f"is shown to the user. Full results: {url}",
             )
         ],
         structured_content={"task_id": task_id, "result_page": url, "datasets": datasets, **heatmap},
@@ -251,10 +313,10 @@ apps.add_html_resource(
 @apps.tool(
     resource_uri=UMAP_URI,
     description=(
-        "Show an interactive UMAP of a CellHit task: the user's samples aligned with "
-        "the CCLE and TCGA reference samples, colored by oncotree code, tissue or batch. "
-        f"{UMAP_SYMBOLS} "
-        "Works for analysis and alignment-only tasks. Always share `result_page` with the user."
+            "Show an interactive UMAP of a CellHit task: the user's samples aligned with "
+            "the CCLE and TCGA reference samples, colored by oncotree code, tissue or batch. "
+            f"{UMAP_SYMBOLS} "
+            "Works for analysis and alignment-only tasks. Always share `result_page` with the user."
     ),
 )
 async def show_umap(task: str) -> CallToolResult:
@@ -279,7 +341,7 @@ async def show_umap(task: str) -> CallToolResult:
             TextContent(
                 type="text",
                 text=f"UMAP of task {task_id} is shown to the user, colored by "
-                f"{', '.join(colorings)}. {UMAP_SYMBOLS} Full results: {url}",
+                     f"{', '.join(colorings)}. {UMAP_SYMBOLS} Full results: {url}",
             )
         ],
         structured_content={"task_id": task_id, "result_page": url, "colorings": colorings},
@@ -292,7 +354,7 @@ async def show_umap(task: str) -> CallToolResult:
     description="Return one UMAP figure of a task for the CellHit App.",
 )
 async def get_umap_figure(
-    task_id: str, coloring: Literal["oncotree", "tissue", "batch"]
+        task_id: str, coloring: Literal["oncotree", "tissue", "batch"]
 ) -> CallToolResult:
     """Args:
         task_id: Bare task ID.
@@ -357,11 +419,11 @@ async def get_task_status(task: str) -> dict[str, Any]:
 
 @mcp.tool()
 async def get_task_results(
-    task: str,
-    dataset: Literal["GDSC", "PRISM"],
-    drug: str | None = None,
-    sample: str | None = None,
-    limit: int = 50,
+        task: str,
+        dataset: Literal["GDSC", "PRISM"],
+        drug: str | None = None,
+        sample: str | None = None,
+        limit: int = 50,
 ) -> dict[str, Any]:
     """Get predictions from a completed CellHit analysis task, filtered by drug and/or sample.
 
@@ -407,8 +469,8 @@ async def get_task_results(
         row
         for row in table
         if (drug_query is None or drug_query in str(row.get("DrugName", "")).lower())
-        and (sample is None or str(row.get("index")) == sample)
-        and row.get("dataset") == dataset
+           and (sample is None or str(row.get("index")) == sample)
+           and row.get("dataset") == dataset
     ]
 
     limit = max(1, min(limit, MAX_ROWS))
@@ -623,20 +685,20 @@ Filters:
 
 @mcp.tool(description=PRECOMPUTED_DESCRIPTION)
 async def get_precomputed(
-    dataset: Literal["GDSC", "PRISM"],
-    drug: str | None = None,
-    sample: str | None = None,
-    neighbor: Literal["transcriptomic", "response"] | None = None,
-    neigh_cell_line: str | None = None,
-    neigh_ccle_oncotree: str | None = None,
-    neigh_tcga_site: str | None = None,
-    neigh_tcga_diagnosis: str | None = None,
-    tissue: str | None = None,
-    disease: str | None = None,
-    tcga_code: str | None = None,
-    oncotree_code: str | None = None,
-    limit: int = 50,
-    offset: int = 0,
+        dataset: Literal["GDSC", "PRISM"],
+        drug: str | None = None,
+        sample: str | None = None,
+        neighbor: Literal["transcriptomic", "response"] | None = None,
+        neigh_cell_line: str | None = None,
+        neigh_ccle_oncotree: str | None = None,
+        neigh_tcga_site: str | None = None,
+        neigh_tcga_diagnosis: str | None = None,
+        tissue: str | None = None,
+        disease: str | None = None,
+        tcga_code: str | None = None,
+        oncotree_code: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
 ) -> dict[str, Any]:
     neighbor_filters = {
         "neighCellLine": neigh_cell_line,

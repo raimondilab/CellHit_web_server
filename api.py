@@ -1,12 +1,13 @@
 from __future__ import annotations
-from fastapi import FastAPI, Response, HTTPException
+import asyncio
+from fastapi import FastAPI, Request, Response, HTTPException
 import uvicorn
 from graphql_server import graphql_app
 from starlette.middleware.cors import CORSMiddleware
 from tasks import worker
 import os
 
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 import sentry_sdk
 from sentry_sdk.integrations.celery import CeleryIntegration
@@ -27,6 +28,32 @@ celery_worker = worker.start_celery("cellhit")
 
 # Create FastAPI app
 app = FastAPI()
+
+# Concurrent GraphQL requests (website and MCP), and how long a request may wait for a slot
+GRAPHQL_MAX_CONCURRENT = int(os.environ.get("CELLHIT_API_MAX_CONCURRENT", "8"))
+GRAPHQL_QUEUE_TIMEOUT = float(os.environ.get("CELLHIT_API_QUEUE_TIMEOUT", "20"))
+graphql_slots = asyncio.Semaphore(GRAPHQL_MAX_CONCURRENT)
+
+
+# Declared before CORSMiddleware so CORS stays the outer layer and 503 responses keep CORS headers
+@app.middleware("http")
+async def limit_graphql(request: Request, call_next):
+    """Limit concurrent GraphQL requests so a burst of queries cannot stall the server."""
+    if not request.url.path.startswith("/graphql"):
+        return await call_next(request)
+    try:
+        await asyncio.wait_for(graphql_slots.acquire(), timeout=GRAPHQL_QUEUE_TIMEOUT)
+    except asyncio.TimeoutError:
+        return JSONResponse(
+            {"errors": [{"message": "CellHit is busy. Try again in a minute."}]},
+            status_code=503,
+            headers={"Retry-After": "30"},
+        )
+    try:
+        return await call_next(request)
+    finally:
+        graphql_slots.release()
+
 
 # Configure CORS (Restrict in production)
 app.add_middleware(

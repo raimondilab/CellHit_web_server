@@ -1,21 +1,51 @@
+import asyncio
+from typing import List, Optional, Union
+
 import strawberry
 from strawberry.fastapi import GraphQLRouter
+
 from .schemas import *
 from .resolvers import QueryResolver, MutationResolver
-from typing import List, Union
 
 
 @strawberry.type
 class Query:
-    gdsc: List[Gdsc] = strawberry.field(resolver=QueryResolver.get_gdsc)
-    gdsc_drug: List[Gdsc] = strawberry.field(resolver=QueryResolver.get_gdsc_drug)
-    prism: List[Prism] = strawberry.field(resolver=QueryResolver.get_prism)
-    prism_drug: List[Prism] = strawberry.field(resolver=QueryResolver.get_prism_drug)
-    databases: List[Union[Gdsc, Prism]] = strawberry.field(resolver=QueryResolver.get_databases)
-    get_task: Task = strawberry.field(resolver=QueryResolver.get_task)
-    get_results: Task = strawberry.field(resolver=QueryResolver.get_results)
-    get_distribution: Task = strawberry.field(resolver=QueryResolver.get_distribution)
-    get_heatmap: Task = strawberry.field(resolver=QueryResolver.get_heatmap)
+
+    @strawberry.field
+    async def gdsc(self, pagination: Optional[PaginationInput] = None) -> List[Gdsc]:
+        return await asyncio.to_thread(QueryResolver.get_gdsc, pagination)
+
+    @strawberry.field
+    async def gdsc_drug(self, drug: str) -> List[Gdsc]:
+        return await asyncio.to_thread(QueryResolver.get_gdsc_drug, drug)
+
+    @strawberry.field
+    async def prism(self, pagination: Optional[PaginationInput] = None) -> List[Prism]:
+        return await asyncio.to_thread(QueryResolver.get_prism, pagination)
+
+    @strawberry.field
+    async def prism_drug(self, drug: str) -> List[Prism]:
+        return await asyncio.to_thread(QueryResolver.get_prism_drug, drug)
+
+    @strawberry.field
+    async def databases(self) -> List[Union[Gdsc, Prism]]:
+        return await asyncio.to_thread(QueryResolver.get_databases)
+
+    @strawberry.field
+    async def get_task(self, task_id: str) -> Task:
+        return await asyncio.to_thread(QueryResolver.get_task, task_id)
+
+    @strawberry.field
+    async def get_results(self, task_id: str, step: str) -> Task:
+        return await asyncio.to_thread(QueryResolver.get_results, task_id, step)
+
+    @strawberry.field
+    async def get_distribution(self, task_id: str, dic_type: str, dataset: str, key: str) -> Task:
+        return await asyncio.to_thread(QueryResolver.get_distribution, task_id, dic_type, dataset, key)
+
+    @strawberry.field
+    async def get_heatmap(self, task_id: str, top: int, dataset: str) -> Task:
+        return await asyncio.to_thread(QueryResolver.get_heatmap, task_id, top, dataset)
 
 
 @strawberry.type
