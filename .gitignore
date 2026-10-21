@@ -9,3 +9,6 @@
 /src/*.json
 /src/*.feather
 /src/*.trc
+
+.env
+/.env
