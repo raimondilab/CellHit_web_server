@@ -14,7 +14,7 @@ const CLAUDE_CODE_COMMAND = `claude mcp add --transport http cellhit ${MCP_URL}`
 const TOOLS = [
   { name: 'get_task_status', description: 'Checks whether a task is completed, still running, failed or deleted.' },
   { name: 'get_task_results', description: 'Returns the predictions of an analysis task, filtered by drug and/or sample.' },
-  { name: 'show_heatmap', description: 'Shows the interactive heatmap of the top 15 drugs of an analysis task.' },
+  { name: 'show_heatmap', description: 'Shows the interactive drug-sensitivity heatmap of an analysis task.' },
   { name: 'show_umap', description: 'Shows the interactive UMAP of a task: your samples aligned with CCLE and TCGA.' },
   { name: 'get_precomputed', description: 'Queries the precomputed predictions for TCGA, TARGET and Treehouse patients and CCLE cell lines.' },
 ];
@@ -69,6 +69,17 @@ const EXAMPLES = [
       ['For Camptothecin in GDSC, which samples respond like TCGA lung tumors?', 'response neighbor'],
       ['Samples whose closest cell line is ACH-001113, for Camptothecin in GDSC', 'neighbor cell line'],
       ['Camptothecin predictions in GDSC for samples whose nearest TCGA neighbor is an adenocarcinoma', 'neighbor diagnosis'],
+    ],
+  },
+  {
+    id: 'understanding',
+    title: 'Understanding the results',
+    questions: [
+      ['What does the quantile score mean in these results?', 'field meanings'],
+      ['How reliable are the Camptothecin predictions in GDSC?', 'modelCorr + predictionsStd'],
+      ['Is this prediction high or low compared with the experimental values?', 'experimental min/median/max'],
+      ['Which genes explain this prediction, and is any of them a target of the drug?', 'TopGenes + RecoveredTargets'],
+      ['How were the drugs in the heatmap chosen?', 'show_heatmap'],
     ],
   },
   {
@@ -131,6 +142,11 @@ const MCPPage = () => {
                 <li className="fs-1 text-justify mb-1"><b>Claude Code:</b></li>
               </ul>
               <CopyBox text={CLAUDE_CODE_COMMAND} copyKey="claude-code" />
+              <Message
+                severity="info"
+                className="mb-5"
+                text="The server is updated regularly. Refresh the connector (or remove and add it again) and start a new conversation to use the latest version."
+              />
 
               <h5 className="display-6 fw-bold mb-4" id="tools">Tools</h5>
               <p className="fs-1 text-justify mb-2">The assistant picks the right tool for each question.</p>
@@ -147,13 +163,26 @@ const MCPPage = () => {
                 </table>
               </div>
 
+              <h5 className="display-6 fw-bold mb-4" id="knowledge">What the assistant knows</h5>
+              <ul className="mb-5">
+                <li className="fs-1 text-justify mb-1">
+                  <b>Field meanings:</b> every returned field comes with its definition, as on the <Link to="/help/" target="_blank" rel="noopener noreferrer"><b><i>help</i></b></Link> page: prediction scales, <Chip label="std" />, <Chip label="quantileScore" />, experimental reference values, model correlation and MSE, SHAP genes and nearest neighbors.
+                </li>
+                <li className="fs-1 text-justify mb-1">
+                  <b>Charts:</b> how the heatmap drugs were selected and how many each view shows; which UMAP symbol marks your samples.
+                </li>
+                <li className="fs-1 text-justify mb-1">
+                  <b>Rules:</b> values come only from CellHit, errors are explained, and predictions are presented as computational estimates.
+                </li>
+              </ul>
+
               <h5 className="display-6 fw-bold mb-4" id="charts">Interactive charts</h5>
               <ul className="mb-3">
                 <li className="fs-1 text-justify mb-1">
-                  <b>Heatmap:</b> top 15 drugs of an analysis task. Switch between <Chip label="GDSC" /> and <Chip label="PRISM" />, and between <Chip label="Median" /> and <Chip label="Standardized" /> scaling.
+                  <b>Heatmap:</b> the 15 most variable drugs of an analysis task; the Median view also includes drugs predicted below −1 in every sample. Switch between <Chip label="GDSC" /> and <Chip label="PRISM" />, and between <Chip label="Median" /> and <Chip label="Standardized" /> scaling.
                 </li>
                 <li className="fs-1 text-justify mb-1">
-                  <b>UMAP:</b> your samples projected onto the CCLE and TCGA reference. Color by <Chip label="Oncotree" />, <Chip label="Tissue" /> or <Chip label="Batch" />.
+                  <b>UMAP:</b> your samples (diamonds) projected onto the TCGA (crosses) and CCLE (circles) reference. Color by <Chip label="Oncotree" />, <Chip label="Tissue" /> or <Chip label="Batch" />.
                 </li>
               </ul>
               <p className="fs-1 text-justify mb-2">
