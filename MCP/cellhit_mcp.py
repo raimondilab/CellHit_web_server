@@ -96,6 +96,8 @@ UUID_RE = re.compile(
     r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
 )
 
+
+
 # Keeps MCP traffic from saturating the API that also serves the website
 api_slots = asyncio.Semaphore(MAX_CONCURRENT)
 
@@ -207,6 +209,11 @@ async def available_heatmap_datasets(task_id: str) -> list[str]:
     return [name for name in ("GDSC", "PRISM") if name in precomputed]
 
 
+def count_drugs(figure: dict[str, Any]) -> int:
+    """Number of drug columns in a clustergram figure (x labels of its heatmap trace)."""
+    return sum(len(trace.get("x") or []) for trace in figure.get("data", []) if trace.get("type") == "heatmap")
+
+
 async def fetch_heatmap(task_id: str, dataset: str) -> dict[str, Any] | None:
     """Fetch the median-scaled and standardized heatmap figures of one dataset."""
     data = await graphql(HEATMAP_QUERY, {"taskId": task_id, "top": HEATMAP_TOP, "dataset": dataset})
@@ -228,9 +235,16 @@ async def fetch_heatmap(task_id: str, dataset: str) -> dict[str, Any] | None:
 @apps.tool(
     resource_uri=HEATMAP_URI,
     description=(
-            f"Show an interactive heatmap of the top {HEATMAP_TOP} drugs for a completed "
-            "CellHit analysis task. The user can switch dataset and scaling in the view. "
-            "Always share `result_page` with the user."
+        "Show an interactive drug-sensitivity heatmap for a completed CellHit analysis task. "
+        "The user can switch dataset and scaling in the view. "
+        "Each view selects its own drugs: drugs with low variability (CV <= 0.1) or highly correlated "
+        f"with another drug (|r| > 0.9) are removed, the {HEATMAP_TOP} most variable remaining drugs are kept, "
+        "and any drug below -1 in every sample is always added. Drugs are chosen by variability, not efficacy. "
+        "Median view: prediction minus the drug's median (negative = more sensitive than typical); the "
+        f"always-added drugs can make it show more than {HEATMAP_TOP} drugs. "
+        f"Standardized view: values standardized per drug across the task's samples (mean 0), so at most "
+        f"{HEATMAP_TOP} drugs. The tool result reports how many drugs each view shows. "
+        "Always share `result_page` with the user."
     ),
 )
 async def show_heatmap(task: str, dataset: Literal["GDSC", "PRISM"]) -> CallToolResult:
@@ -262,12 +276,15 @@ async def show_heatmap(task: str, dataset: Literal["GDSC", "PRISM"]) -> CallTool
         return CallToolResult(content=[TextContent(type="text", text=text)])
 
     # The figures go only to the App; the model gets a short summary
+    n_median = count_drugs(heatmap["figures"]["heatmap"])
+    n_standardized = count_drugs(heatmap["figures"]["standardized"])
     return CallToolResult(
         content=[
             TextContent(
                 type="text",
-                text=f"Heatmap of the top {HEATMAP_TOP} {dataset} drugs for task {task_id} "
-                     f"is shown to the user. Full results: {url}",
+                text=f"{dataset} heatmap for task {task_id} is shown to the user: "
+                f"{n_median} drugs in the Median view, {n_standardized} in the Standardized view. "
+                f"Full results: {url}",
             )
         ],
         structured_content={"task_id": task_id, "result_page": url, "datasets": datasets, **heatmap},
@@ -313,10 +330,10 @@ apps.add_html_resource(
 @apps.tool(
     resource_uri=UMAP_URI,
     description=(
-            "Show an interactive UMAP of a CellHit task: the user's samples aligned with "
-            "the CCLE and TCGA reference samples, colored by oncotree code, tissue or batch. "
-            f"{UMAP_SYMBOLS} "
-            "Works for analysis and alignment-only tasks. Always share `result_page` with the user."
+        "Show an interactive UMAP of a CellHit task: the user's samples aligned with "
+        "the CCLE and TCGA reference samples, colored by oncotree code, tissue or batch. "
+        f"{UMAP_SYMBOLS} "
+        "Works for analysis and alignment-only tasks. Always share `result_page` with the user."
     ),
 )
 async def show_umap(task: str) -> CallToolResult:
@@ -341,7 +358,7 @@ async def show_umap(task: str) -> CallToolResult:
             TextContent(
                 type="text",
                 text=f"UMAP of task {task_id} is shown to the user, colored by "
-                     f"{', '.join(colorings)}. {UMAP_SYMBOLS} Full results: {url}",
+                f"{', '.join(colorings)}. {UMAP_SYMBOLS} Full results: {url}",
             )
         ],
         structured_content={"task_id": task_id, "result_page": url, "colorings": colorings},
@@ -354,7 +371,7 @@ async def show_umap(task: str) -> CallToolResult:
     description="Return one UMAP figure of a task for the CellHit App.",
 )
 async def get_umap_figure(
-        task_id: str, coloring: Literal["oncotree", "tissue", "batch"]
+    task_id: str, coloring: Literal["oncotree", "tissue", "batch"]
 ) -> CallToolResult:
     """Args:
         task_id: Bare task ID.
@@ -419,11 +436,11 @@ async def get_task_status(task: str) -> dict[str, Any]:
 
 @mcp.tool()
 async def get_task_results(
-        task: str,
-        dataset: Literal["GDSC", "PRISM"],
-        drug: str | None = None,
-        sample: str | None = None,
-        limit: int = 50,
+    task: str,
+    dataset: Literal["GDSC", "PRISM"],
+    drug: str | None = None,
+    sample: str | None = None,
+    limit: int = 50,
 ) -> dict[str, Any]:
     """Get predictions from a completed CellHit analysis task, filtered by drug and/or sample.
 
@@ -440,6 +457,24 @@ async def get_task_results(
         drug: Drug name, case-insensitive partial match.
         sample: Sample (patient) index, exact match.
         limit: Maximum rows to return (max 500).
+
+    Returned fields:
+    - DrugID, DrugName, PutativeTarget: drug identifier, name and declared primary protein targets.
+    - index: the user's sample ID. dataset: GDSC or PRISM.
+    - prediction: predicted sensitivity (GDSC ln(IC50) in uM; PRISM log2 fold change in viability).
+      Lower = more sensitive. std: standard deviation across the model ensemble; lower = more confident.
+    - DrugMin / DrugMedian / DrugMax: experimentally observed sensitivity for this drug across the screened
+      cell lines (same units as prediction): most sensitive, typical and most resistant cases.
+    - QuantileScore: 0-1 harmonic mean of efficacy (how the drug ranks against the other drugs for this sample)
+      and selectivity (how this sample ranks against the other samples for this drug). Close to 1 = potent and
+      selective for this sample. Not a confidence measure (see std).
+    - TopGenes: the 15 genes with the largest absolute SHAP contribution to this prediction.
+      RecoveredTargets: TopGenes that are also putative targets of the drug ("No recovered targets" if none).
+    - ccle_transcriptomic_neigh, ccle_transcriptomic_neigh_name, ccle_transcriptomic_neigh_tissue: DepMap ID,
+      common name and tissue (OncoTree lineage) of the CCLE cell line with the closest transcriptome.
+      tcga_transcriptomic_neigh, tcga_transcriptomic_neigh_tissue: closest TCGA sample and its tissue.
+    - ccle_response_neigh*, tcga_response_neigh*: the same, for the closest predicted drug-response profile.
+      "No tissue" means the information is missing.
     """
     if not drug and not sample:
         raise ToolError("Pass at least one filter: drug or sample.")
@@ -469,8 +504,8 @@ async def get_task_results(
         row
         for row in table
         if (drug_query is None or drug_query in str(row.get("DrugName", "")).lower())
-           and (sample is None or str(row.get("index")) == sample)
-           and row.get("dataset") == dataset
+        and (sample is None or str(row.get("index")) == sample)
+        and row.get("dataset") == dataset
     ]
 
     limit = max(1, min(limit, MAX_ROWS))
@@ -489,7 +524,7 @@ async def get_task_results(
 PRECOMPUTED_FIELDS = """
     drugName drugId source sampleIndex
     predictions predictionsStd quantileScore
-    experimentalMin experimentalMedian experimentalMax modelCorr
+    experimentalMin experimentalMedian experimentalMax modelCorr modelMse
     transcrCcleNeigh transcrCcleNeighCelllinename transcrCcleNeighOncotree
     transcrTcgaNeigh transcrTcgaNeighDiagnosis transcrTcgaNeighSite
     responseCcleNeigh responseCcleNeighCelllinename responseCcleNeighOncotree
@@ -651,6 +686,32 @@ TCGA_CODES = "; ".join(
     )
 )
 
+# Meaning of the returned fields, from the CellHit help page
+PRECOMPUTED_FIELD_GLOSSARY = """Returned fields:
+- drugName, drugId: drug name and its GDSC or PRISM identifier. putativeTarget: declared primary protein targets of the drug.
+- sampleIndex: sample ID (TCGA, TARGET or Treehouse barcode, or CCLE DepMap ID such as ACH-001113).
+  source: TCGA for patient samples (including TARGET and Treehouse), CCLE for cell lines.
+- predictions: predicted sensitivity (GDSC ln(IC50) in uM; PRISM log2 fold change in viability). Lower = more sensitive.
+  predictionsStd: standard deviation across the model ensemble; lower = more confident prediction.
+- quantileScore: 0-1 harmonic mean of efficacy (how the drug ranks against the other drugs for this sample)
+  and selectivity (how this sample ranks against the other samples for this drug). Close to 1 = the drug is both
+  potent and selective for this sample. It is not a confidence measure (see predictionsStd).
+- modelCorr: median Pearson correlation between predicted and experimental values of this drug's model on held-out
+  test sets across 20 random splits. Higher = more reliable predictions for this drug; weigh low values with caution.
+  modelMse: median mean squared error over the same splits, on per-drug standardized values (not prediction units).
+  Lower = more accurate.
+- experimentalMin / experimentalMedian / experimentalMax: experimentally observed sensitivity for this drug across
+  the screened cell lines (same units as predictions): most sensitive, typical and most resistant cases.
+  Use them to place a prediction in context.
+- topLocalShapGenes: the 15 genes that contributed most to this prediction (SHAP feature attribution).
+- transcrCcleNeigh, transcrCcleNeighCelllinename, transcrCcleNeighOncotree: DepMap ID, common name and OncoTree cancer type
+  of the CCLE cell line whose transcriptome is closest to the sample (Euclidean distance).
+- transcrTcgaNeigh, transcrTcgaNeighDiagnosis, transcrTcgaNeighSite: ID, GDC histological diagnosis and GDC anatomic site
+  of the transcriptomically closest TCGA sample.
+- responseCcleNeigh*, responseTcgaNeigh*: the same, for the CCLE cell line and the TCGA sample whose predicted
+  drug-response profile is closest (Euclidean distance across all predicted drug responses).
+- A single space or "Not Reported" in a neighbor field means the information is missing."""
+
 PRECOMPUTED_DESCRIPTION = f"""Query CellHit precomputed drug-response predictions for TCGA patients and CCLE cell lines.
 
 Pass at least one of `drug`, `sample`, `tissue`, `disease`, `tcga_code` or `oncotree_code`. `prediction` is ln(IC50) for GDSC and log-fold change
@@ -680,25 +741,27 @@ Filters:
   case-insensitive partial match (e.g. "adenocarcinoma").
 - limit / offset: page through results (limit max 200). If `returned` equals `limit`,
   more rows may exist.
+
+{PRECOMPUTED_FIELD_GLOSSARY}
 """
 
 
 @mcp.tool(description=PRECOMPUTED_DESCRIPTION)
 async def get_precomputed(
-        dataset: Literal["GDSC", "PRISM"],
-        drug: str | None = None,
-        sample: str | None = None,
-        neighbor: Literal["transcriptomic", "response"] | None = None,
-        neigh_cell_line: str | None = None,
-        neigh_ccle_oncotree: str | None = None,
-        neigh_tcga_site: str | None = None,
-        neigh_tcga_diagnosis: str | None = None,
-        tissue: str | None = None,
-        disease: str | None = None,
-        tcga_code: str | None = None,
-        oncotree_code: str | None = None,
-        limit: int = 50,
-        offset: int = 0,
+    dataset: Literal["GDSC", "PRISM"],
+    drug: str | None = None,
+    sample: str | None = None,
+    neighbor: Literal["transcriptomic", "response"] | None = None,
+    neigh_cell_line: str | None = None,
+    neigh_ccle_oncotree: str | None = None,
+    neigh_tcga_site: str | None = None,
+    neigh_tcga_diagnosis: str | None = None,
+    tissue: str | None = None,
+    disease: str | None = None,
+    tcga_code: str | None = None,
+    oncotree_code: str | None = None,
+    limit: int = 50,
+    offset: int = 0,
 ) -> dict[str, Any]:
     neighbor_filters = {
         "neighCellLine": neigh_cell_line,

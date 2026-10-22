@@ -168,7 +168,9 @@ const handleDownloadGdscPrediction = () => {
                   </ul>
                   <li className="fs-1 text-justify mb-1"><b>Quantitative Assessment of Prediction Quality:</b></li>
                      <ul>
-                         <li className="fs-1 text-justify mb-1"><Chip label="quantileScore" /> A normalized score (ranging from 0 to 1) designed to balance sensitivity (true positives) and specificity (true negatives) of drug predictions for a given sample. A score closer to 1 indicates a higher confidence or quality of prediction and more reliable sensitivity profiling.  </li>
+                         <li className="fs-1 text-justify mb-1"><Chip label="quantileScore" /> Harmonic mean, from 0 to 1, of the drug's efficacy (probability that another drug has a higher predicted value for this sample) and selectivity (probability that another sample has a higher predicted value for this drug). A score close to 1 indicates a drug that is both potent and selective for this sample. It does not measure prediction confidence (see <i>predictionsStd</i>).</li>
+                         <li className="fs-1 text-justify mb-1"><Chip label="modelCorr" /> Median Pearson correlation between predicted and experimental values of this drug's model on held-out test sets, across 20 random train/test splits. Higher values indicate more reliable predictions for this drug.</li>
+                         <li className="fs-1 text-justify mb-1"><Chip label="modelMse" /> Median mean squared error of this drug's model on held-out test sets, across the same 20 random train/test splits, computed on per-drug standardized values (not in prediction units). Lower values indicate more accurate predictions for this drug.</li>
                       </ul>
 
                      <li className="fs-1 text-justify mb-1"><b>Transcriptomic Nearest Neighbors:</b></li>
@@ -176,20 +178,20 @@ const handleDownloadGdscPrediction = () => {
                      <ul>
                          <li className="fs-1 text-justify mb-1"><Chip label="transcrCcleNeigh" /> Accession identifier for the Cancer Cell Line Encyclopedia (CCLE) cell line with the transcriptome most similar to the sample of interest, measured by Euclidean distance.</li>
                          <li className="fs-1 text-justify mb-1"><Chip label="transcrCcleNeighCelllinename" /> Commercial or commonly known name of this CCLE cell line neighbor.</li>
-                         <li className="fs-1 text-justify mb-1"><Chip label="transcrCcleNeighOncotree" /> Tissue origin of the closest CCLE transcriptomic neighbor.</li>
+                         <li className="fs-1 text-justify mb-1"><Chip label="transcrCcleNeighOncotree" /> OncoTree cancer type of the closest CCLE transcriptomic neighbor.</li>
                          <li className="fs-1 text-justify mb-1"><Chip label="transcrTcgaNeigh" /> Accession identifier for the TCGA (The Cancer Genome Atlas) sample transcriptomically closest to the sample of interest.</li>
                           <li className="fs-1 text-justify mb-1"><Chip label="transcrTcgaNeighDiagnosis" /> Diagnosis origin of the closest TCGA transcriptomic neighbor.</li>
-                         <li className="fs-1 text-justify mb-1"><Chip label="transcrTcgaNeighSite" /> Tissue origin of the closest TCGA transcriptomic neighbor.</li>
+                         <li className="fs-1 text-justify mb-1"><Chip label="transcrTcgaNeighSite" /> Anatomic site (GDC site of resection or biopsy) of the closest TCGA transcriptomic neighbor.</li>
                       </ul>
 
                   <li className="fs-1 text-justify mb-1"><b>Response-based Nearest Neighbors:</b></li>
                    <ul>
                          <li className="fs-1 text-justify mb-1"><Chip label="responseCcleNeigh" /> Accession identifier of the CCLE cell line whose predicted drug response profile is closest to the current sample, as determined by Euclidean distance across all predicted drug responses.</li>
                          <li className="fs-1 text-justify mb-1"><Chip label="responseCcleNeighCelllinename" /> Commercial or commonly known name of this response-based CCLE neighbor.</li>
-                         <li className="fs-1 text-justify mb-1"><Chip label="responseCcleNeighOncotree" /> Tissue origin of the response-based CCLE neighbor.</li>
+                         <li className="fs-1 text-justify mb-1"><Chip label="responseCcleNeighOncotree" /> OncoTree cancer type of the response-based CCLE neighbor.</li>
                          <li className="fs-1 text-justify mb-1"><Chip label="responseTcgaNeigh" /> Accession identifier of the TCGA sample with the most similar drug response profile.</li>
                          <li className="fs-1 text-justify mb-1"><Chip label="responseTcgaNeighDiagnosis" /> Diagnosis of origin of this TCGA response-based neighbor.</li>
-                         <li className="fs-1 text-justify mb-1"><Chip label="responseTcgaNeighSite" /> Tissue of origin of this TCGA response-based neighbor.</li>
+                         <li className="fs-1 text-justify mb-1"><Chip label="responseTcgaNeighSite" /> Anatomic site (GDC site of resection or biopsy) of this TCGA response-based neighbor.</li>
                   </ul>
                    <li className="fs-1 text-justify mb-1"><b>Source Origin:</b></li>
                      <ul>
@@ -385,7 +387,7 @@ const handleDownloadGdscPrediction = () => {
 
                   <li className="fs-1 text-justify mb-1"><b>Quantitative Assessment of Prediction Quality:</b></li>
                      <ul>
-                         <li className="fs-1 text-justify mb-1"><Chip label="Quantile score" /> A normalized score (ranging from 0 to 1) designed to balance sensitivity (true positives) and specificity (true negatives) of drug predictions for a given sample. A score closer to 1 indicates a higher confidence or quality of prediction and more reliable sensitivity profiling.  </li>
+                         <li className="fs-1 text-justify mb-1"><Chip label="Quantile score" /> Harmonic mean, from 0 to 1, of the drug's efficacy (probability that another drug has a higher predicted value for this sample) and selectivity (probability that another sample has a higher predicted value for this drug). A score close to 1 indicates a drug that is both potent and selective for this sample. It does not measure prediction confidence (see <i>std</i>).</li>
                       </ul>
 
                      <li className="fs-1 text-justify mb-1"><b>Transcriptomic Nearest Neighbors:</b></li>
