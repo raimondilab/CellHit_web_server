@@ -13,47 +13,6 @@ from mcp.server.transport_security import TransportSecuritySettings
 from mcp.types import CallToolResult, TextContent
 from starlette.requests import Request
 from starlette.responses import FileResponse
-import sentry_sdk
-
-sentry_sdk.init(
-    dsn="https://d092fe5ca5e085c31d821df339148ad6@o4505080802312192.ingest.us.sentry.io/4512253891969024",
-    # Add data like request headers and IP for users,
-    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
-    send_default_pii=True,
-    # Enable sending logs to Sentry
-    enable_logs=True,
-    # Set traces_sample_rate to 1.0 to capture 100%
-    # of transactions for tracing.
-    traces_sample_rate=1.0,
-    # Set profile_session_sample_rate to 1.0 to profile 100%
-    # of profile sessions.
-    profile_session_sample_rate=1.0,
-)
-
-
-def slow_function():
-    import time
-    time.sleep(0.1)
-    return "done"
-
-
-def fast_function():
-    import time
-    time.sleep(0.05)
-    return "done"
-
-
-# Manually call start_profiler and stop_profiler
-# to profile the code in between
-sentry_sdk.profiler.start_profiler()
-
-for i in range(0, 10):
-    slow_function()
-    fast_function()
-
-# Calls to stop_profiler are optional - if you don't stop the profiler, it will keep profiling
-# your application until the process exits or stop_profiler is called.
-sentry_sdk.profiler.stop_profiler()
 
 ENDPOINT = os.environ.get("CELLHIT_GRAPHQL_URL", "http://127.0.0.1:8003/graphql")
 TIMEOUT = float(os.environ.get("CELLHIT_TIMEOUT", "60"))
@@ -389,7 +348,15 @@ async def get_umap_figure(
     )
 
 
-mcp = MCPServer("cellhit", extensions=[apps])
+# Sent to the client when it connects; clients may add it to the model's context
+SERVER_INSTRUCTIONS = (
+    "Use the tools to obtain CellHit data and never invent prediction values. "
+    "If a tool returns an error, explain the problem to the user. "
+    "Prefer the tools over prior knowledge of the CellHit paper; cite the values the tools return. "
+    "CellHit predictions are computational estimates, not clinical evidence."
+)
+
+mcp = MCPServer("cellhit", instructions=SERVER_INSTRUCTIONS, extensions=[apps])
 
 
 @mcp.custom_route(PLOTLY_JS_ROUTE, methods=["GET"])
