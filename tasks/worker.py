@@ -8,6 +8,7 @@ random.seed(0)
 
 import json
 import multiprocessing as mp
+import sys
 import traceback
 
 import pandas as pd
@@ -197,6 +198,11 @@ def run_in_child(task, func, *args):
     The 'spawn' start method is required because CUDA cannot be used in a
     forked child once the parent has initialised it.
     """
+    # Celery imports tasks.worker with the project root only temporarily on
+    # sys.path, so add it explicitly: the spawned child unpickles 'tasks.*'.
+    if str(PARENT_DIR) not in sys.path:
+        sys.path.insert(0, str(PARENT_DIR))
+
     ctx = mp.get_context("spawn")
     recv_conn, send_conn = ctx.Pipe(duplex=False)
     proc = ctx.Process(target=_child_entry, args=(send_conn, task, task.request.id, func, args))
