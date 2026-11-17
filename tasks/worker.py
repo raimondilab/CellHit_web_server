@@ -7,6 +7,8 @@ np.random.seed(0)
 random.seed(0)
 
 import json
+import multiprocessing as mp
+import traceback
 
 import pandas as pd
 
@@ -171,6 +173,45 @@ inference_paths_prism = InferencePaths(
     ccle_metadata=PARENT_DIR / 'src/Model.csv',
     tcga_metadata=PARENT_DIR / 'src/tcga_oncotree_data.csv'
 )
+
+
+def _child_entry(conn, func, args):
+    """Run func(*args) inside the child process and send the outcome to the parent."""
+    try:
+        conn.send(("ok", func(*args)))
+    except BaseException as exc:
+        conn.send(("error", f"{type(exc).__name__}: {exc}\n{traceback.format_exc()}"))
+    finally:
+        conn.close()
+
+
+def run_in_child(func, *args):
+    """Run a task body in a forked child process.
+
+    All memory the task allocates (dataframes, models, CUDA context) belongs to
+    the child and is returned to the OS when it exits, so the worker stays at
+    its import-time size between tasks. If the child is killed (e.g. by the OOM
+    killer) the task fails instead of staying in PROGRESS forever.
+    """
+    ctx = mp.get_context("fork")
+    recv_conn, send_conn = ctx.Pipe(duplex=False)
+    proc = ctx.Process(target=_child_entry, args=(send_conn, func, args))
+    proc.start()
+    send_conn.close()  # Keep only the child's copy so EOF is detected if it dies
+    try:
+        status, payload = recv_conn.recv()  # Read before join: large results would block the pipe
+    except EOFError:
+        proc.join()
+        raise RuntimeError(
+            f"Task child process died unexpectedly (exit code {proc.exitcode}), "
+            f"possibly killed by the OOM killer"
+        )
+    finally:
+        recv_conn.close()
+    proc.join()
+    if status == "error":
+        raise RuntimeError(payload)
+    return payload
 
 
 @celery.task(bind=True)
@@ -359,6 +400,10 @@ def analysis(self, file, datasets, datatype):
 
 @celery.task(bind=True)
 def alignment(self, file, datatype):
+    return run_in_child(_alignment_impl, self, file, datatype)
+
+
+def _alignment_impl(self, file, datatype):
     try:
 
         task_id = self.request.id  # Get the task ID
