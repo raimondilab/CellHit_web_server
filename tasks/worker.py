@@ -226,6 +226,10 @@ def run_in_child(task, func, *args):
 
 @celery.task(bind=True)
 def analysis(self, file, datasets, datatype):
+    return run_in_child(self, _analysis_impl, file, datasets, datatype)
+
+
+def _analysis_impl(self, file, datasets, datatype):
     try:
         results_pipeline = {}
 
