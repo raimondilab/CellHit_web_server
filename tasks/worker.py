@@ -175,27 +175,31 @@ inference_paths_prism = InferencePaths(
 )
 
 
-def _child_entry(conn, func, args):
-    """Run func(*args) inside the child process and send the outcome to the parent."""
+def _child_entry(conn, task, task_id, func, args):
+    """Run func(task, *args) inside the child process and send the outcome to the parent."""
     try:
-        conn.send(("ok", func(*args)))
+        task.push_request(id=task_id)  # Restore self.request.id so update_state() keeps working
+        conn.send(("ok", func(task, *args)))
     except BaseException as exc:
         conn.send(("error", f"{type(exc).__name__}: {exc}\n{traceback.format_exc()}"))
     finally:
         conn.close()
 
 
-def run_in_child(func, *args):
-    """Run a task body in a forked child process.
+def run_in_child(task, func, *args):
+    """Run a task body in a fresh child process.
 
     All memory the task allocates (dataframes, models, CUDA context) belongs to
     the child and is returned to the OS when it exits, so the worker stays at
     its import-time size between tasks. If the child is killed (e.g. by the OOM
     killer) the task fails instead of staying in PROGRESS forever.
+
+    The 'spawn' start method is required because CUDA cannot be used in a
+    forked child once the parent has initialised it.
     """
-    ctx = mp.get_context("fork")
+    ctx = mp.get_context("spawn")
     recv_conn, send_conn = ctx.Pipe(duplex=False)
-    proc = ctx.Process(target=_child_entry, args=(send_conn, func, args))
+    proc = ctx.Process(target=_child_entry, args=(send_conn, task, task.request.id, func, args))
     proc.start()
     send_conn.close()  # Keep only the child's copy so EOF is detected if it dies
     try:
@@ -400,7 +404,7 @@ def analysis(self, file, datasets, datatype):
 
 @celery.task(bind=True)
 def alignment(self, file, datatype):
-    return run_in_child(_alignment_impl, self, file, datatype)
+    return run_in_child(self, _alignment_impl, file, datatype)
 
 
 def _alignment_impl(self, file, datatype):
